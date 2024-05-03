@@ -120,12 +120,12 @@ task flamesTask {
             --outdir ~{OutDir} \
             --config_file ~{OutDir}/config.json
             
-            mv ~{OutDir}/isoform_annotated.gff3 ~{OutDir}/FLAMES-py.gff3
+            mv ~{OutDir}/isoform_annotated.gff3 ~{OutDir}/FLAMES.gff3
         fi
     >>>
 
     output {
-        File? flamesReducedGTF = "FLAMES-py.gff3"
+        File? flamesReducedGTF = "FLAMES.gff3"
         File monitoringLog = "monitoring.log"
     }
 
