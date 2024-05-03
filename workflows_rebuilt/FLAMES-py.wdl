@@ -125,7 +125,7 @@ task flamesTask {
     >>>
 
     output {
-        File? flamesGTF = "FLAMES-py.gff3"
+        File? flamesReducedGTF = "FLAMES-py.gff3"
         File monitoringLog = "monitoring.log"
     }
 
@@ -174,7 +174,7 @@ workflow flamesWorkflow {
     }
 
     output {
-        File? flamesGTF = flamesTask.flamesGTF
+        File? flamesReducedGTF = flamesTask.flamesReducedGTF
         File monitoringLog = flamesTask.monitoringLog
     }
 }
