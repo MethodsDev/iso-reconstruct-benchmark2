@@ -65,9 +65,7 @@ task isoquantTask {
             mv ~{OutDir}/Quant/OUT/OUT.transcript_counts.tsv ~{OutDir}/IsoQuant_quant.tsv 
 
         fi
-    >>>
 
-    command <<<
         if [ -f ~{inputBAM_with_polyA_for_IsoQuant} ] && [ -f ~{inputBAMIndex_with_polyA_for_IsoQuant} ]; then
             if [ "~{ID_or_Quant_or_Both}" = "ID" ] || [ "~{ID_or_Quant_or_Both}" = "Both" ]; then
                 /usr/local/src/IsoQuant/isoquant.py \
