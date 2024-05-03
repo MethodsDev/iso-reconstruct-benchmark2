@@ -42,7 +42,7 @@ task salmonTask {
             
             cd ~{OutDir}
             salmon quant --noErrorModel --noLengthCorrection -t transcriptome.fa -l A -a mapped.sorted.bam -o quant -p ~{numThreads}
-            mv ~{OutDir}/quant/quant.sf ~{OutDir}/Salmon_quant.sf
+            mv quant/quant.sf Salmon_quant.sf
         fi
     >>>
 
