@@ -274,7 +274,6 @@ call relocateOutputs {
         flairReducedGTF = flair.flairReducedGTF,
         flairCounts = flair.flairCounts,
         flamesReducedGTF = flames.flamesReducedGTF,
-        flamesCounts = flames.flamesCounts,
         isoquantReducedGTF = isoquant.isoquantReducedGTF,
         isoquantGTF = isoquant.isoquantGTF,
         isoquantCounts = isoquant.isoquantCounts,
