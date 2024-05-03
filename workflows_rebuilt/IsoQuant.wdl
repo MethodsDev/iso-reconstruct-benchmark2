@@ -66,7 +66,7 @@ task isoquantTask {
 
         fi
 
-        if [ -f ~{inputBAM_with_polyA_for_IsoQuant} ] && [ -f ~{inputBAMIndex_with_polyA_for_IsoQuant} ]; then
+        if [ "~{inputBAM_with_polyA_for_IsoQuant}" != "" ] && [ "~{inputBAMIndex_with_polyA_for_IsoQuant}" != "" ]; then
             if [ "~{ID_or_Quant_or_Both}" = "ID" ] || [ "~{ID_or_Quant_or_Both}" = "Both" ]; then
                 /usr/local/src/IsoQuant/isoquant.py \
                 --reference ~{referenceGenome} \
