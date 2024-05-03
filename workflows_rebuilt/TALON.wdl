@@ -29,7 +29,7 @@ task talonTask {
         cd ~{OutDir}
 
         if [[ "~{ID_or_Quant_or_Both}" == "ID" ]] || [[ "~{ID_or_Quant_or_Both}" == "Both" ]]; then
-            if [[ -n "~{referenceAnnotation_reduced}" ]]; then
+            if [[ "~{referenceAnnotation_reduced}" != "" ]]; then
                 talon_label_reads --f ~{inputBAM} --t 1 --o ~{talonPrefix} --g ~{referenceGenome}
                 samtools calmd -@ ~{numThreads} --reference ~{referenceGenome} "~{talonPrefix}_labeled.sam" > "~{talonPrefix}_labeled.md.sam"
                 talon_initialize_database --f ~{referenceAnnotation_reduced} --g ~{datasetName} --a ~{datasetName} --o ~{datasetName}
