@@ -14,31 +14,31 @@ import "TALON.wdl" as talonWorkflow
 
 task relocateOutputs {
     input {
-        ?File bambuReducedGTF
-        ?File bambuNDR1ReducedGTF
-        ?File bambuGTF
-        ?File bambuCounts
-        ?File espressoReducedGTF
-        ?File espressoCounts
-        ?File flairReducedGTF
-        ?File flairCounts
-        ?File flamesReducedGTF
-        ?File isoquantReducedGTF
-        ?File isoquantGTF
-        ?File isoquantCounts
-        ?File isoquantGTF_with_polyA
-        ?File isoquantReducedGTF_with_polyA
-        ?File isoquantCounts_with_polyA
-        ?File isoseqReducedGTF
-        ?File isoseqGTF
-        ?File mandalorionReducedGTF
-        ?File mandalorionGTF
-        ?File oarfishCounts
-        ?File salmonCounts
-        ?File stringtieReducedGTF
-        ?File stringtieGTF
-        ?File stringtieCounts
-        ?File talonReducedGTF
+        File? bambuReducedGTF
+        File? bambuNDR1ReducedGTF
+        File? bambuGTF
+        File? bambuCounts
+        File? espressoReducedGTF
+        File? espressoCounts
+        File? flairReducedGTF
+        File? flairCounts
+        File? flamesReducedGTF
+        File? isoquantReducedGTF
+        File? isoquantGTF
+        File? isoquantCounts
+        File? isoquantGTF_with_polyA
+        File? isoquantReducedGTF_with_polyA
+        File? isoquantCounts_with_polyA
+        File? isoseqReducedGTF
+        File? isoseqGTF
+        File? mandalorionReducedGTF
+        File? mandalorionGTF
+        File? oarfishCounts
+        File? salmonCounts
+        File? stringtieReducedGTF
+        File? stringtieGTF
+        File? stringtieCounts
+        File? talonReducedGTF
     }
 
     command {
