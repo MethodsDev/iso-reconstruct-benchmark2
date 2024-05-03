@@ -24,6 +24,7 @@ task espressoTask {
 
     command <<<
         bash ~{monitoringScript} > monitoring.log &
+        mkdir -p ESPRESSO_out
 
         # Convert BAM to SAM
         samtools view -h -o input.sam ~{inputBAM}
