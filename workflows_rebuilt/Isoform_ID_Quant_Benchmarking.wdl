@@ -179,7 +179,7 @@ if (runIsoquant) {
 }
 
 if (runIsoseq) {
-    call isoseqWorkflow.isoseqWorkflow as isoeq {
+    call isoseqWorkflow.isoseqWorkflow as isoseq {
         input:
             inputBAM = inputBAM,
             inputBAMIndex = inputBAMIndex,
