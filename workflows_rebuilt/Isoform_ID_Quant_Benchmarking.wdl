@@ -43,24 +43,24 @@ task relocateOutputs {
 
     command {
         mkdir ID_reduced ID Quant
-
+    
         # Define arrays of files for each directory
         reduced_files=(~{bambuReducedGTF} ~{bambuNDR1ReducedGTF} ~{espressoReducedGTF} ~{flairReducedGTF} ~{flamesReducedGTF} ~{isoquantReducedGTF} ~{isoquantReducedGTF_with_polyA} ~{isoseqReducedGTF} ~{mandalorionReducedGTF} ~{stringtieReducedGTF} ~{talonReducedGTF})
         id_files=(~{bambuGTF} ~{isoquantGTF} ~{isoquantGTF_with_polyA} ~{isoseqGTF} ~{mandalorionGTF} ~{stringtieGTF})
         quant_files=(~{bambuCounts} ~{espressoCounts} ~{flairCounts} ~{isoquantCounts} ~{isoquantCounts_with_polyA} ~{oarfishCounts} ~{salmonCounts} ~{stringtieCounts})
-
+    
         # Loop over the files for each directory
-        scatter (file in reduced_files) {
+        for file in "${reduced_files[@]}"; do
           [ -f "$file" ] && mv "$file" ID_reduced/
-        }
-
-        scatter (file in reduced_files) {
+        done
+    
+        for file in "${id_files[@]}"; do
           [ -f "$file" ] && mv "$file" ID/
-        }
-
-        scatter (file in reduced_files) {
+        done
+    
+        for file in "${quant_files[@]}"; do
           [ -f "$file" ] && mv "$file" Quant/
-        }
+        done
     }
 
     output {
