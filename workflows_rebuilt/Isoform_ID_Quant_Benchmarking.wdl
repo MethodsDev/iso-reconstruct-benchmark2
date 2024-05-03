@@ -67,9 +67,9 @@ task relocateOutputs {
     >>>
 
     output {
-        Directory ID_reduced = "ID_reduced"
-        Directory ID = "ID"
-        Directory Quant = "Quant"
+        Array[File] ID_reduced_files = glob("ID_reduced/*")
+        Array[File] ID_files = glob("ID/*")
+        Array[File] Quant_files = glob("Quant/*")
     }
 
     runtime {
