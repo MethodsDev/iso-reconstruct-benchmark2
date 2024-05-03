@@ -1,0 +1,38 @@
+version: 1.2
+workflows:
+  - name: ISOFORM_ID_QUANT_BENCHMARKING
+    subclass: WDL
+    primaryDescriptorPath: /workflows_rebuilt/Isoform_ID_Quant_Benchmarking.wdl
+  - name: ISOQUANT
+    subclass: WDL
+    primaryDescriptorPath: /workflows_rebuilt/IsoQuant.wdl
+  - name: STRINGTIE
+    subclass: WDL
+    primaryDescriptorPath: /workflows_rebuilt/StringTie.wdl
+  - name: BAMBU
+    subclass: WDL
+    primaryDescriptorPath: /workflows_rebuilt/Bambu.wdl
+  - name: FLAIR
+    subclass: WDL
+    primaryDescriptorPath: /workflows_rebuilt/Flair.wdl
+  - name: TALON
+    subclass: WDL
+    primaryDescriptorPath: /workflows_rebuilt/TALON.wdl
+  - name: ISOSEQ
+    subclass: WDL
+    primaryDescriptorPath: /workflows_rebuilt/IsoSeq.wdl
+  - name: MANDALORION
+    subclass: WDL
+    primaryDescriptorPath: /workflows_rebuilt/Mandalorion.wdl
+  - name: ESPRESSO
+    subclass: WDL
+    primaryDescriptorPath: /workflows_rebuilt/ESPRESSO.wdl
+  - name: FLAMES
+    subclass: WDL
+    primaryDescriptorPath: /workflows_rebuilt/FLAMES-py.wdl
+  - name: OARFISH
+    subclass: WDL
+    primaryDescriptorPath: /workflows_rebuilt/Oarfish.wdl
+  - name: SALMON
+    subclass: WDL
+    primaryDescriptorPath: /workflows_rebuilt/Salmon.wdl
