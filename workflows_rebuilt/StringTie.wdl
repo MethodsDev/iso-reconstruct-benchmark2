@@ -78,12 +78,6 @@ workflow stringtieWorkflow {
         File? referenceAnnotation_full
         String dataType
         String ID_or_Quant_or_Both
-        Int cpu
-        Int numThreads
-        Int memoryGB
-        Int diskSizeGB
-        String docker
-        File monitoringScript
     }
 
     call stringtieTask {
@@ -95,13 +89,7 @@ workflow stringtieWorkflow {
             referenceAnnotation_reduced = referenceAnnotation_reduced,
             referenceAnnotation_full = referenceAnnotation_full,
             dataType = dataType,
-            ID_or_Quant_or_Both = ID_or_Quant_or_Both,
-            cpu = cpu,
-            numThreads = numThreads,
-            memoryGB = memoryGB,
-            diskSizeGB = diskSizeGB,
-            docker = docker,
-            monitoringScript = monitoringScript
+            ID_or_Quant_or_Both = ID_or_Quant_or_Both
     }
 
     output {
