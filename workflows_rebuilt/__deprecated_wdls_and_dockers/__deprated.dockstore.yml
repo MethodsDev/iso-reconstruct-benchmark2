@@ -1,0 +1,95 @@
+version: 1.2
+workflows:
+  - name: ISOFORM_ID_QUANT_BENCHMARKING
+    subclass: WDL
+    primaryDescriptorPath: /workflows_rebuilt/Isoform_ID_Quant_Benchmarking.wdl
+  - name: ISOQUANT
+    subclass: WDL
+    primaryDescriptorPath: /workflows_rebuilt/IsoQuant.wdl
+  - name: STRINGTIE
+    subclass: WDL
+    primaryDescriptorPath: /workflows_rebuilt/StringTie.wdl
+  - name: BAMBU
+    subclass: WDL
+    primaryDescriptorPath: /workflows_rebuilt/Bambu.wdl
+  - name: FLAIR
+    subclass: WDL
+    primaryDescriptorPath: /workflows_rebuilt/Flair.wdl
+  - name: TALON
+    subclass: WDL
+    primaryDescriptorPath: /workflows_rebuilt/TALON.wdl
+  - name: ISOSEQ
+    subclass: WDL
+    primaryDescriptorPath: /workflows_rebuilt/IsoSeq.wdl
+  - name: MANDALORION
+    subclass: WDL
+    primaryDescriptorPath: /workflows_rebuilt/Mandalorion.wdl
+  - name: ESPRESSO
+    subclass: WDL
+    primaryDescriptorPath: /workflows_rebuilt/ESPRESSO.wdl
+  - name: FLAMES
+    subclass: WDL
+    primaryDescriptorPath: /workflows_rebuilt/FLAMES-py.wdl
+  - name: OARFISH
+    subclass: WDL
+    primaryDescriptorPath: /workflows_rebuilt/Oarfish.wdl
+  - name: SALMON
+    subclass: WDL
+    primaryDescriptorPath: /workflows_rebuilt/Salmon.wdl
+  - name: IsoformDiscoveryBenchmark
+    subclass: WDL
+    primaryDescriptorPath: /workflows/IsoformDiscoveryBenchmark.wdl
+  - name: IsoQuant
+    subclass: WDL
+    primaryDescriptorPath: /workflows/IsoQuant.wdl
+  - name: IsoQuantv2
+    subclass: WDL
+    primaryDescriptorPath: /workflows/IsoQuantv2.wdl
+  - name: StringTie
+    subclass: WDL
+    primaryDescriptorPath: /workflows/StringTie.wdl
+  - name: Bambu
+    subclass: WDL
+    primaryDescriptorPath: /workflows/Bambu.wdl
+  - name: Flair
+    subclass: WDL
+    primaryDescriptorPath: /workflows/Flair.wdl
+  - name: Talon
+    subclass: WDL
+    primaryDescriptorPath: /workflows/Talon.wdl
+  - name: IsoSeq
+    subclass: WDL
+    primaryDescriptorPath: /workflows/IsoSeq.wdl
+  - name: IsoSeqv2
+    subclass: WDL
+    primaryDescriptorPath: /workflows/IsoSeqv2.wdl
+  - name: Flames
+    subclass: WDL
+    primaryDescriptorPath: /workflows/Flames.wdl
+  - name: Flamesv2
+    subclass: WDL
+    primaryDescriptorPath: /workflows/Flamesv2.wdl
+  - name: Cupcake
+    subclass: WDL
+    primaryDescriptorPath: /workflows/Cupcake.wdl
+  - name: IsoformDiscoveryBenchmarkTasks
+    subclass: WDL
+    primaryDescriptorPath: /workflows/IsoformDiscoveryBenchmarkTasks.wdl
+  - name: Mandalorion
+    subclass: WDL
+    primaryDescriptorPath: /workflows/Mandalorion.wdl
+  - name: IsoformDiscoveryBenchmark-test
+    subclass: WDL
+    primaryDescriptorPath: /workflows/IsoformDiscoveryBenchmark-test.wdl
+  - name: IsoformDiscoveryBenchmark-test2
+    subclass: WDL
+    primaryDescriptorPath: /workflows/IsoformDiscoveryBenchmark-test2.wdl
+  - name: IsoformDiscoveryBenchmark-test3
+    subclass: WDL
+    primaryDescriptorPath: /workflows/IsoformDiscoveryBenchmark-test3.wdl
+  - name: IsoformDiscoveryBenchmark-test4
+    subclass: WDL
+    primaryDescriptorPath: /workflows/IsoformDiscoveryBenchmark-test4.wdl
+  - name: minimap2_mandalorion
+    subclass: WDL
+    primaryDescriptorPath: /workflows/minimap2_mandalorion.wdl
