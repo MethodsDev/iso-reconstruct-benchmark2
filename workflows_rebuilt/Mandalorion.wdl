@@ -23,6 +23,7 @@ task mandalorionTask {
 
     command <<<
         bash ~{monitoringScript} > monitoring.log &
+        mkdir -p ~{OutDir}
 
         if [ "~{ID_or_Quant_or_Both}" = "ID" ] || [ "~{ID_or_Quant_or_Both}" = "Both" ]; then
             samtools bam2fq ~{inputBAM} > ~{OutDir}/samtools.bam2fq.fastq
