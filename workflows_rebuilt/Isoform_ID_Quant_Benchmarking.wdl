@@ -42,7 +42,9 @@ task relocateOutputs {
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/espresso@sha256:f538303f6457c55e7b3c2a45081e6d8e3053e6f76e56bc65631b7f4aa290b026"
     }
 
-    command {
+    command <<<
+        bash ~{monitoringScript} > monitoring.log &
+
         mkdir ID_reduced ID Quant
     
         # Define arrays of files for each directory
@@ -62,7 +64,7 @@ task relocateOutputs {
         for file in "${quant_files[@]}"; do
           [ -f "$file" ] && mv "$file" Quant/
         done
-    }
+    >>>
 
     output {
         Directory ID_reduced = "ID_reduced"
@@ -72,7 +74,7 @@ task relocateOutputs {
 
     runtime {
         docker: docker
-        memory: "4 GB"
+        memory: "32 GB"
         cpu: 1
         disks: "local-disk 10 HDD"
     }
