@@ -43,9 +43,10 @@ task talonTask {
         fi
     >>>
 
-    output {
-        File? talonReducedGTF = ~{OutDir}/TALON_reduced.gtf
-        File monitoringLog = "monitoring.log"
+        output {
+            File? talonReducedGTF = "TALON_out/TALON_reduced.gtf"
+            File monitoringLog = "monitoring.log"
+        }
     }
 
     runtime {
@@ -93,8 +94,9 @@ workflow talonWorkflow {
             monitoringScript = monitoringScript
     }
 
-    output {
-        File? talonReducedGTF = talonTask.talonReducedGTF
-        File monitoringLog = talonTask.monitoringLog
+        output {
+            File? talonReducedGTF = "TALON_out/TALON_reduced.gtf"
+            File monitoringLog = "monitoring.log"
+        }
     }
 }
