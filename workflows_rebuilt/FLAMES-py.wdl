@@ -23,6 +23,7 @@ task flamesTask {
 
     command <<<
         bash ~{monitoringScript} > monitoring.log &
+        mkdir -p ~{OutDir}
 
         if [ "~{dataType}" = "pacbio_ccs" ]; then
             cat > ~{OutDir}/config.json << EOF
