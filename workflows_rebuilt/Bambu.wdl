@@ -36,7 +36,7 @@ task bambuTask {
 
         if [ "~{ID_or_Quant_or_Both}" == "ID" ] || [ "~{ID_or_Quant_or_Both}" == "Both" ]; then
             if [ "~{referenceAnnotation_reduced}" != "" ]; then
-                Rscript -<< "EOF"
+                Rscript -<< EOF
                 library(bambu)
                 fa.file <- "~{referenceGenome}"
                 gtf.file <- "~{referenceAnnotation_reduced}"
@@ -50,7 +50,7 @@ task bambuTask {
                 cut -f1 ~{OutDir}/ID_reduced/expressed_annotations.gtf.counts > ~{OutDir}/ID_reduced/expressed_transcripts.txt
                 grep -Ff ~{OutDir}/ID_reduced/expressed_transcripts.txt ~{OutDir}/ID_reduced/extended_annotations.gtf > ~{OutDir}/Bambu_reduced.gtf
 
-                Rscript -<< "EOF"
+                Rscript -<< EOF
                 library(bambu)
                 fa.file <- "~{referenceGenome}"
                 gtf.file <- "~{referenceAnnotation_reduced}"
@@ -65,7 +65,7 @@ task bambuTask {
                 grep -Ff ~{OutDir}/ID_ndr1_reduced/expressed_transcripts.txt ~{OutDir}/ID_ndr1_reduced/extended_annotations.gtf > ~{OutDir}/Bambu_ndr1_reduced.gtf
 
 
-                Rscript -<< "EOF"
+                Rscript -<< EOF
                 library(bambu)
                 fa.file <- "~{referenceGenome}"
                 lr.bam <- "~{inputBAM}"
@@ -76,7 +76,7 @@ task bambuTask {
                 mv ~{OutDir}/ID_reffree/Bambu.gtf  ~{OutDir}/Bambu.gtf
 
             else
-                Rscript -<< "EOF"
+                Rscript -<< EOF
                 library(bambu)
                 fa.file <- "~{referenceGenome}"
                 lr.bam <- "~{inputBAM}"
