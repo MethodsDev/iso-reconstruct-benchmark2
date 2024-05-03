@@ -22,17 +22,18 @@ task bambuTask {
     String OutDir = "Bambu_out"
 
     command <<<
-    if [[ "~{ID_or_Quant_or_Both}" != "ID" && "~{referenceAnnotation_full}" != "" ]]; then
+
+    bash ~{monitoringScript} > monitoring.log &
+    mkdir ~{OutDir}
+    mkdir ~{OutDir}/ID_reduced
+    mkdir ~{OutDir}/ID_ndr1_reduced
+    mkdir ~{OutDir}/ID_reffree
+    mkdir ~{OutDir}/Quant
+
+    if [[ "~{ID_or_Quant_or_Both}" != "ID" && -z "~{referenceAnnotation_full}" ]]; then
         echo "Error: referenceAnnotation_full must be provided if ID_or_Quant_or_Both is not equal to ID."
         exit 1
     fi
-
-    bash ~{monitoringScript} > monitoring.log &
-        mkdir ~{OutDir}
-        mkdir ~{OutDir}/ID_reduced
-        mkdir ~{OutDir}/ID_ndr1_reduced
-        mkdir ~{OutDir}/ID_reffree
-        mkdir ~{OutDir}/Quant
 
         if [ "~{ID_or_Quant_or_Both}" == "ID" ] || [ "~{ID_or_Quant_or_Both}" == "Both" ]; then
             if [ "~{referenceAnnotation_reduced}" != "" ]; then
