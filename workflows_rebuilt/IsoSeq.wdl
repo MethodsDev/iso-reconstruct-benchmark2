@@ -100,8 +100,8 @@ workflow isoseqWorkflow {
     }
 
     output {
-        File isoseqGTF = isoseqTask.isoseqGFF
-        File? isoseqReducedGTF = isoseqTask.isoseqReducedGFF
+        File isoseqGTF = isoseqTask.isoseqGTF
+        File? isoseqReducedGTF = isoseqTask.isoseqReducedGTF
         File monitoringLog = isoseqTask.monitoringLog
     }
 }
