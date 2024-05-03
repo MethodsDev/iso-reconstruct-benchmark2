@@ -68,9 +68,6 @@ task stringtieTask {
     }
 }
 
-
-version 1.0
-
 workflow stringtieWorkflow {
     input {
         File inputBAM
