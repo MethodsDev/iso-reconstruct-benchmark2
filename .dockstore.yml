@@ -3,7 +3,7 @@ workflows:
   - name: ISOFORM_ID_QUANT_BENCHMARKING
     subclass: WDL
     primaryDescriptorPath: /workflows_rebuilt/Isoform_ID_Quant_Benchmarking.wdl
-  - name: ISOQUANTt
+  - name: ISOQUANT
     subclass: WDL
     primaryDescriptorPath: /workflows_rebuilt/IsoQuant.wdl
   - name: STRINGTIE
