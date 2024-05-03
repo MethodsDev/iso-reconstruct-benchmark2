@@ -43,10 +43,9 @@ task talonTask {
         fi
     >>>
 
-        output {
-            File? talonReducedGTF = "TALON_out/TALON_reduced.gtf"
-            File monitoringLog = "monitoring.log"
-        }
+    output {
+        File? talonReducedGTF = "TALON_out/TALON_reduced.gtf"
+        File monitoringLog = "monitoring.log"
     }
 
     runtime {
@@ -56,7 +55,6 @@ task talonTask {
         docker: docker
     }
 }
-
 
 workflow talonWorkflow {
     input {
@@ -94,9 +92,8 @@ workflow talonWorkflow {
             monitoringScript = monitoringScript
     }
 
-        output {
-            File? talonReducedGTF = "TALON_out/TALON_reduced.gtf"
-            File monitoringLog = "monitoring.log"
-        }
+    output {
+        File? talonReducedGTF = talonTask.talonReducedGTF
+        File monitoringLog = talonTask.monitoringLog
     }
 }
