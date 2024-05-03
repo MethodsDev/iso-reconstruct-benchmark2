@@ -22,7 +22,7 @@ task bambuTask {
     String OutDir = "Bambu_out"
 
     command <<<
-    if [[ "~{ID_or_Quant_or_Both}" != "ID" && -z "~{referenceAnnotation_full}" ]]; then
+    if [[ "~{ID_or_Quant_or_Both}" != "ID" && "~{referenceAnnotation_full}" != "" ]]; then
         echo "Error: referenceAnnotation_full must be provided if ID_or_Quant_or_Both is not equal to ID."
         exit 1
     fi
