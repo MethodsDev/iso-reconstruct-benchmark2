@@ -29,11 +29,11 @@ task espressoTask {
         samtools view -h -o input.sam ~{inputBAM}
 
         # Create espresso_samples.tsv
-        echo -e "input.sam\tespresso" > ~{OutDir}/{samples_filename}
+        echo -e "input.sam\tespresso" > ~{OutDir}/~{samples_filename}
 
         if [[ "~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both" || "~{ID_or_Quant_or_Both}" == "ID" && -n "~{referenceAnnotation_reduced}" ]]; then
             mkdir -p ~{OutDir}
-            perl /usr/src/app/espresso/src/ESPRESSO_S.pl --sort_buffer_size 16G -L ~{OutDir}/{samples_filename} -F ~{referenceGenome} -A ~{referenceAnnotation_full} -O ~{OutDir} -T ~{numThreads}
+            perl /usr/src/app/espresso/src/ESPRESSO_S.pl --sort_buffer_size 16G -L ~{OutDir}/~{samples_filename} -F ~{referenceGenome} -A ~{referenceAnnotation_full} -O ~{OutDir} -T ~{numThreads}
             perl /usr/src/app/espresso/src/ESPRESSO_C.pl --sort_buffer_size 16G -I ~{OutDir} -F ~{referenceGenome} -X 0 -T ~{numThreads}
             perl /usr/src/app/espresso/src/ESPRESSO_Q.pl -L ~{OutDir}/espresso_samples.tsv.updated -A ~{referenceAnnotation_full} -T ~{numThreads}
             mv ~{OutDir}/espresso_samples_N2_R0_abundance.esp ~{OutDir}/ESPRESSO_quant.txt
