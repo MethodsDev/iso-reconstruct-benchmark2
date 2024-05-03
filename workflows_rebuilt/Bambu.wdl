@@ -89,7 +89,7 @@ task bambuTask {
         fi
 
         if [ "~{referenceAnnotation_full}" != "" ] && ([ "~{ID_or_Quant_or_Both}" == "Quant" ] || [ "~{ID_or_Quant_or_Both}" == "Both" ]); then
-            Rscript -<< "EOF"
+            Rscript -<< EOF
             library(bambu)
             test.bam <- "~{inputBAM}"
             fa.file <- "~{referenceGenome}"
