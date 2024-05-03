@@ -25,7 +25,7 @@ task flamesTask {
         bash ~{monitoringScript} > monitoring.log &
 
         if [ "~{dataType}" = "pacbio_ccs" ]; then
-            cat > ~{OutDir}/config.json <<EOF
+            cat > ~{OutDir}/config.json << EOF
             {
                 "comment":"this is the default config for nanopore single cell long read data using 10X RNA-seq kit. use splice annotation in alignment.",
                 "pipeline_parameters":{
@@ -64,9 +64,9 @@ task flamesTask {
                     "min_read_coverage":0.4
                 }
             }
-            EOF
+EOF
         else
-            cat > ~{OutDir}/config.json <<EOF
+            cat > ~{OutDir}/config.json << EOF
             {
                 "comment":"this is the default config for nanopore single cell long read data using 10X RNA-seq kit. use splice annotation in alignment.",
                 "pipeline_parameters":{
@@ -105,7 +105,7 @@ task flamesTask {
                     "min_read_coverage":0.4
                 }
             }
-            EOF
+EOF
         fi
 
         if [ "~{ID_or_Quant_or_Both}" = "ID" -o "~{ID_or_Quant_or_Both}" = "Both" ] && [ -n "~{referenceAnnotation_reduced}" ]; then
