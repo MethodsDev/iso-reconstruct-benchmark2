@@ -59,9 +59,6 @@ task salmonTask {
     }
 }
 
-
-version 1.0
-
 workflow salmonWorkflow {
     input {
         File inputBAM
