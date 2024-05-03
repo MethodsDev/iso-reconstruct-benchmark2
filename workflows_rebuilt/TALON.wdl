@@ -38,7 +38,7 @@ task talonTask {
                 talon_filter_transcripts --db "~{datasetName}.db" -a ~{datasetName} --datasets ~{datasetName} --o "~{talonPrefix}_filter"
                 talon_create_GTF --build ~{datasetName} --db "~{datasetName}.db" -a ~{datasetName} --o ~{talonPrefix} --whitelist "~{talonPrefix}_filter"
                 
-                mv ~{OutDir}/TALON_talon.gtf ~{OutDir}/TALON_reduced.gtf
+                mv TALON_talon.gtf TALON_reduced.gtf
             fi
         fi
     >>>
