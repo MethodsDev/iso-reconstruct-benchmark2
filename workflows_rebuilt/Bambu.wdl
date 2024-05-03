@@ -44,7 +44,7 @@ task bambuTask {
                 lr.bam <- "~{inputBAM}"
                 lr.se <- bambu(reads = lr.bam, rcOutDir = "~{OutDir}/ID_reduced", annotations = bambuAnnotations, genome = fa.file, ncore = ~{numThreads})
                 writeBambuOutput(lr.se, path = "~{OutDir}/ID_reduced")
-                EOF
+EOF
 
                 awk ' $3 >= 1 ' ~{OutDir}/ID_reduced/counts_transcript.txt | sort -k3,3n > ~{OutDir}/ID_reduced/expressed_annotations.gtf.counts
                 cut -f1 ~{OutDir}/ID_reduced/expressed_annotations.gtf.counts > ~{OutDir}/ID_reduced/expressed_transcripts.txt
@@ -58,7 +58,7 @@ task bambuTask {
                 lr.bam <- "~{inputBAM}"
                 lr.se <- bambu(reads = lr.bam, rcOutDir = "~{OutDir}/ID_ndr1_reduced", annotations = bambuAnnotations, genome = fa.file, ncore = ~{numThreads}, NDR = 1)
                 writeBambuOutput(lr.se, path = "~{OutDir}/ID_ndr1_reduced")
-                EOF
+EOF
 
                 awk ' $3 >= 1 ' ~{OutDir}/ID_ndr1_reduced/counts_transcript.txt | sort -k3,3n > ~{OutDir}/ID_ndr1_reduced/expressed_annotations.gtf.counts
                 cut -f1 ~{OutDir}/ID_ndr1_reduced/expressed_annotations.gtf.counts > ~{OutDir}/ID_ndr1_reduced/expressed_transcripts.txt
@@ -71,7 +71,7 @@ task bambuTask {
                 lr.bam <- "~{inputBAM}"
                 lr.se <- bambu(reads = lr.bam, rcOutDir = '~{OutDir}/ID_reffree', annotations = NULL, genome = fa.file, quant = FALSE, NDR = 1, ncore = ~{numThreads})
                 writeToGTF(lr.se, "~{OutDir}/ID_reffree/Bambu.gtf")
-                EOF
+EOF
                 
                 mv ~{OutDir}/ID_reffree/Bambu.gtf  ~{OutDir}/Bambu.gtf
 
@@ -82,7 +82,7 @@ task bambuTask {
                 lr.bam <- "~{inputBAM}"
                 lr.se <- bambu(reads = lr.bam, rcOutDir = '~{OutDir}/ID_reffree', annotations = NULL, genome = fa.file, quant = FALSE, NDR = 1, ncore = ~{numThreads})
                 writeToGTF(lr.se, "~{OutDir}/ID_reffree/Bambu.gtf")
-                EOF
+EOF
                 
                 mv ~{OutDir}/ID_reffree/Bambu.gtf  ~{OutDir}/Bambu.gtf
             fi
@@ -96,7 +96,7 @@ task bambuTask {
             gtf.file <- "~{referenceAnnotation_full}"
             se.quantOnly <- bambu(reads = test.bam, annotations = gtf.file, genome = fa.file, discovery = FALSE)
             writeBambuOutput(se.quantOnly, path = "~{OutDir}/Quant")
-            EOF
+EOF
 
             mv ~{OutDir}/Quant/counts_transcript.txt ~{OutDir}/Bambu_quant.txt
         fi
