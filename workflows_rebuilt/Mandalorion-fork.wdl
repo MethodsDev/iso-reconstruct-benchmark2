@@ -1,6 +1,6 @@
 version 1.0
 
-# This task uses Mandalorion version 4.5.0 (MDL fork version)
+# This task uses Mandalorion version 4.5.0 (MDL fork version to be able to directly run on aligned bam files)
 task mandalorionforkTask {
     input {
         File inputBAM
