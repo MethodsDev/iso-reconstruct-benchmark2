@@ -7,7 +7,7 @@ import "FLAMES.wdl" as flamesWorkflow
 import "IsoQuant.wdl" as isoquantWorkflow
 import "IsoSeq.wdl" as isoseqWorkflow
 import "Mandalorion.wdl" as mandalorionWorkflow
-import "Mandalorionforked.wdl" as mandalorionforkedWorkflow
+import "Mandalorion-fork.wdl" as mandalorionforkedWorkflow
 import "Oarfish.wdl" as oarfishWorkflow
 import "Salmon.wdl" as salmonWorkflow
 import "StringTie.wdl" as stringtieWorkflow
@@ -34,6 +34,8 @@ task relocateOutputs {
         File? isoseqGTF
         File? mandalorionReducedGTF
         File? mandalorionGTF
+        File? mandalorionforkReducedGTF
+        File? mandalorionforkGTF
         File? oarfishCounts
         File? salmonCounts
         File? stringtieReducedGTF
@@ -51,8 +53,8 @@ task relocateOutputs {
         mkdir ID_reduced ID Quant All_Outputs_Relocated
     
         # Define arrays of files for each directory
-        reduced_files=("~{bambuReducedGTF}" "~{bambuNDR1ReducedGTF}" "~{espressoReducedGTF}" "~{flairReducedGTF}" "~{flamesReducedGTF}" "~{isoquantReducedGTF}" "~{isoquantReducedGTF_with_polyA}" "~{isoseqReducedGTF}" "~{mandalorionReducedGTF}" "~{stringtieReducedGTF}" "~{talonReducedGTF}")
-        id_files=("~{bambuGTF}" "~{isoquantGTF}" "~{isoquantGTF_with_polyA}" "~{isoseqGTF}" "~{mandalorionGTF}" "~{stringtieGTF}")
+        reduced_files=("~{bambuReducedGTF}" "~{bambuNDR1ReducedGTF}" "~{espressoReducedGTF}" "~{flairReducedGTF}" "~{flamesReducedGTF}" "~{isoquantReducedGTF}" "~{isoquantReducedGTF_with_polyA}" "~{isoseqReducedGTF}" "~{mandalorionReducedGTF}" "~{mandalorionforkReducedGTF}" "~{stringtieReducedGTF}" "~{talonReducedGTF}")
+        id_files=("~{bambuGTF}" "~{isoquantGTF}" "~{isoquantGTF_with_polyA}" "~{isoseqGTF}" "~{mandalorionGTF}" "~{mandalorionforkGTF}" "~{stringtieGTF}")
         quant_files=("~{bambuCounts}" "~{espressoCounts}" "~{flairCounts}" "~{isoquantCounts}" "~{isoquantCounts_with_polyA}" "~{oarfishCounts}" "~{salmonCounts}" "~{stringtieCounts}")
     
         # Loop over the files for each directory
@@ -208,6 +210,20 @@ if (runMandalorion) {
     }
 }
 
+if (runMandalorionfork) {
+    call mandalorionforkWorkflow.mandalorionforkWorkflow as mandalorionfork {
+        input:
+            inputBAM = inputBAM,
+            inputBAMIndex = inputBAMIndex,
+            referenceGenome = referenceGenome,
+            referenceGenomeIndex = referenceGenomeIndex,
+            referenceAnnotation_reduced = referenceAnnotation_reduced,
+            referenceAnnotation_full = referenceAnnotation_full,
+            dataType = dataType,
+            ID_or_Quant_or_Both = ID_or_Quant_or_Both
+    }
+}
+
 if (runOarfish) {
     call oarfishWorkflow.oarfishWorkflow as oarfish {
         input:
@@ -286,6 +302,8 @@ call relocateOutputs {
         isoseqGTF = isoseq.isoseqGTF,
         mandalorionReducedGTF = mandalorion.mandalorionReducedGTF,
         mandalorionGTF = mandalorion.mandalorionGTF,
+        mandalorionforkReducedGTF = mandalorionfork.mandalorionforkReducedGTF,
+        mandalorionforkGTF = mandalorionfork.mandalorionforkGTF,
         oarfishCounts = oarfish.oarfishCounts,
         salmonCounts = salmon.salmonCounts,
         stringtieReducedGTF = stringtie.stringtieReducedGTF,
