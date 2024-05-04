@@ -47,7 +47,7 @@ task relocateOutputs {
     command <<<
         bash ~{monitoringScript} > monitoring.log &
 
-        mkdir ID_reduced ID Quant
+        mkdir ID_reduced ID Quant All_Outputs_Relocated
     
         # Define arrays of files for each directory
         reduced_files=("~{bambuReducedGTF}" "~{bambuNDR1ReducedGTF}" "~{espressoReducedGTF}" "~{flairReducedGTF}" "~{flamesReducedGTF}" "~{isoquantReducedGTF}" "~{isoquantReducedGTF_with_polyA}" "~{isoseqReducedGTF}" "~{mandalorionReducedGTF}" "~{stringtieReducedGTF}" "~{talonReducedGTF}")
@@ -66,12 +66,13 @@ task relocateOutputs {
         for file in "${quant_files[@]}"; do
           [ -f "$file" ] && mv "$file" Quant/
         done
+
+        mv ID_reduced ID Quant All_Outputs_Relocated/
+        tar -czf All_Outputs_Relocated.tar.gz All_Outputs_Relocated/
     >>>
 
     output {
-        Array[File] ID_reduced_files = glob("ID_reduced/*")
-        Array[File] ID_files = glob("ID/*")
-        Array[File] Quant_files = glob("Quant/*")
+        File relocated_files = "All_Outputs_Relocated.tar.gz"
     }
 
     runtime {
