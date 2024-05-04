@@ -39,7 +39,7 @@ task isoseqTask {
             pigeon prepare ~{referenceAnnotation_reduced} ~{referenceGenome}
             pigeon prepare ~{OutDir}/isoseq_reffree/pbmm_aligned.gff
 
-            mv ~{referenceAnnotation_reduced}  ~{OutDir}/isoseq/ref_reduced.gtf
+            cp ~{referenceAnnotation_reduced}  ~{OutDir}/isoseq/ref_reduced.gtf
 
             pigeon classify ~{OutDir}/isoseq_reffree/pbmm_aligned.sorted.gff ~{OutDir}/isoseq/ref_reduced.sorted.gtf ~{referenceGenome} --fl ~{OutDir}/isoseq_reffree/pbmm_aligned.flnc_count.txt -d ~{OutDir}/isoseq
             cp ~{OutDir}/isoseq_reffree/pbmm_aligned.sorted.gff ~{OutDir}/isoseq/pbmm_aligned.sorted.gff
