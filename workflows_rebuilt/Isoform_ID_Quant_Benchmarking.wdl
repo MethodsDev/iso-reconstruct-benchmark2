@@ -3,10 +3,11 @@ version 1.0
 import "Bambu.wdl" as bambuWorkflow
 import "ESPRESSO.wdl" as espressoWorkflow
 import "Flair.wdl" as flairWorkflow
-import "FLAMES-py.wdl" as flamesWorkflow
+import "FLAMES.wdl" as flamesWorkflow
 import "IsoQuant.wdl" as isoquantWorkflow
 import "IsoSeq.wdl" as isoseqWorkflow
 import "Mandalorion.wdl" as mandalorionWorkflow
+import "Mandalorionforked.wdl" as mandalorionforkedWorkflow
 import "Oarfish.wdl" as oarfishWorkflow
 import "Salmon.wdl" as salmonWorkflow
 import "StringTie.wdl" as stringtieWorkflow
