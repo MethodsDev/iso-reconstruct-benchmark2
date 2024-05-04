@@ -126,7 +126,7 @@ EOF
     >>>
 
     output {
-        File? flamesReducedGTF = "FLAMES.gff3"
+        File? flamesReducedGTF = "~{OutDir}/FLAMES.gff3"
         File monitoringLog = "monitoring.log"
     }
 
