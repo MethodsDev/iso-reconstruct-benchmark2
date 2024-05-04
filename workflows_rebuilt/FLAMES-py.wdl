@@ -19,7 +19,7 @@ task flamesTask {
         File monitoringScript = "gs://ctat_genome_libs/terra_scripts/cromwell_monitoring_script2.sh"
     }
     
-    String OutDir = "FLAMES-py_out"
+    String OutDir = "FLAMES_out"
 
     command <<<
         bash ~{monitoringScript} > monitoring.log &
