@@ -24,12 +24,15 @@ workflows:
   - name: MANDALORION
     subclass: WDL
     primaryDescriptorPath: /workflows_rebuilt/Mandalorion.wdl
+  - name: MANDALORION-FORK
+    subclass: WDL
+    primaryDescriptorPath: /workflows_rebuilt/Mandalorion-fork.wdl
   - name: ESPRESSO
     subclass: WDL
     primaryDescriptorPath: /workflows_rebuilt/ESPRESSO.wdl
   - name: FLAMES
     subclass: WDL
-    primaryDescriptorPath: /workflows_rebuilt/FLAMES-py.wdl
+    primaryDescriptorPath: /workflows_rebuilt/FLAMES.wdl
   - name: OARFISH
     subclass: WDL
     primaryDescriptorPath: /workflows_rebuilt/Oarfish.wdl
