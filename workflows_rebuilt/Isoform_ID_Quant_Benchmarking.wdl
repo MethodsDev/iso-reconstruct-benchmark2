@@ -104,6 +104,7 @@ workflow LongReadRNABenchmark {
         Boolean runFlames = true
         Boolean runIsoquant = true
         Boolean runIsoseq = true
+        Boolean runMandalorionfork = true
         Boolean runMandalorion = true
         Boolean runOarfish = true
         Boolean runSalmon = true
