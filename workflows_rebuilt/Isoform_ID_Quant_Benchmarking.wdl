@@ -7,7 +7,7 @@ import "FLAMES.wdl" as flamesWorkflow
 import "IsoQuant.wdl" as isoquantWorkflow
 import "IsoSeq.wdl" as isoseqWorkflow
 import "Mandalorion.wdl" as mandalorionWorkflow
-import "Mandalorion-fork.wdl" as mandalorionforkedWorkflow
+import "Mandalorion-fork.wdl" as mandalorionforkWorkflow
 import "Oarfish.wdl" as oarfishWorkflow
 import "Salmon.wdl" as salmonWorkflow
 import "StringTie.wdl" as stringtieWorkflow
