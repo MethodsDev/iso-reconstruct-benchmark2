@@ -1,6 +1,6 @@
 version 1.0
 
-# This task uses Mandalorion version 4.5.0
+# This task uses Mandalorion version 4.5.0 (MDL fork version)
 task mandalorionforkTask {
     input {
         File inputBAM
