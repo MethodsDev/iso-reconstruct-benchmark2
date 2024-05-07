@@ -42,6 +42,14 @@ task lraaTask {
                                      --output_prefix ~{OutDir}/~{out_prefix} \
                                      ~{true="--no_norm" false="" LRAA_no_norm} \
                                      --gtf ~{referenceAnnotation_reduced}
+
+            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
+                                     --bam ~{inputBAM} \
+                                     --output_prefix ~{OutDir}/~{out_prefix}.noEM \
+                                     ~{true="--no_norm" false="" LRAA_no_norm} \
+                                     --gtf ~{referenceAnnotation_reduced} \
+                                     --no_EM
+
         fi
     
         if [[ "~{ID_or_Quant_or_Both}" == "Quant" && -n "~{referenceAnnotation_full}" ]]; then
@@ -52,6 +60,15 @@ task lraaTask {
                                          --quant_only \
                                          ~{true="--no_norm" false="" LRAA_no_norm} \
                                          --gtf ~{referenceAnnotation_full}
+                                     
+
+                /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
+                                         --bam ~{inputBAM} \
+                                         --output_prefix ~{OutDir}/~{out_prefix}.noEM \
+                                         --quant_only \
+                                         ~{true="--no_norm" false="" LRAA_no_norm} \
+                                         --gtf ~{referenceAnnotation_full} \
+                                         --no_EM
             fi
         fi
 
