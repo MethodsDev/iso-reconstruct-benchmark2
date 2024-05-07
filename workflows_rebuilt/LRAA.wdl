@@ -21,8 +21,6 @@ task lraaTask {
     }
 
     String OutDir = "LRAA_out"
-    Boolean quant_only = false
-    Boolean? no_norm = false
 
     command <<<
         bash ~{monitoringScript} > monitoring.log &
@@ -31,20 +29,41 @@ task lraaTask {
 
         out_prefix=lraa
 
+    if [[ "~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both" ]]; then
         /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                  --bam ~{inputBAM} \
-                                 --output_prefix ~{OutDir}/~{ID_or_Quant_or_Both} \
-                                 ~{true='--quant_only' false='' quant_only} \
+                                 --output_prefix ~{OutDir}/~{out_prefix} \
+                                 ~{true="--no_norm" false="" LRAA_no_norm}
+    fi
+
+    if [[ ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{referenceAnnotation_reduced}" ]]; then
+        /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
+                                 --bam ~{inputBAM} \
+                                 --output_prefix ~{OutDir}/~{out_prefix} \
                                  ~{true="--no_norm" false="" LRAA_no_norm} \
-                                 ~{"--gtf " + referenceAnnotation_full} \
-                                 --output_prefix ~{OutDir}/~{ID_or_Quant_or_Both}${out_prefix}
+                                 --gtf ~{referenceAnnotation_reduced}
+    fi
+
+    if [[ "~{ID_or_Quant_or_Both}" == "Quant" && -n "~{referenceAnnotation_full}" ]]; then
+        if [[ -n "~{referenceAnnotation_reduced}" ]]; then
+            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
+                                     --bam ~{inputBAM} \
+                                     --output_prefix ~{OutDir}/~{out_prefix} \
+                                     --quant_only \
+                                     ~{true="--no_norm" false="" LRAA_no_norm} \
+                                     --gtf ~{referenceAnnotation_full}
+        fi
+    fi
+
+
+
     >>>
 
     output {
-        File lraaGTF = "~{OutDir}/~{ID_or_Quant_or_Both}.gtf"
-        File? lraaReducedGTF = "~{OutDir}/~{ID_or_Quant_or_Both}_reduced.gtf"
-        File? isoquantCounts = "~{OutDir}/~{ID_or_Quant_or_Both}_quant.tsv"
-        File? isoquantGTF_with_polyA = "~{OutDir}/~{ID_or_Quant_or_Both}_with_polyA.gtf"
+        File lraaGTF = "~{OutDir}/~{out_prefix}.gtf"
+        File? lraaReducedGTF = "~{OutDir}/~{out_prefix}_reduced.gtf"
+        File? isoquantCounts = "~{OutDir}/~{out_prefix}_quant.tsv"
+        File? isoquantCounts_noEM = "~{OutDir}/~{out_prefix}_quant.tsv"
         File monitoringLog = "monitoring.log"
     }
 
@@ -84,7 +103,7 @@ workflow lraaWorkflow {
         File lraaGTF = lraaTask.lraaGTF
         File? lraaReducedGTF = lraaTask.lraaReducedGTF
         File? isoquantCounts = lraaTask.isoquantCounts
-        File? isoquantGTF_with_polyA = lraaTask.isoquantGTF_with_polyA
+        File? isoquantCounts_noEM = lraaTask.isoquantCounts_noEM
         File monitoringLog = lraaTask.monitoringLog
     }
 }
