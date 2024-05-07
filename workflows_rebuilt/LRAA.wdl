@@ -27,7 +27,7 @@ command <<<
     
     rm -rf ~{OutDir} && mkdir -p ~{OutDir}/ID ~{OutDir}/ID_reduced ~{OutDir}/Quant ~{OutDir}/Quant_noEM
 
-    out_prefix=lraa
+    out_prefix=LRAA
 
     if [[ "~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both" ]]; then
         /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
@@ -39,7 +39,7 @@ command <<<
     if [[ ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{referenceAnnotation_reduced}" ]]; then
         /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                  --bam ~{inputBAM} \
-                                 --output_prefix ~{OutDir}/ID_reduced/~{out_prefix} \
+                                 --output_prefix ~{OutDir}/ID_reduced/~{out_prefix}_reduced.gtf \
                                  ~{true="--no_norm" false="" LRAA_no_norm} \
                                  --gtf ~{referenceAnnotation_reduced}
     fi
