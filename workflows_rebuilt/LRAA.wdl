@@ -22,52 +22,48 @@ task lraaTask {
 
     String OutDir = "LRAA_out"
 
-    command <<<
-        bash ~{monitoringScript} > monitoring.log &
-        
-        rm -rf ~{OutDir} && mkdir ~{OutDir} 
-
-        out_prefix=lraa
-
-        if [[ "~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both" ]]; then
-            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
-                                     --bam ~{inputBAM} \
-                                     --output_prefix ~{OutDir}/~{out_prefix} \
-                                     ~{true="--no_norm" false="" LRAA_no_norm}
-        fi
+command <<<
+    bash ~{monitoringScript} > monitoring.log &
     
-        if [[ ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{referenceAnnotation_reduced}" ]]; then
+    rm -rf ~{OutDir} && mkdir -p ~{OutDir}/ID ~{OutDir}/ID_reduced ~{OutDir}/Quant ~{OutDir}/Quant_noEM
+
+    out_prefix=lraa
+
+    if [[ "~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both" ]]; then
+        /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
+                                 --bam ~{inputBAM} \
+                                 --output_prefix ~{OutDir}/ID/~{out_prefix} \
+                                 ~{true="--no_norm" false="" LRAA_no_norm}
+    fi
+
+    if [[ ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{referenceAnnotation_reduced}" ]]; then
+        /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
+                                 --bam ~{inputBAM} \
+                                 --output_prefix ~{OutDir}/ID_reduced/~{out_prefix} \
+                                 ~{true="--no_norm" false="" LRAA_no_norm} \
+                                 --gtf ~{referenceAnnotation_reduced}
+    fi
+
+    if [[ "~{ID_or_Quant_or_Both}" == "Quant" && -n "~{referenceAnnotation_full}" ]]; then
+        if [[ -n "~{referenceAnnotation_reduced}" ]]; then
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                      --bam ~{inputBAM} \
-                                     --output_prefix ~{OutDir}/~{out_prefix} \
+                                     --output_prefix ~{OutDir}/Quant/~{out_prefix} \
+                                     --quant_only \
                                      ~{true="--no_norm" false="" LRAA_no_norm} \
-                                     --gtf ~{referenceAnnotation_reduced}
+                                     --gtf ~{referenceAnnotation_full}
 
+            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
+                                     --bam ~{inputBAM} \
+                                     --output_prefix ~{OutDir}/Quant_noEM/~{out_prefix}.noEM \
+                                     --quant_only \
+                                     ~{true="--no_norm" false="" LRAA_no_norm} \
+                                     --gtf ~{referenceAnnotation_full} \
+                                     --no_EM
         fi
-    
-        if [[ "~{ID_or_Quant_or_Both}" == "Quant" && -n "~{referenceAnnotation_full}" ]]; then
-            if [[ -n "~{referenceAnnotation_reduced}" ]]; then
-                /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
-                                         --bam ~{inputBAM} \
-                                         --output_prefix ~{OutDir}/~{out_prefix} \
-                                         --quant_only \
-                                         ~{true="--no_norm" false="" LRAA_no_norm} \
-                                         --gtf ~{referenceAnnotation_full}
-                                     
+    fi
+>>>
 
-                /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
-                                         --bam ~{inputBAM} \
-                                         --output_prefix ~{OutDir}/~{out_prefix}.noEM \
-                                         --quant_only \
-                                         ~{true="--no_norm" false="" LRAA_no_norm} \
-                                         --gtf ~{referenceAnnotation_full} \
-                                         --no_EM
-            fi
-        fi
-
-
-
-    >>>
 
     output {
         File lraaGTF = "~{OutDir}/~{out_prefix}.gtf"
