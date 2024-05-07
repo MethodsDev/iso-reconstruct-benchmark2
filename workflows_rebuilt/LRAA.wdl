@@ -1,107 +1,90 @@
 version 1.0
 
-workflow lraa_wf {
-
+# This task uses LRAA version 0.0.4
+task lraaTask {
     input {
-        File genome_fa
-        File aligned_reads_bam
-        File? aligned_reads_bai
-        String sample_id
-        File? gtf_file
-        Boolean quant_only = false
-        Boolean no_norm = false
-
+        File inputBAM
+        File inputBAMIndex
+        File referenceGenome
+        File referenceGenomeIndex
+        File? referenceAnnotation_reduced
+        File? referenceAnnotation_full
+        String dataType
+        String ID_or_Quant_or_Both
+        Boolean? LRAA_no_norm = false
+        Int cpu = 16
+        Int numThreads = 32
+        Int memoryGB = 256
+        Int diskSizeGB = 500
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/lraa/lraa:latest"
-        Int cpu = 4
-        String memory = "32G"
-        Int disk_space = "100"
-        Int preemptible = 0
-        
+        File monitoringScript = "gs://ctat_genome_libs/terra_scripts/cromwell_monitoring_script2.sh"
     }
 
-    call lraa_task {
-        input:
-            genome_fa=genome_fa,
-            aligned_reads_bam=aligned_reads_bam,
-            aligned_reads_bai=aligned_reads_bai,
-            sample_id=sample_id,
-            gtf_file=gtf_file,
-            quant_only=quant_only,
-            no_norm=no_norm,
-        
-            docker=docker,
-            cpu=cpu,
-            memory=memory,
-            disk_space=disk_space,
-            preemptible=preemptible
-    }
+    String OutDir = "LRAA_out"
+    Boolean quant_only = false
+    Boolean? no_norm = false
 
+    command <<<
+        bash ~{monitoringScript} > monitoring.log &
+        
+        rm -rf ~{OutDir} && mkdir ~{OutDir} 
+
+        out_prefix=lraa
+
+        /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
+                                 --bam ~{inputBAM} \
+                                 --output_prefix ~{OutDir}/~{ID_or_Quant_or_Both} \
+                                 ~{true='--quant_only' false='' quant_only} \
+                                 ~{true="--no_norm" false="" LRAA_no_norm} \
+                                 ~{"--gtf " + referenceAnnotation_full} \
+                                 --output_prefix ~{OutDir}/~{ID_or_Quant_or_Both}${out_prefix}
+    >>>
 
     output {
-          File? LRAA_gtf = lraa_task.LRAA_gtf
-          File? LRAA_quant_expr = lraa_task.LRAA_quant_expr
-          File? LRAA_quant_tracking = lraa_task.LRAA_quant_tracking
+        File lraaGTF = "~{OutDir}/~{ID_or_Quant_or_Both}.gtf"
+        File? lraaReducedGTF = "~{OutDir}/~{ID_or_Quant_or_Both}_reduced.gtf"
+        File? isoquantCounts = "~{OutDir}/~{ID_or_Quant_or_Both}_quant.tsv"
+        File? isoquantGTF_with_polyA = "~{OutDir}/~{ID_or_Quant_or_Both}_with_polyA.gtf"
+        File monitoringLog = "monitoring.log"
     }
-        
+
+    runtime {
+        cpu: cpu
+        memory: "~{memoryGB} GiB"
+        disks: "local-disk ~{diskSizeGB} HDD"
+        docker: docker
+    }
 }
 
-
-
-task lraa_task {
-    
+workflow lraaWorkflow {
     input {
-        File genome_fa
-        File aligned_reads_bam
-        File? aligned_reads_bai
-        String sample_id
-        File? gtf_file
-        Boolean quant_only
-        Boolean no_norm
-
-        String docker
-        Int cpu
-        String memory
-        Int disk_space
-        Int preemptible
-  
+        File inputBAM
+        File inputBAMIndex
+        File referenceGenome
+        File referenceGenomeIndex
+        File? referenceAnnotation_reduced
+        File? referenceAnnotation_full
+        String dataType
+        String ID_or_Quant_or_Both
     }
 
-    String output_prefix = if defined (gtf_file) then ".refGuided" else ".refFree"
+    call lraaTask {
+        input:
+            inputBAM = inputBAM,
+            inputBAMIndex = inputBAMIndex,
+            referenceGenome = referenceGenome,
+            referenceGenomeIndex = referenceGenomeIndex,
+            referenceAnnotation_reduced = referenceAnnotation_reduced,
+            referenceAnnotation_full = referenceAnnotation_full,
+            dataType = dataType,
+            ID_or_Quant_or_Both = ID_or_Quant_or_Both
+    }
 
-    
-    command <<<
-        
-        set -ex
-
-        out_prefix=~{output_prefix}
-        if [[ ~{quant_only} == "true" ]]; then
-            out_prefix=""
-        fi
-        
-        /usr/local/src/LRAA/LRAA --genome ~{genome_fa} \
-                                 --bam ~{aligned_reads_bam} \
-                                 --output_prefix ~{sample_id}.LRAA \
-                                 ~{true='--quant_only' false='' quant_only} \
-                                 ~{true="--no_norm" false="" no_norm} \
-                                 ~{"--gtf " + gtf_file} \
-                                 --output_prefix ~{sample_id}.LRAA${out_prefix}
-
-      >>>
-
-
-      output {
-          File? LRAA_gtf = "~{sample_id}.LRAA~{output_prefix}.gtf"
-          File? LRAA_quant_expr = "~{sample_id}.LRAA.quant.expr"
-          File? LRAA_quant_tracking = "~{sample_id}.LRAA.quant.tracking"
-      }
-
-      runtime {
-        docker: docker
-        memory: memory
-        bootDiskSizeGb: 12
-        disks: "local-disk " + disk_space + " HDD"
-        cpu: cpu
-        preemptible: preemptible
-     }
-      
+    output {
+        File lraaGTF = lraaTask.lraaGTF
+        File? lraaReducedGTF = lraaTask.lraaReducedGTF
+        File? isoquantCounts = lraaTask.isoquantCounts
+        File? isoquantGTF_with_polyA = lraaTask.isoquantGTF_with_polyA
+        File monitoringLog = lraaTask.monitoringLog
+    }
 }
