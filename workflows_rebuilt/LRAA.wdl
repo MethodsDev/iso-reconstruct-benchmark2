@@ -50,15 +50,16 @@ task lraaTask {
                                      --output_prefix ~{OutDir}/Quant/LRAA \
                                      --quant_only \
                                      ~{no_norm_flag} \
-                                     --gtf ~{referenceAnnotation_full}
+                                     --gtf ~{referenceAnnotation_full} \
+                                     --EM
+
 
                 /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                      --bam ~{inputBAM} \
                                      --output_prefix ~{OutDir}/Quant_noEM/LRAA.noEM \
                                      --quant_only \
                                      ~{no_norm_flag} \
-                                     --gtf ~{referenceAnnotation_full} \
-                                     --no_EM
+                                     --gtf ~{referenceAnnotation_full}
             fi
         fi
     >>>
