@@ -12,6 +12,8 @@ import "Oarfish.wdl" as oarfishWorkflow
 import "Salmon.wdl" as salmonWorkflow
 import "StringTie.wdl" as stringtieWorkflow
 import "TALON.wdl" as talonWorkflow
+import "LRAA.wdl" as lraaWorkflow
+
 
 task relocateOutputs {
     input {
@@ -42,6 +44,10 @@ task relocateOutputs {
         File? stringtieGTF
         File? stringtieCounts
         File? talonReducedGTF
+        File? lraaGTF
+        File? lraaReducedGTF
+        File? lraaCounts
+        File? lraaCounts_noEM
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/espresso@sha256:f538303f6457c55e7b3c2a45081e6d8e3053e6f76e56bc65631b7f4aa290b026"
         File monitoringScript = "gs://ctat_genome_libs/terra_scripts/cromwell_monitoring_script2.sh"
 
