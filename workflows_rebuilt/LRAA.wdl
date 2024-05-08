@@ -32,14 +32,14 @@ task lraaTask {
         if [[ "~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both" ]]; then
             /home/jupyter/tools/LRAA/LRAA --genome ~{referenceGenome} \
                                  --bam ~{inputBAM} \
-                                 --output_prefix ~{OutDir}/ID/~{out_prefix} \
+                                 --output_prefix ~{OutDir}/ID/LRAA \
                                  ~{no_norm_flag}
         fi
 
         if [[ ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{referenceAnnotation_reduced}" ]]; then
             /home/jupyter/tools/LRAA/LRAA --genome ~{referenceGenome} \
                                  --bam ~{inputBAM} \
-                                 --output_prefix ~{OutDir}/ID_reduced/~{out_prefix}_reduced \
+                                 --output_prefix ~{OutDir}/ID_reduced/LRAA_reduced \
                                  ~{no_norm_flag} \
                                  --gtf ~{referenceAnnotation_reduced}
         fi
@@ -48,14 +48,14 @@ task lraaTask {
             if [[ -n "~{referenceAnnotation_reduced}" ]]; then
                 /home/jupyter/tools/LRAA/LRAA --genome ~{referenceGenome} \
                                      --bam ~{inputBAM} \
-                                     --output_prefix ~{OutDir}/Quant/~{out_prefix} \
+                                     --output_prefix ~{OutDir}/Quant/LRAA \
                                      --quant_only \
                                      ~{no_norm_flag} \
                                      --gtf ~{referenceAnnotation_full}
 
                 /home/jupyter/tools/LRAA/LRAA --genome ~{referenceGenome} \
                                      --bam ~{inputBAM} \
-                                     --output_prefix ~{OutDir}/Quant_noEM/~{out_prefix}.noEM \
+                                     --output_prefix ~{OutDir}/Quant_noEM/LRAA.noEM \
                                      --quant_only \
                                      ~{no_norm_flag} \
                                      --gtf ~{referenceAnnotation_full} \
@@ -65,12 +65,12 @@ task lraaTask {
     >>>
 
     output {
-        File lraaGTF = "~{OutDir}/ID/~{out_prefix}.gtf"
-        File? lraaReducedGTF = "~{OutDir}/ID_reduced/~{out_prefix}_reduced.gtf"
-        File? lraaCounts = "~{OutDir}/Quant/~{out_prefix}.quant.expr"
-        File? lraaCounts_noEM = "~{OutDir}/Quant_noEM/~{out_prefix}.noEM.quant.expr"
-        File? lraa_quant_tracking = "~{OutDir}/Quant/~{out_prefix}.quant.tracking"
-        File? lraa_quant_tracking_noEM = "~{OutDir}/Quant_noEM/~{out_prefix}.noEM.quant.tracking"
+        File lraaGTF = "~{OutDir}/ID/LRAA.gtf"
+        File? lraaReducedGTF = "~{OutDir}/ID_reduced/LRAA_reduced.gtf"
+        File? lraaCounts = "~{OutDir}/Quant/LRAA.quant.expr"
+        File? lraaCounts_noEM = "~{OutDir}/Quant_noEM/LRAA.noEM.quant.expr"
+        File? lraa_quant_tracking = "~{OutDir}/Quant/LRAA.quant.tracking"
+        File? lraa_quant_tracking_noEM = "~{OutDir}/Quant_noEM/LRAA.noEM.quant.tracking"
         File monitoringLog = "monitoring.log"
     }
 
