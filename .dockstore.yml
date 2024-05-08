@@ -39,3 +39,6 @@ workflows:
   - name: SALMON
     subclass: WDL
     primaryDescriptorPath: /workflows_rebuilt/Salmon.wdl
+  - name: LRAA
+    subclass: WDL
+    primaryDescriptorPath: /workflows_rebuilt/LRAA.wdl
