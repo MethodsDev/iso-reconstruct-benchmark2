@@ -12,7 +12,6 @@ task lraaTask {
         String dataType
         String ID_or_Quant_or_Both
         Boolean? LRAA_no_norm
-        String out_prefix
         Int cpu = 16
         Int numThreads = 32
         Int memoryGB = 256
