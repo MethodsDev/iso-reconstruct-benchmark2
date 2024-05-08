@@ -337,12 +337,12 @@ call relocateOutputs {
         stringtieReducedGTF = stringtie.stringtieReducedGTF,
         stringtieGTF = stringtie.stringtieGTF,
         stringtieCounts = stringtie.stringtieCounts,
-        talonReducedGTF = talon.talonReducedGTF
-        lraaGTF = lraa.lraaGTF
-        lraaReducedGTF = lraa.lraaReducedGTF
-        lraaCounts = lraa.lraaCounts
-        lraaCounts_noEM = lraa.lraaCounts_noEM
-        lraa_quant_tracking = lraa.lraa_quant_tracking
+        talonReducedGTF = talon.talonReducedGTF,
+        lraaGTF = lraa.lraaGTF,
+        lraaReducedGTF = lraa.lraaReducedGTF,
+        lraaCounts = lraa.lraaCounts,
+        lraaCounts_noEM = lraa.lraaCounts_noEM,
+        lraa_quant_tracking = lraa.lraa_quant_tracking,
         lraa_quant_tracking_noEM = lraa.lraa_quant_tracking_noEM
 }
 }
