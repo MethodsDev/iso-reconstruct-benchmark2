@@ -294,7 +294,7 @@ if (runTalon) {
     
 
 if (runLraa) {
-    call talonWorkflow.talonWorkflow as talon {
+    call lraaWorkflow.lraaWorkflow as lraa {
         input:
             inputBAM = inputBAM,
             inputBAMIndex = inputBAMIndex,
@@ -338,12 +338,12 @@ call relocateOutputs {
         stringtieGTF = stringtie.stringtieGTF,
         stringtieCounts = stringtie.stringtieCounts,
         talonReducedGTF = talon.talonReducedGTF
-        lraaGTF = lraaTask.lraaGTF
-        lraaReducedGTF = lraaTask.lraaReducedGTF
-        lraaCounts = lraaTask.lraaCounts
-        lraaCounts_noEM = lraaTask.lraaCounts_noEM
-        lraa_quant_tracking = lraaTask.lraa_quant_tracking
-        lraa_quant_tracking_noEM = lraaTask.lraa_quant_tracking_noEM
+        lraaGTF = lraa.lraaGTF
+        lraaReducedGTF = lraa.lraaReducedGTF
+        lraaCounts = lraa.lraaCounts
+        lraaCounts_noEM = lraa.lraaCounts_noEM
+        lraa_quant_tracking = lraa.lraa_quant_tracking
+        lraa_quant_tracking_noEM = lraa.lraa_quant_tracking_noEM
 }
 }
 
