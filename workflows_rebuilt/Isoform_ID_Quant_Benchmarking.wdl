@@ -106,6 +106,7 @@ workflow LongReadRNABenchmark {
         File? referenceAnnotation_full
         String dataType
         String ID_or_Quant_or_Both
+        Boolean? LRAA_no_norm = false
         Boolean runBambu = true
         Boolean runEspresso = true
         Boolean runFlair = true
@@ -118,6 +119,8 @@ workflow LongReadRNABenchmark {
         Boolean runSalmon = true
         Boolean runStringtie = true
         Boolean runTalon = true
+        Boolean runLraa = true
+
     }
 if (runBambu) {
     call bambuWorkflow.bambuWorkflow as bambu {
@@ -289,7 +292,23 @@ if (runTalon) {
     }
 }
     
-    
+
+if (runLraa) {
+    call talonWorkflow.talonWorkflow as talon {
+        input:
+            inputBAM = inputBAM,
+            inputBAMIndex = inputBAMIndex,
+            referenceGenome = referenceGenome,
+            referenceGenomeIndex = referenceGenomeIndex,
+            referenceAnnotation_reduced = referenceAnnotation_reduced,
+            referenceAnnotation_full = referenceAnnotation_full,
+            dataType = dataType,
+            ID_or_Quant_or_Both = ID_or_Quant_or_Both
+            Boolean? LRAA_no_norm = false
+    }
+}
+
+
 call relocateOutputs {
     input:
         bambuReducedGTF = bambu.bambuReducedGTF,
@@ -319,6 +338,12 @@ call relocateOutputs {
         stringtieGTF = stringtie.stringtieGTF,
         stringtieCounts = stringtie.stringtieCounts,
         talonReducedGTF = talon.talonReducedGTF
+        lraaGTF = lraaTask.lraaGTF
+        lraaReducedGTF = lraaTask.lraaReducedGTF
+        lraaCounts = lraaTask.lraaCounts
+        lraaCounts_noEM = lraaTask.lraaCounts_noEM
+        lraa_quant_tracking = lraaTask.lraa_quant_tracking
+        lraa_quant_tracking_noEM = lraaTask.lraa_quant_tracking_noEM
 }
 }
 
