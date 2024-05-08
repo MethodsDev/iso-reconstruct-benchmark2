@@ -303,7 +303,7 @@ if (runLraa) {
             referenceAnnotation_reduced = referenceAnnotation_reduced,
             referenceAnnotation_full = referenceAnnotation_full,
             dataType = dataType,
-            ID_or_Quant_or_Both = ID_or_Quant_or_Both
+            ID_or_Quant_or_Both = ID_or_Quant_or_Both,
             LRAA_no_norm = LRAA_no_norm
     }
 }
