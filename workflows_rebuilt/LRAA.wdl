@@ -21,6 +21,7 @@ task lraaTask {
     }
 
     String OutDir = "LRAA_out"
+    String out_prefix = "LRAA"
     String no_norm_flag = if (defined(LRAA_no_norm) && LRAA_no_norm) then "--no_norm" else ""
 
     command <<<
