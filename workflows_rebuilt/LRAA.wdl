@@ -93,6 +93,7 @@ workflow lraaWorkflow {
         File? referenceAnnotation_full
         String dataType
         String ID_or_Quant_or_Both
+        Boolean? LRAA_no_norm = false
     }
 
     call lraaTask {
@@ -104,7 +105,8 @@ workflow lraaWorkflow {
             referenceAnnotation_reduced = referenceAnnotation_reduced,
             referenceAnnotation_full = referenceAnnotation_full,
             dataType = dataType,
-            ID_or_Quant_or_Both = ID_or_Quant_or_Both
+            ID_or_Quant_or_Both = ID_or_Quant_or_Both,
+            Boolean? LRAA_no_norm = false
     }
 
     output {
