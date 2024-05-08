@@ -21,45 +21,44 @@ task lraaTask {
     }
 
     String OutDir = "LRAA_out"
+    String no_norm_flag = if (LRAA_no_norm) then "--no_norm" else ""
 
 command <<<
     bash ~{monitoringScript} > monitoring.log &
     
-    rm -rf ~{OutDir} && mkdir -p ~{OutDir}/ID ~{OutDir}/ID_reduced ~{OutDir}/Quant ~{OutDir}/Quant_noEM
-
-    out_prefix=LRAA
+    mkdir -p ~{OutDir}/ID ~{OutDir}/ID_reduced ~{OutDir}/Quant ~{OutDir}/Quant_noEM
 
     if [[ "~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both" ]]; then
-        /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
-                                 --bam ~{inputBAM} \
-                                 --output_prefix ~{OutDir}/ID/~{out_prefix} \
-                                 ~{true="--no_norm" false="" LRAA_no_norm}
+        /home/jupyter/tools/LRAA/LRAA --genome ~{referenceGenome} \
+                             --bam ~{inputBAM} \
+                             --output_prefix ~{OutDir}/ID/~{out_prefix} \
+                             ~{no_norm_flag}
     fi
 
     if [[ ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{referenceAnnotation_reduced}" ]]; then
-        /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
-                                 --bam ~{inputBAM} \
-                                 --output_prefix ~{OutDir}/ID_reduced/~{out_prefix}_reduced.gtf \
-                                 ~{true="--no_norm" false="" LRAA_no_norm} \
-                                 --gtf ~{referenceAnnotation_reduced}
+        /home/jupyter/tools/LRAA/LRAA --genome ~{referenceGenome} \
+                             --bam ~{inputBAM} \
+                             --output_prefix ~{OutDir}/ID_reduced/~{out_prefix}_reduced \
+                             ~{no_norm_flag} \
+                             --gtf ~{referenceAnnotation_reduced}
     fi
 
-    if [[ "~{ID_or_Quant_or_Both}" == "Quant" && -n "~{referenceAnnotation_full}" ]]; then
+    if [[ ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{referenceAnnotation_full}" ]]; then
         if [[ -n "~{referenceAnnotation_reduced}" ]]; then
-            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
-                                     --bam ~{inputBAM} \
-                                     --output_prefix ~{OutDir}/Quant/~{out_prefix} \
-                                     --quant_only \
-                                     ~{true="--no_norm" false="" LRAA_no_norm} \
-                                     --gtf ~{referenceAnnotation_full}
+            /home/jupyter/tools/LRAA/LRAA --genome ~{referenceGenome} \
+                                 --bam ~{inputBAM} \
+                                 --output_prefix ~{OutDir}/Quant/~{out_prefix} \
+                                 --quant_only \
+                                 ~{no_norm_flag} \
+                                 --gtf ~{referenceAnnotation_full}
 
-            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
-                                     --bam ~{inputBAM} \
-                                     --output_prefix ~{OutDir}/Quant_noEM/~{out_prefix}.noEM \
-                                     --quant_only \
-                                     ~{true="--no_norm" false="" LRAA_no_norm} \
-                                     --gtf ~{referenceAnnotation_full} \
-                                     --no_EM
+            /home/jupyter/tools/LRAA/LRAA --genome ~{referenceGenome} \
+                                 --bam ~{inputBAM} \
+                                 --output_prefix ~{OutDir}/Quant_noEM/~{out_prefix}.noEM \
+                                 --quant_only \
+                                 ~{no_norm_flag} \
+                                 --gtf ~{referenceAnnotation_full} \
+                                 --no_EM
         fi
     fi
 >>>
