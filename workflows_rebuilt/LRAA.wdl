@@ -66,12 +66,12 @@ command <<<
 
 
     output {
-        File lraaGTF = "~{OutDir}/~{out_prefix}.gtf"
-        File? lraaReducedGTF = "~{OutDir}/~{out_prefix}_reduced.gtf"
-        File? isoquantCounts = "~{OutDir}/~{out_prefix}.quant.expr"
-        File? isoquantCounts_noEM = "~{OutDir}/~{out_prefix}.noEM.quant.tsv"
-        File? LRAA_quant_tracking = "~{OutDir}/~{out_prefix}.quant.tracking"
-        File? LRAA_quant_tracking_noEM = "~{OutDir}/~{out_prefix}.noEM.quant.tracking"
+        File lraaGTF = "~{OutDir}/ID/~{out_prefix}.gtf"
+        File? lraaReducedGTF = "~{OutDir}/ID_reduced/~{out_prefix}_reduced.gtf"
+        File? lraaCounts = "~{OutDir}/Quant/~{out_prefix}.quant.expr"
+        File? lraaCounts_noEM = "~{OutDir}/Quant_noEM/~{out_prefix}.noEM.quant.expr"
+        File? lraa_quant_tracking = "~{OutDir}/Quant/~{out_prefix}.quant.tracking"
+        File? lraa_quant_tracking_noEM = "~{OutDir}/Quant_noEM/~{out_prefix}.noEM.quant.tracking"
         File monitoringLog = "monitoring.log"
     }
 
