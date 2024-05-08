@@ -29,14 +29,14 @@ task lraaTask {
         mkdir -p ~{OutDir}/ID ~{OutDir}/ID_reduced ~{OutDir}/Quant ~{OutDir}/Quant_noEM
 
         if [[ "~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both" ]]; then
-            /home/jupyter/tools/LRAA/LRAA --genome ~{referenceGenome} \
+            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                  --bam ~{inputBAM} \
                                  --output_prefix ~{OutDir}/ID/LRAA \
                                  ~{no_norm_flag}
         fi
 
         if [[ ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{referenceAnnotation_reduced}" ]]; then
-            /home/jupyter/tools/LRAA/LRAA --genome ~{referenceGenome} \
+            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                  --bam ~{inputBAM} \
                                  --output_prefix ~{OutDir}/ID_reduced/LRAA_reduced \
                                  ~{no_norm_flag} \
@@ -45,14 +45,14 @@ task lraaTask {
 
         if [[ ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{referenceAnnotation_full}" ]]; then
             if [[ -n "~{referenceAnnotation_reduced}" ]]; then
-                /home/jupyter/tools/LRAA/LRAA --genome ~{referenceGenome} \
+                /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                      --bam ~{inputBAM} \
                                      --output_prefix ~{OutDir}/Quant/LRAA \
                                      --quant_only \
                                      ~{no_norm_flag} \
                                      --gtf ~{referenceAnnotation_full}
 
-                /home/jupyter/tools/LRAA/LRAA --genome ~{referenceGenome} \
+                /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                      --bam ~{inputBAM} \
                                      --output_prefix ~{OutDir}/Quant_noEM/LRAA.noEM \
                                      --quant_only \
