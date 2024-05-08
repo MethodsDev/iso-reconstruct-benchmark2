@@ -92,7 +92,6 @@ workflow lraaWorkflow {
         String dataType
         String ID_or_Quant_or_Both
         Boolean? LRAA_no_norm
-        String out_prefix
     }
 
     call lraaTask {
@@ -106,7 +105,6 @@ workflow lraaWorkflow {
             dataType = dataType,
             ID_or_Quant_or_Both = ID_or_Quant_or_Both,
             LRAA_no_norm = LRAA_no_norm,
-            out_prefix = out_prefix
     }
 
     output {
