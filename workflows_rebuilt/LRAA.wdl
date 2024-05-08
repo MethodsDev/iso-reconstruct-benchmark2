@@ -110,10 +110,10 @@ workflow lraaWorkflow {
     output {
         File lraaGTF = lraaTask.lraaGTF
         File? lraaReducedGTF = lraaTask.lraaReducedGTF
-        File? isoquantCounts = lraaTask.isoquantCounts
-        File? isoquantCounts_noEM = lraaTask.isoquantCounts_noEM
-        File? LRAA_quant_tracking = lraaTask.LRAA_quant_tracking
-        File? LRAA_quant_tracking_noEM = lraaTask.LRAA_quant_tracking_noEM
+        File? lraaCounts = lraaTask.lraaCounts
+        File? lraaCounts_noEM = lraaTask.lraaCounts_noEM
+        File? lraa_quant_tracking = lraaTask.lraa_quant_tracking
+        File? lraa_quant_tracking_noEM = lraaTask.lraa_quant_tracking_noEM
         File monitoringLog = lraaTask.monitoringLog
     }
 }
