@@ -41,7 +41,7 @@ task lrquantTask {
 
             mv LRQuant_OUT/gffcompare_out/LRQuant_OUT.gffcompare.tsv Gffcompare_quant.tsv
             mv LRQuant_OUT/lrquant_out/LRQuant_OUT.lrquant.tsv LRQuant_quant.tsv
-            zip -r LRQuant_OUT LRQuant_OUT.zip
+            tar -czf LRQuant_OUT.tar.gz LRQuant_OUT/
         fi
     >>>
 
