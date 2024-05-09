@@ -381,7 +381,7 @@ call relocateOutputs {
         lraaCounts = lraa.lraaCounts,
         lraaCounts_noEM = lraa.lraaCounts_noEM,
         lraa_quant_tracking = lraa.lraa_quant_tracking,
-        lraa_quant_tracking_noEM = lraa.lraa_quant_tracking_noEM,
+        lraa_quant_tracking_noEM = lraa.lraa_quant_tracking_noEM
 #        gffcompareCounts = lrquant.gffcompareCounts,
 #        lrquantCounts = lrquant.lrquantCounts,
 #        lrquantOUT = lrquant.lrquantOUT
