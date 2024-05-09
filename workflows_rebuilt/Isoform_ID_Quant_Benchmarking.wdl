@@ -90,16 +90,16 @@ task relocateOutputs {
         mv ID_reduced ID Quant All_Outputs_Relocated/
         tar -czf All_Outputs_Relocated.tar.gz All_Outputs_Relocated/
 
-        if [[ -n "~{lrquantOUT}" ]]; then
-            mv ~{lrquantOUT} LRQuant_OUT.tar.gz
-        fi
+#        if [[ -n "~{lrquantOUT}" ]]; then
+#            mv ~{lrquantOUT} LRQuant_OUT.tar.gz
+#        fi
     
-        if [[ -n "~{isoquantCounts_OUT}" ]]; then
-            mv ~{isoquantCounts_OUT} isoquantCounts_OUT.tar.gz
-        fi
+#        if [[ -n "~{isoquantCounts_OUT}" ]]; then
+#            mv ~{isoquantCounts_OUT} isoquantCounts_OUT.tar.gz
+#        fi
     
-        if [[ -n "~{isoquantCounts_with_polyA_OUT}" ]]; then
-            mv ~{isoquantCounts_with_polyA_OUT} isoquantCounts_with_polyA_OUT.tar.gz
+#        if [[ -n "~{isoquantCounts_with_polyA_OUT}" ]]; then
+#            mv ~{isoquantCounts_with_polyA_OUT} isoquantCounts_with_polyA_OUT.tar.gz
     >>>
 
     output {
