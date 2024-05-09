@@ -30,7 +30,6 @@ task lrquantTask {
             fi  
             mkdir -p ~{OutDir}
 
-            cd ~{OutDir}
 
             samtools bam2fq --threads ~{numThreads} ~{inputBAM} > LRQuant_tmp.fq
             LRQuant -r LRQuant_tmp.fq \
