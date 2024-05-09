@@ -32,18 +32,23 @@ task lrquantTask {
 
             cd ~{OutDir}
 
-            samtools bam2fq --threads 32 MORF_aligned_00001.bam > LRQuant_tmp.fq
-            LRQuant -r /data/LRQuant_tmp.fq \
-            -g /data/minigenome.fa \
-            -a /data/minigenome.UTRs_trimmed.gtf \
+            samtools bam2fq --threads ~{numThreads} ~{inputBAM} > LRQuant_tmp.fq
+            LRQuant -r LRQuant_tmp.fq \
+            -g {referenceGenome} \
+            -a {referenceAnnotation_full} \
             -p LRQuant_OUT
-                
-            mv lrquant_out.quant lrquant_quant.tsv
+
+
+            mv LRQuant_OUT/gffcompare_out/LRQuant_OUT.gffcompare.tsv Gffcompare_quant.tsv
+            mv LRQuant_OUT/lrquant_out/LRQuant_OUT.lrquant.tsv LRQuant_quant.tsv
+            zip -r LRQuant_OUT LRQuant_OUT.zip
         fi
     >>>
 
     output {
-        File? lrquantCounts = "~{OutDir}/LRQuant_quant.tsv"
+        File? gffcompareCounts = "LRQuant_quant.tsv"
+        File? lrquantCounts = "Gffcompare_quant.tsv"
+        File? lrquantOUT = "LRQuant_OUT.zip"
         File monitoringLog = "monitoring.log"
     }
 
@@ -81,7 +86,9 @@ workflow lrquantWorkflow {
     }
 
     output {
-        File? lrquantCounts = lrquantTask.lrquantCounts
+        File? gffcompareCounts = "LRQuant_quant.tsv"
+        File? lrquantCounts = "Gffcompare_quant.tsv"
+        File? lrquantOUT = "LRQuant_OUT.zip"        
         File monitoringLog = lrquantTask.monitoringLog
     }
 }
