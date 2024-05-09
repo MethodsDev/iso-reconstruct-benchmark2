@@ -13,6 +13,7 @@ import "Salmon.wdl" as salmonWorkflow
 import "StringTie.wdl" as stringtieWorkflow
 import "TALON.wdl" as talonWorkflow
 import "LRAA.wdl" as lraaWorkflow
+import "LRQuant.wdl" as lrquantWorkflow
 
 
 task relocateOutputs {
@@ -50,6 +51,9 @@ task relocateOutputs {
         File? lraaCounts_noEM
         File? lraa_quant_tracking
         File? lraa_quant_tracking_noEM
+        File? gffcompareCounts
+        File? lrquantCounts
+        File? lrquantOUT
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/espresso@sha256:f538303f6457c55e7b3c2a45081e6d8e3053e6f76e56bc65631b7f4aa290b026"
         File monitoringScript = "gs://ctat_genome_libs/terra_scripts/cromwell_monitoring_script2.sh"
 
@@ -63,7 +67,7 @@ task relocateOutputs {
         # Define arrays of files for each directory
         reduced_files=("~{bambuReducedGTF}" "~{bambuNDR1ReducedGTF}" "~{espressoReducedGTF}" "~{flairReducedGTF}" "~{flamesReducedGTF}" "~{isoquantReducedGTF}" "~{isoquantReducedGTF_with_polyA}" "~{isoseqReducedGTF}" "~{mandalorionReducedGTF}" "~{mandalorionforkReducedGTF}" "~{stringtieReducedGTF}" "~{talonReducedGTF}" "~{lraaReducedGTF}")
         id_files=("~{bambuGTF}" "~{isoquantGTF}" "~{isoquantGTF_with_polyA}" "~{isoseqGTF}" "~{mandalorionGTF}" "~{mandalorionforkGTF}" "~{stringtieGTF}" "~{lraaGTF}")
-        quant_files=("~{bambuCounts}" "~{espressoCounts}" "~{flairCounts}" "~{isoquantCounts}" "~{isoquantCounts_with_polyA}" "~{oarfishCounts}" "~{salmonCounts}" "~{stringtieCounts}" "~{lraaCounts}" "~{lraaCounts_noEM}" "~{lraa_quant_tracking}" "~{lraa_quant_tracking_noEM}")
+        quant_files=("~{bambuCounts}" "~{espressoCounts}" "~{flairCounts}" "~{isoquantCounts}" "~{isoquantCounts_with_polyA}" "~{oarfishCounts}" "~{salmonCounts}" "~{stringtieCounts}" "~{lraaCounts}" "~{lraaCounts_noEM}" "~{lraa_quant_tracking}" "~{lraa_quant_tracking_noEM}" "~{gffcompareCounts}" "~{lrquantCounts}")
     
         # Loop over the files for each directory
         for file in "${reduced_files[@]}"; do
@@ -80,10 +84,13 @@ task relocateOutputs {
 
         mv ID_reduced ID Quant All_Outputs_Relocated/
         tar -czf All_Outputs_Relocated.tar.gz All_Outputs_Relocated/
+
+        mv ~{lrquantOUT} LRQuant_OUT.tar.gz
     >>>
 
     output {
         File relocated_files = "All_Outputs_Relocated.tar.gz"
+        File lrquant_files = "LRQuant_OUT.tar.gz"
     }
 
     runtime {
@@ -120,6 +127,7 @@ workflow LongReadRNABenchmark {
         Boolean runStringtie = true
         Boolean runTalon = true
         Boolean runLraa = true
+        Boolean runLrquant = true
 
     }
 if (runBambu) {
@@ -308,6 +316,19 @@ if (runLraa) {
     }
 }
 
+if (runLrquant) {
+    call lrquantWorkflow.lrquantWorkflow as lrquant {
+        input:
+            inputBAM = inputBAM,
+            inputBAMIndex = inputBAMIndex,
+            referenceGenome = referenceGenome,
+            referenceGenomeIndex = referenceGenomeIndex,
+            referenceAnnotation_reduced = referenceAnnotation_reduced,
+            referenceAnnotation_full = referenceAnnotation_full,
+            dataType = dataType,
+            ID_or_Quant_or_Both = ID_or_Quant_or_Both
+    }
+}
 
 call relocateOutputs {
     input:
@@ -343,7 +364,10 @@ call relocateOutputs {
         lraaCounts = lraa.lraaCounts,
         lraaCounts_noEM = lraa.lraaCounts_noEM,
         lraa_quant_tracking = lraa.lraa_quant_tracking,
-        lraa_quant_tracking_noEM = lraa.lraa_quant_tracking_noEM
+        lraa_quant_tracking_noEM = lraa.lraa_quant_tracking_noEM,
+        gffcompareCounts = lrquant.gffcompareCounts,
+        lrquantCounts = lrquant.lrquantCounts,
+        lrquantOUT = lrquant.lrquantOUT
 }
 }
 
