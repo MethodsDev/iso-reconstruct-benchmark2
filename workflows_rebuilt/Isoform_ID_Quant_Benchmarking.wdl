@@ -33,6 +33,8 @@ task relocateOutputs {
         File? isoquantGTF_with_polyA
         File? isoquantReducedGTF_with_polyA
         File? isoquantCounts_with_polyA
+        File? isoquantCounts_OUT
+        File? isoquantCounts_with_polyA_OUT
         File? isoseqReducedGTF
         File? isoseqGTF
         File? mandalorionReducedGTF
@@ -86,11 +88,16 @@ task relocateOutputs {
         tar -czf All_Outputs_Relocated.tar.gz All_Outputs_Relocated/
 
         mv ~{lrquantOUT} LRQuant_OUT.tar.gz
+
+        mv ~{isoquantCounts_OUT} isoquantCounts_OUT.tar.gz
+        mv ~{isoquantCounts_with_polyA_OUT} isoquantCounts_with_polyA_OUT.tar.gz
     >>>
 
     output {
         File relocated_files = "All_Outputs_Relocated.tar.gz"
         File lrquant_files = "LRQuant_OUT.tar.gz"
+        File isoquantCounts_OUT = "isoquantCounts_OUT.tar.gz"
+        File isoquantCounts_with_polyA_OUT = "isoquantCounts_with_polyA_OUT.tar.gz"
     }
 
     runtime {
@@ -128,7 +135,6 @@ workflow LongReadRNABenchmark {
         Boolean runTalon = true
         Boolean runLraa = true
         Boolean runLrquant = true
-
     }
 if (runBambu) {
     call bambuWorkflow.bambuWorkflow as bambu {
@@ -347,6 +353,8 @@ call relocateOutputs {
         isoquantGTF_with_polyA = isoquant.isoquantGTF_with_polyA,
         isoquantReducedGTF_with_polyA = isoquant.isoquantReducedGTF_with_polyA,
         isoquantCounts_with_polyA = isoquant.isoquantCounts_with_polyA,
+        isoquantCounts_OUT = isoquant.isoquantCounts_OUT,
+        isoquantCounts_with_polyA_OUT = isoquant.isoquantCounts_with_polyA_OUT,  
         isoseqReducedGTF = isoseq.isoseqReducedGTF,
         isoseqGTF = isoseq.isoseqGTF,
         mandalorionReducedGTF = mandalorion.mandalorionReducedGTF,
