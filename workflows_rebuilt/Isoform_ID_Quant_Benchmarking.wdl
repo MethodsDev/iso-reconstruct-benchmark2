@@ -104,9 +104,9 @@ task relocateOutputs {
 
     output {
         File? relocated_files = "All_Outputs_Relocated.tar.gz"
-        File? lrquant_files = "LRQuant_OUT.tar.gz"
-        File? isoquantCounts_OUT = "isoquantCounts_OUT.tar.gz"
-        File? isoquantCounts_with_polyA_OUT = "isoquantCounts_with_polyA_OUT.tar.gz"
+#        File? lrquant_files = "LRQuant_OUT.tar.gz"
+#        File? isoquantCounts_OUT = "isoquantCounts_OUT.tar.gz"
+#        File? isoquantCounts_with_polyA_OUT = "isoquantCounts_with_polyA_OUT.tar.gz"
     }
 
     runtime {
