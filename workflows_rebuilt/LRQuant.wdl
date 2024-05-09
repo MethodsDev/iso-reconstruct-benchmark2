@@ -33,8 +33,8 @@ task lrquantTask {
 
             samtools bam2fq --threads ~{numThreads} ~{inputBAM} > LRQuant_tmp.fq
             LRQuant -r LRQuant_tmp.fq \
-            -g {referenceGenome} \
-            -a {referenceAnnotation_full} \
+            -g ~{referenceGenome} \
+            -a ~{referenceAnnotation_full} \
             -p LRQuant_OUT
 
 
