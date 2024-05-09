@@ -45,9 +45,9 @@ task lrquantTask {
     >>>
 
     output {
-        File? gffcompareCounts = "LRQuant_quant.tsv"
-        File? lrquantCounts = "Gffcompare_quant.tsv"
-        File? lrquantOUT = "LRQuant_OUT.tar.gz"
+        File? gffcompareCounts = "./LRQuant_quant.tsv"
+        File? lrquantCounts = "./Gffcompare_quant.tsv"
+        File? lrquantOUT = "./LRQuant_OUT.tar.gz"
         File monitoringLog = "monitoring.log"
     }
 
@@ -85,9 +85,9 @@ workflow lrquantWorkflow {
     }
 
     output {
-        File? lrquantCounts = "LRQuant_quant.tsv"
-        File? gffcompareCounts = "Gffcompare_quant.tsv"
-        File? lrquantOUT = "LRQuant_OUT.tar.gz"        
+        File? lrquantCounts = "./LRQuant_quant.tsv"
+        File? gffcompareCounts = "./Gffcompare_quant.tsv"
+        File? lrquantOUT = "./LRQuant_OUT.tar.gz"        
         File monitoringLog = lrquantTask.monitoringLog
     }
 }
