@@ -17,7 +17,7 @@ task isoquantTask {
         Int numThreads = 32
         Int memoryGB = 256
         Int diskSizeGB = 500
-        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/isoquant@sha256:199395318713f631f29ef6f8b59debf3e0677a8a4f2590c7e9b7b941403d431f"
+        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/isoquant:latest"
         File monitoringScript = "gs://ctat_genome_libs/terra_scripts/cromwell_monitoring_script2.sh"
     }
 
