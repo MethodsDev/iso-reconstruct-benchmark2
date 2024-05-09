@@ -63,7 +63,7 @@ task isoquantTask {
             --no_model_construction
             
             mv ~{OutDir}/Quant/OUT/OUT.transcript_counts.tsv ~{OutDir}/IsoQuant_quant.tsv
-            tar -czf LRQuant_OUT.tar.gz ~{OutDir}/Quant
+            tar -czf IsoQuant_OUT.tar.gz ~{OutDir}/Quant
 
         fi
 
@@ -103,7 +103,7 @@ task isoquantTask {
                 --no_model_construction
                 
                 mv ~{OutDir}/Quant_with_polyA/OUT/OUT.transcript_counts.tsv ~{OutDir}/IsoQuant_quant_with_polyA.tsv 
-                tar -czf LRQuant_OUT_with_polyA.tar.gz ~{OutDir}/Quant_with_polyA
+                tar -czf IsoQuant_OUT_with_polyA.tar.gz ~{OutDir}/Quant_with_polyA
 
             fi
         fi
@@ -116,8 +116,8 @@ task isoquantTask {
         File? isoquantGTF_with_polyA = "~{OutDir}/IsoQuant_with_polyA.gtf"
         File? isoquantReducedGTF_with_polyA = "~{OutDir}/IsoQuant_reduced_with_polyA.gtf"
         File? isoquantCounts_with_polyA = "~{OutDir}/IsoQuant_quant_with_polyA.tsv"
-        File? isoquantCounts_OUT = "LRQuant_OUT.tar.gz"
-        File? isoquantCounts_with_polyA_OUT = "LRQuant_OUT_with_polyA.tar.gz"
+        File? isoquantCounts_OUT = "IsoQuant_OUT.tar.gz"
+        File? isoquantCounts_with_polyA_OUT = "IsoQuant_OUT_with_polyA.tar.gz"
         File monitoringLog = "monitoring.log"
     }
 
