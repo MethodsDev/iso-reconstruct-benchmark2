@@ -58,7 +58,9 @@ task relocateOutputs {
         File? lrquantOUT
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/espresso@sha256:f538303f6457c55e7b3c2a45081e6d8e3053e6f76e56bc65631b7f4aa290b026"
         File monitoringScript = "gs://ctat_genome_libs/terra_scripts/cromwell_monitoring_script2.sh"
-
+        Int cpu = 16
+        Int memoryGB = 256
+        Int diskSizeGB = 500
     }
 
     command <<<
@@ -101,10 +103,10 @@ task relocateOutputs {
     }
 
     runtime {
+        cpu: cpu
+        memory: "~{memoryGB} GiB"
+        disks: "local-disk ~{diskSizeGB} HDD"
         docker: docker
-        memory: "32 GB"
-        cpu: 1
-        disks: "local-disk 10 HDD"
     }
 }
 
