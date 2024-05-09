@@ -56,6 +56,7 @@ task relocateOutputs {
         File? gffcompareCounts
         File? lrquantCounts
         File? lrquantOUT
+
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/espresso@sha256:f538303f6457c55e7b3c2a45081e6d8e3053e6f76e56bc65631b7f4aa290b026"
         File monitoringScript = "gs://ctat_genome_libs/terra_scripts/cromwell_monitoring_script2.sh"
         Int cpu = 16
