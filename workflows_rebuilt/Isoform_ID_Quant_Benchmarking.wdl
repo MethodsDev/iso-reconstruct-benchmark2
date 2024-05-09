@@ -362,8 +362,8 @@ call relocateOutputs {
         isoquantGTF_with_polyA = isoquant.isoquantGTF_with_polyA,
         isoquantReducedGTF_with_polyA = isoquant.isoquantReducedGTF_with_polyA,
         isoquantCounts_with_polyA = isoquant.isoquantCounts_with_polyA,
-        isoquantCounts_OUT = isoquant.isoquantCounts_OUT,
-        isoquantCounts_with_polyA_OUT = isoquant.isoquantCounts_with_polyA_OUT,  
+ #       isoquantCounts_OUT = isoquant.isoquantCounts_OUT,
+ #       isoquantCounts_with_polyA_OUT = isoquant.isoquantCounts_with_polyA_OUT,  
         isoseqReducedGTF = isoseq.isoseqReducedGTF,
         isoseqGTF = isoseq.isoseqGTF,
         mandalorionReducedGTF = mandalorion.mandalorionReducedGTF,
@@ -382,9 +382,9 @@ call relocateOutputs {
         lraaCounts_noEM = lraa.lraaCounts_noEM,
         lraa_quant_tracking = lraa.lraa_quant_tracking,
         lraa_quant_tracking_noEM = lraa.lraa_quant_tracking_noEM,
-        gffcompareCounts = lrquant.gffcompareCounts,
-        lrquantCounts = lrquant.lrquantCounts,
-        lrquantOUT = lrquant.lrquantOUT
+#        gffcompareCounts = lrquant.gffcompareCounts,
+#        lrquantCounts = lrquant.lrquantCounts,
+#        lrquantOUT = lrquant.lrquantOUT
 }
 }
 
