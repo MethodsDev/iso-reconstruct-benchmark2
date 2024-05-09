@@ -1,6 +1,6 @@
 version 1.0
 
-# This task uses IsoQuant version 3.3.0
+# This task uses IsoQuant version 3.4.0
 task isoquantTask {
     input {
         File inputBAM
