@@ -34,8 +34,8 @@ task espressoTask {
 
         if [[ "~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both" || ("~{ID_or_Quant_or_Both}" == "ID" && "~{referenceAnnotation_reduced}" -ne "") ]]; then            
             mkdir -p ~{OutDir}
-            perl /usr/src/app/espresso/src/ESPRESSO_S.pl --sort_buffer_size 16G -L ~{OutDir}/~{samples_filename} -F ~{referenceGenome} -A ~{referenceAnnotation_full} -O ~{OutDir} -T ~{numThreads}
-            perl /usr/src/app/espresso/src/ESPRESSO_C.pl --sort_buffer_size 16G -I ~{OutDir} -F ~{referenceGenome} -X 0 -T ~{numThreads}
+            perl /usr/src/app/espresso/src/ESPRESSO_S.pl --sort_buffer_size ~{memoryGB} -L ~{OutDir}/~{samples_filename} -F ~{referenceGenome} -A ~{referenceAnnotation_full} -O ~{OutDir} -T ~{numThreads}
+            perl /usr/src/app/espresso/src/ESPRESSO_C.pl --sort_buffer_size ~{memoryGB} -I ~{OutDir} -F ~{referenceGenome} -X 0 -T ~{numThreads}
             perl /usr/src/app/espresso/src/ESPRESSO_Q.pl -L ~{OutDir}/espresso_samples.tsv.updated -A ~{referenceAnnotation_full} -T ~{numThreads}
             mv ~{OutDir}/espresso_samples_N2_R0_abundance.esp ~{OutDir}/ESPRESSO_quant.txt
             if [[ "~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both" ]]; then
