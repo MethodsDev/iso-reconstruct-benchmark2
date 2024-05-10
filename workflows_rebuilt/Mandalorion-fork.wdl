@@ -28,7 +28,7 @@ task mandalorionforkTask {
         if [ "~{ID_or_Quant_or_Both}" = "ID" ] || [ "~{ID_or_Quant_or_Both}" = "Both" ]; then
             samtools bam2fq ~{inputBAM} > ~{OutDir}/samtools.bam2fq.fastq
             if samtools view -f 0x100 ~{inputBAM} | read -r; then
-                samtools view -F 0x904 ~{inputBAM} > ~{OutDir}/output.bam
+                samtools view -b -F 0x904 ~{inputBAM} > ~{OutDir}/output.bam
                 samtools view -h -o samtools.view.sam ~{OutDir}/output.bam
             else
                 samtools view -h -o samtools.view.sam ~{inputBAM}
