@@ -121,7 +121,7 @@ EOF
             --outdir ~{OutDir} \
             --config_file ~{OutDir}/config.json
             
-            mv ~{OutDir}/isoform_annotated.gff3 ~{OutDir}/FLAMES.gff3
+            mv ~{OutDir}/isoform_annotated.gff3 ~{OutDir}/FLAMES_reduced.gff3
         fi
     >>>
 
