@@ -59,7 +59,6 @@ task lraaTask {
                                  --quant_only \
                                  ~{no_norm_flag} \
                                  --gtf ~{referenceAnnotation_full}
-            fi
         fi
     >>>
 
