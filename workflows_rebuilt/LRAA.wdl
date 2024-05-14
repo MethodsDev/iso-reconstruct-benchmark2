@@ -44,28 +44,27 @@ task lraaTask {
         fi
 
         if [[ ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{referenceAnnotation_full}" ]]; then
-            if [[ -n "~{referenceAnnotation_reduced}" ]]; then
-                /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
-                                     --bam ~{inputBAM} \
-                                     --output_prefix ~{OutDir}/Quant/LRAA \
-                                     --quant_only \
-                                     ~{no_norm_flag} \
-                                     --gtf ~{referenceAnnotation_full} \
-                                     --EM
+            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
+                                 --bam ~{inputBAM} \
+                                 --output_prefix ~{OutDir}/Quant/LRAA \
+                                 --quant_only \
+                                 ~{no_norm_flag} \
+                                 --gtf ~{referenceAnnotation_full} \
+                                 --EM
 
 
-                /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
-                                     --bam ~{inputBAM} \
-                                     --output_prefix ~{OutDir}/Quant_noEM/LRAA.noEM \
-                                     --quant_only \
-                                     ~{no_norm_flag} \
-                                     --gtf ~{referenceAnnotation_full}
+            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
+                                 --bam ~{inputBAM} \
+                                 --output_prefix ~{OutDir}/Quant_noEM/LRAA.noEM \
+                                 --quant_only \
+                                 ~{no_norm_flag} \
+                                 --gtf ~{referenceAnnotation_full}
             fi
         fi
     >>>
 
     output {
-        File lraaGTF = "~{OutDir}/ID/LRAA.gtf"
+        File? lraaGTF = "~{OutDir}/ID/LRAA.gtf"
         File? lraaReducedGTF = "~{OutDir}/ID_reduced/LRAA_reduced.gtf"
         File? lraaCounts = "~{OutDir}/Quant/LRAA.quant.expr"
         File? lraaCounts_noEM = "~{OutDir}/Quant_noEM/LRAA.noEM.quant.expr"
@@ -109,7 +108,7 @@ workflow lraaWorkflow {
     }
 
     output {
-        File lraaGTF = lraaTask.lraaGTF
+        File? lraaGTF = lraaTask.lraaGTF
         File? lraaReducedGTF = lraaTask.lraaReducedGTF
         File? lraaCounts = lraaTask.lraaCounts
         File? lraaCounts_noEM = lraaTask.lraaCounts_noEM
