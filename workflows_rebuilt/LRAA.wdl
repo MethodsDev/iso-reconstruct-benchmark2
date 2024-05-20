@@ -98,6 +98,7 @@ workflow lraaWorkflow {
         String dataType
         String ID_or_Quant_or_Both
         Boolean? LRAA_no_norm
+        Boolean? LRAA_try_correct_alignments
     }
 
     call lraaTask {
@@ -111,6 +112,7 @@ workflow lraaWorkflow {
             dataType = dataType,
             ID_or_Quant_or_Both = ID_or_Quant_or_Both,
             LRAA_no_norm = LRAA_no_norm,
+            LRAA_try_correct_alignments = LRAA_try_correct_alignments
     }
 
     output {
