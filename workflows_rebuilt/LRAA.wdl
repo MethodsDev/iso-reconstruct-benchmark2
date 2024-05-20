@@ -12,6 +12,7 @@ task lraaTask {
         String dataType
         String ID_or_Quant_or_Both
         Boolean? LRAA_no_norm
+        Boolean? LRAA_try_correct_alignments
         Int cpu = 16
         Int numThreads = 32
         Int memoryGB = 256
@@ -22,6 +23,8 @@ task lraaTask {
 
     String OutDir = "LRAA_out"
     String no_norm_flag = if (defined(LRAA_no_norm) && LRAA_no_norm) then "--no_norm" else ""
+    String try_correct_alignments_flag = if (defined(LRAA_try_correct_alignments) && LRAA_try_correct_alignments) then "--try_correct_alignments" else ""
+
 
     command <<<
         bash ~{monitoringScript} > monitoring.log &
@@ -32,7 +35,8 @@ task lraaTask {
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                  --bam ~{inputBAM} \
                                  --output_prefix ~{OutDir}/ID/LRAA \
-                                 ~{no_norm_flag}
+                                 ~{no_norm_flag} \
+                                 ~{try_correct_alignments_flag}
         fi
 
         if [[ ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{referenceAnnotation_reduced}" ]]; then
@@ -40,7 +44,8 @@ task lraaTask {
                                  --bam ~{inputBAM} \
                                  --output_prefix ~{OutDir}/ID_reduced/LRAA_reduced \
                                  ~{no_norm_flag} \
-                                 --gtf ~{referenceAnnotation_reduced}
+                                 --gtf ~{referenceAnnotation_reduced} \
+                                 ~{try_correct_alignments_flag}
         fi
 
         if [[ ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{referenceAnnotation_full}" ]]; then
@@ -50,7 +55,8 @@ task lraaTask {
                                  --quant_only \
                                  ~{no_norm_flag} \
                                  --gtf ~{referenceAnnotation_full} \
-                                 --EM
+                                 --EM \
+                                 ~{try_correct_alignments_flag}
 
 
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
@@ -58,7 +64,8 @@ task lraaTask {
                                  --output_prefix ~{OutDir}/Quant_noEM/LRAA.noEM \
                                  --quant_only \
                                  ~{no_norm_flag} \
-                                 --gtf ~{referenceAnnotation_full}
+                                 --gtf ~{referenceAnnotation_full} \
+                                 ~{try_correct_alignments_flag}
         fi
     >>>
 
