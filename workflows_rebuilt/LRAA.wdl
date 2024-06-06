@@ -11,7 +11,7 @@ task lraaTask {
         File? referenceAnnotation_full
         String dataType
         String ID_or_Quant_or_Both
-        Int? min_mapping_quality
+        Int? LRAA_min_mapping_quality
         Boolean? LRAA_no_norm
         Int cpu = 16
         Int numThreads = 32
@@ -22,7 +22,7 @@ task lraaTask {
     }
 
     String OutDir = "LRAA_out"
-    String min_mapping_quality_flag = if (defined(min_mapping_quality)) then "--min_mapping_quality=" + min_mapping_quality else ""
+    String LRAA_min_mapping_quality_flag = if (defined(LRAA_min_mapping_quality)) then "--LRAA_min_mapping_quality=" + LRAA_min_mapping_quality else ""
 
     String no_norm_flag = if (defined(LRAA_no_norm) && LRAA_no_norm) then "--no_norm" else ""
 
@@ -68,14 +68,14 @@ task lraaTask {
                                  --gtf ~{referenceAnnotation_full}
         fi
 
-        if [[ ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{referenceAnnotation_full}" && -n "~{min_mapping_quality}" ]]; then
+        if [[ ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{referenceAnnotation_full}" && -n "~{LRAA_min_mapping_quality}" ]]; then
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                  --bam ~{inputBAM} \
                                  --output_prefix ~{OutDir}/Quant_noEM_minMapQ/LRAA.noEM.minMapQ \
                                  --quant_only \
                                  ~{no_norm_flag} \
                                  --gtf ~{referenceAnnotation_full} \
-                                 ~{min_mapping_quality_flag}
+                                 ~{LRAA_min_mapping_quality_flag}
         fi
     >>>
 
@@ -109,7 +109,7 @@ workflow lraaWorkflow {
         File? referenceAnnotation_full
         String dataType
         String ID_or_Quant_or_Both
-        Int? min_mapping_quality
+        Int? LRAA_min_mapping_quality
         Boolean? LRAA_no_norm
     }
 
@@ -123,7 +123,7 @@ workflow lraaWorkflow {
             referenceAnnotation_full = referenceAnnotation_full,
             dataType = dataType,
             ID_or_Quant_or_Both = ID_or_Quant_or_Both,
-            min_mapping_quality = min_mapping_quality,
+            LRAA_min_mapping_quality = LRAA_min_mapping_quality,
             LRAA_no_norm = LRAA_no_norm
     }
 
