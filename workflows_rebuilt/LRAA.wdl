@@ -1,6 +1,6 @@
 version 1.0
 
-# This task uses LRAA version 0.0.4
+# This task uses LRAA version 0.0.8
 task lraaTask {
     input {
         File inputBAM
@@ -11,8 +11,8 @@ task lraaTask {
         File? referenceAnnotation_full
         String dataType
         String ID_or_Quant_or_Both
+        Int? min_mapping_quality
         Boolean? LRAA_no_norm
-        Boolean? LRAA_try_correct_alignments
         Int cpu = 16
         Int numThreads = 32
         Int memoryGB = 256
@@ -22,8 +22,9 @@ task lraaTask {
     }
 
     String OutDir = "LRAA_out"
+    String min_mapping_quality_flag = if (defined(min_mapping_quality)) then "--min_mapping_quality=" + min_mapping_quality else ""
+
     String no_norm_flag = if (defined(LRAA_no_norm) && LRAA_no_norm) then "--no_norm" else ""
-    String try_correct_alignments_flag = if (defined(LRAA_try_correct_alignments) && LRAA_try_correct_alignments) then "--try_correct_alignments" else ""
 
 
     command <<<
@@ -35,8 +36,8 @@ task lraaTask {
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                  --bam ~{inputBAM} \
                                  --output_prefix ~{OutDir}/ID/LRAA \
-                                 ~{no_norm_flag} \
-                                 ~{try_correct_alignments_flag}
+                                 ~{no_norm_flag}
+
         fi
 
         if [[ ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{referenceAnnotation_reduced}" ]]; then
@@ -44,8 +45,9 @@ task lraaTask {
                                  --bam ~{inputBAM} \
                                  --output_prefix ~{OutDir}/ID_reduced/LRAA_reduced \
                                  ~{no_norm_flag} \
-                                 --gtf ~{referenceAnnotation_reduced} \
-                                 ~{try_correct_alignments_flag}
+                                 --gtf ~{referenceAnnotation_reduced}
+
+
         fi
 
         if [[ ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{referenceAnnotation_full}" ]]; then
@@ -55,8 +57,7 @@ task lraaTask {
                                  --quant_only \
                                  ~{no_norm_flag} \
                                  --gtf ~{referenceAnnotation_full} \
-                                 --EM \
-                                 ~{try_correct_alignments_flag}
+                                 --EM
 
 
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
@@ -64,8 +65,17 @@ task lraaTask {
                                  --output_prefix ~{OutDir}/Quant_noEM/LRAA.noEM \
                                  --quant_only \
                                  ~{no_norm_flag} \
+                                 --gtf ~{referenceAnnotation_full}
+        fi
+
+        if [[ ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{referenceAnnotation_full}" && -n "~{min_mapping_quality}" ]]; then
+            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
+                                 --bam ~{inputBAM} \
+                                 --output_prefix ~{OutDir}/Quant_noEM_minMapQ/LRAA.noEM.minMapQ \
+                                 --quant_only \
+                                 ~{no_norm_flag} \
                                  --gtf ~{referenceAnnotation_full} \
-                                 ~{try_correct_alignments_flag}
+                                 ~{min_mapping_quality_flag}
         fi
     >>>
 
@@ -76,6 +86,8 @@ task lraaTask {
         File? lraaCounts_noEM = "~{OutDir}/Quant_noEM/LRAA.noEM.quant.expr"
         File? lraa_quant_tracking = "~{OutDir}/Quant/LRAA.quant.tracking"
         File? lraa_quant_tracking_noEM = "~{OutDir}/Quant_noEM/LRAA.noEM.quant.tracking"
+        File? lraaCounts_noEM_minMapQ = "~{OutDir}/Quant_noEM_minMapQ/LRAA.noEM.minMapQ.quant.expr"
+        File? lraa_quant_tracking_noEM_minMapQ = "~{OutDir}/Quant_noEM_minMapQ/LRAA.noEM.minMapQ.quant.tracking"
         File monitoringLog = "monitoring.log"
     }
 
@@ -97,8 +109,8 @@ workflow lraaWorkflow {
         File? referenceAnnotation_full
         String dataType
         String ID_or_Quant_or_Both
+        Int? min_mapping_quality
         Boolean? LRAA_no_norm
-        Boolean? LRAA_try_correct_alignments
     }
 
     call lraaTask {
@@ -111,8 +123,8 @@ workflow lraaWorkflow {
             referenceAnnotation_full = referenceAnnotation_full,
             dataType = dataType,
             ID_or_Quant_or_Both = ID_or_Quant_or_Both,
-            LRAA_no_norm = LRAA_no_norm,
-            LRAA_try_correct_alignments = LRAA_try_correct_alignments
+            min_mapping_quality = min_mapping_quality,
+            LRAA_no_norm = LRAA_no_norm
     }
 
     output {
@@ -122,6 +134,8 @@ workflow lraaWorkflow {
         File? lraaCounts_noEM = lraaTask.lraaCounts_noEM
         File? lraa_quant_tracking = lraaTask.lraa_quant_tracking
         File? lraa_quant_tracking_noEM = lraaTask.lraa_quant_tracking_noEM
+        File? lraaCounts_noEM_minMapQ = lraaTask.lraaCounts_noEM_minMapQ
+        File? lraa_quant_tracking_noEM_minMapQ = lraaTask.lraa_quant_tracking_noEM_minMapQ
         File monitoringLog = lraaTask.monitoringLog
     }
 }
