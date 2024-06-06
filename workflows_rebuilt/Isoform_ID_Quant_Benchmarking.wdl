@@ -53,6 +53,8 @@ task relocateOutputs {
         File? lraaCounts_noEM
         File? lraa_quant_tracking
         File? lraa_quant_tracking_noEM
+        File? lraaCounts_noEM_minMapQ
+        File? lraa_quant_tracking_noEM_minMapQ
         File? gffcompareCounts
         File? lrquantCounts
         File? lrquantOUT
@@ -72,11 +74,11 @@ task relocateOutputs {
         # Define arrays of files for each directory
         reduced_files=("~{bambuReducedGTF}" "~{bambuNDR1ReducedGTF}" "~{espressoReducedGTF}" "~{flairReducedGTF}" "~{flamesReducedGTF}" "~{isoquantReducedGTF}" "~{isoquantReducedGTF_with_polyA}" "~{isoseqReducedGTF}" "~{mandalorionReducedGTF}" "~{mandalorionforkReducedGTF}" "~{stringtieReducedGTF}" "~{talonReducedGTF}" "~{lraaReducedGTF}")
         id_files=("~{bambuGTF}" "~{isoquantGTF}" "~{isoquantGTF_with_polyA}" "~{isoseqGTF}" "~{mandalorionGTF}" "~{mandalorionforkGTF}" "~{stringtieGTF}" "~{lraaGTF}")
-        quant_files=("~{bambuCounts}" "~{espressoCounts}" "~{flairCounts}" "~{isoquantCounts}" "~{isoquantCounts_with_polyA}" "~{oarfishCounts}" "~{salmonCounts}" "~{stringtieCounts}" "~{lraaCounts}" "~{lraaCounts_noEM}" "~{lraa_quant_tracking}" "~{lraa_quant_tracking_noEM}" "~{gffcompareCounts}" "~{lrquantCounts}")
+        quant_files=("~{bambuCounts}" "~{espressoCounts}" "~{flairCounts}" "~{isoquantCounts}" "~{isoquantCounts_with_polyA}" "~{oarfishCounts}" "~{salmonCounts}" "~{stringtieCounts}" "~{lraaCounts}" "~{lraaCounts_noEM}" "~{lraa_quant_tracking}" "~{lraa_quant_tracking_noEM}" "~{lraaCounts_noEM_minMapQ}" "~{lraa_quant_tracking_noEM_minMapQ}" "~{gffcompareCounts}" "~{lrquantCounts}")
     
         # Loop over the files for each directory
         for file in "${reduced_files[@]}"; do
-          [ -f "$file" ] && mv "$file" ID_reduced/
+          [ -f "$file" ] && mv "$file" ID_reduced/v
         done
     
         for file in "${id_files[@]}"; do
@@ -130,7 +132,7 @@ workflow LongReadRNABenchmark {
         String dataType
         String ID_or_Quant_or_Both
         Boolean? LRAA_no_norm = false
-        Boolean? LRAA_try_correct_alignments = false
+        Int? LRAA_min_mapping_quality
         Boolean runBambu = true
         Boolean runEspresso = true
         Boolean runFlair = true
@@ -329,7 +331,7 @@ if (runLraa) {
             dataType = dataType,
             ID_or_Quant_or_Both = ID_or_Quant_or_Both,
             LRAA_no_norm = LRAA_no_norm,
-            LRAA_try_correct_alignments = LRAA_try_correct_alignments
+            LRAA_min_mapping_quality  = LRAA_min_mapping_quality
 
     }
 }
@@ -365,8 +367,11 @@ call relocateOutputs {
         isoquantGTF_with_polyA = isoquant.isoquantGTF_with_polyA,
         isoquantReducedGTF_with_polyA = isoquant.isoquantReducedGTF_with_polyA,
         isoquantCounts_with_polyA = isoquant.isoquantCounts_with_polyA,
- #       isoquantCounts_OUT = isoquant.isoquantCounts_OUT,
- #       isoquantCounts_with_polyA_OUT = isoquant.isoquantCounts_with_polyA_OUT,  
+#       isoquantCounts_OUT = isoquant.isoquantCounts_OUT,
+#       isoquantCounts_with_polyA_OUT = isoquant.isoquantCounts_with_polyA_OUT,
+#        gffcompareCounts = lrquant.gffcompareCounts,
+#        lrquantCounts = lrquant.lrquantCounts,
+#        lrquantOUT = lrquant.lrquantOUT
         isoseqReducedGTF = isoseq.isoseqReducedGTF,
         isoseqGTF = isoseq.isoseqGTF,
         mandalorionReducedGTF = mandalorion.mandalorionReducedGTF,
@@ -384,10 +389,10 @@ call relocateOutputs {
         lraaCounts = lraa.lraaCounts,
         lraaCounts_noEM = lraa.lraaCounts_noEM,
         lraa_quant_tracking = lraa.lraa_quant_tracking,
-        lraa_quant_tracking_noEM = lraa.lraa_quant_tracking_noEM
-#        gffcompareCounts = lrquant.gffcompareCounts,
-#        lrquantCounts = lrquant.lrquantCounts,
-#        lrquantOUT = lrquant.lrquantOUT
+        lraa_quant_tracking_noEM = lraa.lraa_quant_tracking_noEM,
+        lraaCounts_noEM_minMapQ = lraa.lraaCounts_noEM_minMapQ,
+        lraa_quant_tracking_noEM_minMapQ = lraa.lraa_quant_tracking_noEM_minMapQ
+
 }
 }
 
