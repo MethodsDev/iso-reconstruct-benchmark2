@@ -22,7 +22,7 @@ task lraaTask {
     }
 
     String OutDir = "LRAA_out"
-    String LRAA_min_mapping_quality_flag = if (defined(LRAA_min_mapping_quality)) then "--LRAA_min_mapping_quality=" + LRAA_min_mapping_quality else ""
+    String LRAA_min_mapping_quality_flag = if (defined(LRAA_min_mapping_quality)) then "min_mapping_quality=" + LRAA_min_mapping_quality else ""
 
     String no_norm_flag = if (defined(LRAA_no_norm) && LRAA_no_norm) then "--no_norm" else ""
 
@@ -50,7 +50,7 @@ task lraaTask {
 
         fi
 
-        if [[ ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{referenceAnnotation_full}" ]]; then
+        if [[ ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{referenceAnnotation_full}" && -z "~{LRAA_min_mapping_quality_flag}" ]]; then
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                  --bam ~{inputBAM} \
                                  --output_prefix ~{OutDir}/Quant/LRAA \
@@ -76,6 +76,15 @@ task lraaTask {
                                  ~{no_norm_flag} \
                                  --gtf ~{referenceAnnotation_full} \
                                  ~{LRAA_min_mapping_quality_flag}
+
+            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
+                                 --bam ~{inputBAM} \
+                                 --output_prefix ~{OutDir}/Quant_minMapQ/LRAA.minMapQ \
+                                 --quant_only \
+                                 ~{no_norm_flag} \
+                                 --gtf ~{referenceAnnotation_full} \
+                                 ~{LRAA_min_mapping_quality_flag} \
+                                 --EM
         fi
     >>>
 
@@ -88,6 +97,8 @@ task lraaTask {
         File? lraa_quant_tracking_noEM = "~{OutDir}/Quant_noEM/LRAA.noEM.quant.tracking"
         File? lraaCounts_noEM_minMapQ = "~{OutDir}/Quant_noEM_minMapQ/LRAA.noEM.minMapQ.quant.expr"
         File? lraa_quant_tracking_noEM_minMapQ = "~{OutDir}/Quant_noEM_minMapQ/LRAA.noEM.minMapQ.quant.tracking"
+        File? lraaCounts_minMapQ = "~{OutDir}/Quant_minMapQ/LRAA.minMapQ.quant.expr"
+        File? lraa_quant_tracking_minMapQ = "~{OutDir}/Quant_minMapQ/LRAA.minMapQ.quant.tracking"
         File monitoringLog = "monitoring.log"
     }
 
@@ -136,6 +147,8 @@ workflow lraaWorkflow {
         File? lraa_quant_tracking_noEM = lraaTask.lraa_quant_tracking_noEM
         File? lraaCounts_noEM_minMapQ = lraaTask.lraaCounts_noEM_minMapQ
         File? lraa_quant_tracking_noEM_minMapQ = lraaTask.lraa_quant_tracking_noEM_minMapQ
+        File? lraaCounts_minMapQ = lraaTask.lraaCounts_minMapQ
+        File? lraa_quant_tracking_minMapQ = lraaTask.lraa_quant_tracking_minMapQ
         File monitoringLog = lraaTask.monitoringLog
     }
 }
