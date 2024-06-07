@@ -135,6 +135,7 @@ EOF
         memory: "~{memoryGB} GiB"
         disks: "local-disk ~{diskSizeGB} HDD"
         docker: docker
+        errorStrategy: "Continue"
     }
 }
 
