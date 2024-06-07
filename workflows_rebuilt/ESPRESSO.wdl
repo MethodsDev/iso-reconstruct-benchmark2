@@ -36,7 +36,7 @@ task espressoTask {
             mkdir -p ~{OutDir}/ID
             perl /usr/src/app/espresso/src/ESPRESSO_S.pl --sort_buffer_size ~{memoryGB} -L ~{OutDir}/ID/~{samples_filename} -F ~{referenceGenome} -A ~{referenceAnnotation_reduced} -O ~{OutDir}/ID -T ~{numThreads}
             perl /usr/src/app/espresso/src/ESPRESSO_C.pl --sort_buffer_size ~{memoryGB} -I ~{OutDir}/ID -F ~{referenceGenome} -X 0 -T ~{numThreads}
-#            perl /usr/src/app/espresso/src/ESPRESSO_Q.pl -L ~{OutDir}/ID/espresso_samples.tsv.updated -A ~{referenceAnnotation_reduced} -T ~{numThreads}            
+            perl /usr/src/app/espresso/src/ESPRESSO_Q.pl -L ~{OutDir}/ID/espresso_samples.tsv.updated -A ~{referenceAnnotation_reduced} -T ~{numThreads}            
             mv ~{OutDir}/ID/espresso_samples_N2_R0_updated.gtf ~{OutDir}/ID/ESPRESSO_reduced.gtf
         fi
     
