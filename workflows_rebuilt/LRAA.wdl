@@ -22,7 +22,7 @@ task lraaTask {
     }
 
     String OutDir = "LRAA_out"
-    String LRAA_min_mapping_quality_flag = if (defined(LRAA_min_mapping_quality)) then "min_mapping_quality=" + LRAA_min_mapping_quality else ""
+    String LRAA_min_mapping_quality_flag = if (defined(LRAA_min_mapping_quality)) then "--min_mapping_quality=" + LRAA_min_mapping_quality else ""
 
     String no_norm_flag = if (defined(LRAA_no_norm) && LRAA_no_norm) then "--no_norm" else ""
 
