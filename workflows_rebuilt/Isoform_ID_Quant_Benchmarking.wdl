@@ -55,6 +55,8 @@ task relocateOutputs {
         File? lraa_quant_tracking_noEM
         File? lraaCounts_noEM_minMapQ
         File? lraa_quant_tracking_noEM_minMapQ
+        File? lraaCounts_minMapQ
+        File? lraa_quant_tracking_minMapQ
         File? gffcompareCounts
         File? lrquantCounts
         File? lrquantOUT
@@ -74,7 +76,7 @@ task relocateOutputs {
         # Define arrays of files for each directory
         reduced_files=("~{bambuReducedGTF}" "~{bambuNDR1ReducedGTF}" "~{espressoReducedGTF}" "~{flairReducedGTF}" "~{flamesReducedGTF}" "~{isoquantReducedGTF}" "~{isoquantReducedGTF_with_polyA}" "~{isoseqReducedGTF}" "~{mandalorionReducedGTF}" "~{mandalorionforkReducedGTF}" "~{stringtieReducedGTF}" "~{talonReducedGTF}" "~{lraaReducedGTF}")
         id_files=("~{bambuGTF}" "~{isoquantGTF}" "~{isoquantGTF_with_polyA}" "~{isoseqGTF}" "~{mandalorionGTF}" "~{mandalorionforkGTF}" "~{stringtieGTF}" "~{lraaGTF}")
-        quant_files=("~{bambuCounts}" "~{espressoCounts}" "~{flairCounts}" "~{isoquantCounts}" "~{isoquantCounts_with_polyA}" "~{oarfishCounts}" "~{salmonCounts}" "~{stringtieCounts}" "~{lraaCounts}" "~{lraaCounts_noEM}" "~{lraa_quant_tracking}" "~{lraa_quant_tracking_noEM}" "~{lraaCounts_noEM_minMapQ}" "~{lraa_quant_tracking_noEM_minMapQ}" "~{gffcompareCounts}" "~{lrquantCounts}")
+        quant_files=("~{bambuCounts}" "~{espressoCounts}" "~{flairCounts}" "~{isoquantCounts}" "~{isoquantCounts_with_polyA}" "~{oarfishCounts}" "~{salmonCounts}" "~{stringtieCounts}" "~{lraaCounts}" "~{lraaCounts_noEM}" "~{lraa_quant_tracking}" "~{lraa_quant_tracking_noEM}" "~{lraaCounts_noEM_minMapQ}" "~{lraa_quant_tracking_noEM_minMapQ}" "~{lraaCounts_minMapQ}" "~{lraa_quant_tracking_minMapQ}" "~{gffcompareCounts}" "~{lrquantCounts}")
     
         # Loop over the files for each directory
         for file in "${reduced_files[@]}"; do
@@ -391,7 +393,9 @@ call relocateOutputs {
         lraa_quant_tracking = lraa.lraa_quant_tracking,
         lraa_quant_tracking_noEM = lraa.lraa_quant_tracking_noEM,
         lraaCounts_noEM_minMapQ = lraa.lraaCounts_noEM_minMapQ,
-        lraa_quant_tracking_noEM_minMapQ = lraa.lraa_quant_tracking_noEM_minMapQ
+        lraa_quant_tracking_noEM_minMapQ = lraa.lraa_quant_tracking_noEM_minMapQ,
+        lraaCounts_minMapQ = lraa.lraaCounts_minMapQ,
+        lraa_quant_tracking_minMapQ = lraa.lraa_quant_tracking_minMapQ
 
 }
 }
