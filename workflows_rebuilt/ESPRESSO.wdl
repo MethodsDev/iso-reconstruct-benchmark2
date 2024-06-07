@@ -57,6 +57,7 @@ task espressoTask {
         memory: "256 GiB"
         disks: "local-disk 500 HDD"
         docker: docker
+        errorStrategy: "Continue"
     }
 }
 
