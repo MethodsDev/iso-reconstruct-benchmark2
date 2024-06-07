@@ -33,22 +33,25 @@ task espressoTask {
         echo -e "input.sam\tespresso" > ~{OutDir}/~{samples_filename}
 
         if [[ "~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both" || ("~{ID_or_Quant_or_Both}" == "ID" && "~{referenceAnnotation_reduced}" -ne "") ]]; then            
-            mkdir -p ~{OutDir}
-            perl /usr/src/app/espresso/src/ESPRESSO_S.pl --sort_buffer_size ~{memoryGB} -L ~{OutDir}/~{samples_filename} -F ~{referenceGenome} -A ~{referenceAnnotation_full} -O ~{OutDir} -T ~{numThreads}
-            perl /usr/src/app/espresso/src/ESPRESSO_C.pl --sort_buffer_size ~{memoryGB} -I ~{OutDir} -F ~{referenceGenome} -X 0 -T ~{numThreads}
-            perl /usr/src/app/espresso/src/ESPRESSO_Q.pl -L ~{OutDir}/espresso_samples.tsv.updated -A ~{referenceAnnotation_full} -T ~{numThreads}
-            mv ~{OutDir}/espresso_samples_N2_R0_abundance.esp ~{OutDir}/ESPRESSO_quant.txt
-            if [[ "~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both" ]]; then
-                mv ~{OutDir}/espresso_samples_N2_R0_updated.gtf ~{OutDir}/ESPRESSO_reduced.gtf
-            fi
-        else
-            echo "Reference annotation reduced is not provided. Cannot run in ID mode."
+            mkdir -p ~{OutDir}/ID
+            perl /usr/src/app/espresso/src/ESPRESSO_S.pl --sort_buffer_size ~{memoryGB} -L ~{OutDir}/ID/~{samples_filename} -F ~{referenceGenome} -A ~{referenceAnnotation_reduced} -O ~{OutDir}/ID -T ~{numThreads}
+            perl /usr/src/app/espresso/src/ESPRESSO_C.pl --sort_buffer_size ~{memoryGB} -I ~{OutDir}/ID -F ~{referenceGenome} -X 0 -T ~{numThreads}
+            perl /usr/src/app/espresso/src/ESPRESSO_Q.pl -L ~{OutDir}/ID/espresso_samples.tsv.updated -A ~{referenceAnnotation_reduced} -T ~{numThreads}            
+            mv ~{OutDir}/ID/espresso_samples_N2_R0_updated.gtf ~{OutDir}/ID/ESPRESSO_reduced.gtf
+        fi
+
+        if [[ "~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both" ]]; then
+            mkdir -p ~{OutDir}/Quant
+            perl /usr/src/app/espresso/src/ESPRESSO_S.pl --sort_buffer_size ~{memoryGB} -L ~{OutDir}/Quant/~{samples_filename} -F ~{referenceGenome} -A ~{referenceAnnotation_full} -O ~{OutDir}/Quant -T ~{numThreads}
+            perl /usr/src/app/espresso/src/ESPRESSO_C.pl --sort_buffer_size ~{memoryGB} -I ~{OutDir}/Quant -F ~{referenceGenome} -X 0 -T ~{numThreads}
+            perl /usr/src/app/espresso/src/ESPRESSO_Q.pl -L ~{OutDir}/Quant/espresso_samples.tsv.updated -A ~{referenceAnnotation_full} -T ~{numThreads}
+            mv ~{OutDir}/Quant/espresso_samples_N2_R0_abundance.esp ~{OutDir}/Quant/ESPRESSO_quant.txt
         fi
     >>>
 
     output {
-        File? espressoCounts = "~{OutDir}/ESPRESSO_quant.txt"
-        File? espressoReducedGTF = "~{OutDir}/ESPRESSO_reduced.gtf"
+        File? espressoCounts = "~{OutDir}/Quant/ESPRESSO_quant.txt"
+        File? espressoReducedGTF = "~{OutDir}/ID/ESPRESSO_reduced.gtf"
         File monitoringLog = "monitoring.log"
     }
 
