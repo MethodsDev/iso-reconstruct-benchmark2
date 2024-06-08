@@ -11,10 +11,10 @@ task stringtieTask {
         File? referenceAnnotation_full
         String dataType
         String ID_or_Quant_or_Both
-        Int cpu = 16
-        Int numThreads = 32
-        Int memoryGB = 256
-        Int diskSizeGB = 500
+        Int cpu = 4
+        Int numThreads = 8
+        Int memoryGB = 64
+        Int diskSizeGB = 250
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/stringtie@sha256:fb579fc315d6976ccfa4094e7b0e5fe45587f56b02a6124bcce463023ead7d5d"
         File monitoringScript = "gs://ctat_genome_libs/terra_scripts/cromwell_monitoring_script2.sh"
     }
