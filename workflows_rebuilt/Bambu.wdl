@@ -11,10 +11,10 @@ task bambuTask {
         File? referenceAnnotation_full
         String dataType
         String ID_or_Quant_or_Both
-        Int cpu = 16
-        Int numThreads = 32
-        Int memoryGB = 256
-        Int diskSizeGB = 500
+        Int cpu = 4
+        Int numThreads = 8
+        Int memoryGB = 64
+        Int diskSizeGB = 250
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/bambu@sha256:04601e3dd0d7f9c2008c5f430da7aef62277dc8ffd50ecb356d4b48ba962e6c7"
         File monitoringScript = "gs://ctat_genome_libs/terra_scripts/cromwell_monitoring_script2.sh"
     }
