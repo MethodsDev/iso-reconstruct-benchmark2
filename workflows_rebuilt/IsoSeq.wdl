@@ -11,10 +11,10 @@ task isoseqTask {
         File? referenceAnnotation_full
         String dataType
         String ID_or_Quant_or_Both
-        Int cpu = 16
-        Int numThreads = 32
-        Int memoryGB = 256
-        Int diskSizeGB = 500
+        Int cpu = 4
+        Int numThreads = 8
+        Int memoryGB = 64
+        Int diskSizeGB = 250
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/isoseq@sha256:c0d801579938050b15ee6e62adc31df8763b1d2aed0e4ff64e8026f154ab120e"
         File monitoringScript = "gs://ctat_genome_libs/terra_scripts/cromwell_monitoring_script2.sh"
     }
