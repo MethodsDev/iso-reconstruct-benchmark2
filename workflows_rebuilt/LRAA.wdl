@@ -13,10 +13,10 @@ task lraaTask {
         String ID_or_Quant_or_Both
         Int? LRAA_min_mapping_quality
         Boolean? LRAA_no_norm
-        Int cpu = 16
-        Int numThreads = 32
-        Int memoryGB = 256
-        Int diskSizeGB = 500
+        Int cpu = 4
+        Int numThreads = 8
+        Int memoryGB = 64
+        Int diskSizeGB = 250
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/lraa/lraa:latest"
         File monitoringScript = "gs://ctat_genome_libs/terra_scripts/cromwell_monitoring_script2.sh"
     }
@@ -36,7 +36,7 @@ task lraaTask {
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                  --bam ~{inputBAM} \
                                  --output_prefix ~{OutDir}/ID/LRAA \
-                                 ~{no_norm_flag}
+                                 ~{no_norm_flag} --CPU ~{numThreads}
 
         fi
 
@@ -45,7 +45,7 @@ task lraaTask {
                                  --bam ~{inputBAM} \
                                  --output_prefix ~{OutDir}/ID_reduced/LRAA_reduced \
                                  ~{no_norm_flag} \
-                                 --gtf ~{referenceAnnotation_reduced}
+                                 --gtf ~{referenceAnnotation_reduced} --CPU ~{numThreads} 
 
 
         fi
@@ -57,7 +57,7 @@ task lraaTask {
                                  --quant_only \
                                  ~{no_norm_flag} \
                                  --gtf ~{referenceAnnotation_full} \
-                                 --EM
+                                 --EM --CPU ~{numThreads}
 
 
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
@@ -65,7 +65,7 @@ task lraaTask {
                                  --output_prefix ~{OutDir}/Quant_noEM/LRAA.noEM \
                                  --quant_only \
                                  ~{no_norm_flag} \
-                                 --gtf ~{referenceAnnotation_full}
+                                 --gtf ~{referenceAnnotation_full} --CPU ~{numThreads}
         fi
 
         if [[ ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{referenceAnnotation_full}" && -n "~{LRAA_min_mapping_quality}" ]]; then
@@ -75,7 +75,7 @@ task lraaTask {
                                  --quant_only \
                                  ~{no_norm_flag} \
                                  --gtf ~{referenceAnnotation_full} \
-                                 ~{LRAA_min_mapping_quality_flag}
+                                 ~{LRAA_min_mapping_quality_flag} --CPU ~{numThreads}
 
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                  --bam ~{inputBAM} \
@@ -84,7 +84,7 @@ task lraaTask {
                                  ~{no_norm_flag} \
                                  --gtf ~{referenceAnnotation_full} \
                                  ~{LRAA_min_mapping_quality_flag} \
-                                 --EM
+                                 --EM --CPU ~{numThreads} --CPU ~{numThreads}
         fi
     >>>
 
