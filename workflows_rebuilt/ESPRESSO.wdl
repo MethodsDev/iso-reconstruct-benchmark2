@@ -30,7 +30,7 @@ task espressoTask {
         samtools view -h -o input.sam ~{inputBAM}
         
         # Create espresso_samples.tsv
-        echo -e "input.sam\tespresso" > ESPRESSO_out/~{samples_filename}
+        echo -e "input.sam\tespresso" > ESPRESSO_out/ID/~{samples_filename}
         
         if [[ "~{referenceAnnotation_reduced}" != "" && ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both" || "~{ID_or_Quant_or_Both}" == "ID") ]]; then
             mkdir -p ESPRESSO_out/ID
