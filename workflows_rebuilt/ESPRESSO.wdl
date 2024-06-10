@@ -40,13 +40,13 @@ task espressoTask {
             mv ~{OutDir}/ID/espresso_samples_N2_R0_updated.gtf ~{OutDir}/ID/ESPRESSO_reduced.gtf
         fi
     
-        if [[ "~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both" ]]; then
-            mkdir -p ~{OutDir}/Quant
-            perl /usr/src/app/espresso/src/ESPRESSO_S.pl --sort_buffer_size ~{memoryGB} -L ~{OutDir}/Quant/~{samples_filename} -F ~{referenceGenome} -A ~{referenceAnnotation_full} -O ~{OutDir}/Quant -T ~{numThreads}
-            perl /usr/src/app/espresso/src/ESPRESSO_C.pl --sort_buffer_size ~{memoryGB} -I ~{OutDir}/Quant -F ~{referenceGenome} -X 0 -T ~{numThreads}
-            perl /usr/src/app/espresso/src/ESPRESSO_Q.pl -L ~{OutDir}/Quant/espresso_samples.tsv.updated -A ~{referenceAnnotation_full} -T ~{numThreads}
-            mv ~{OutDir}/Quant/espresso_samples_N2_R0_abundance.esp ~{OutDir}/Quant/ESPRESSO_quant.txt
-        fi
+ #       if [[ "~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both" ]]; then
+ #           mkdir -p ~{OutDir}/Quant
+ #           perl /usr/src/app/espresso/src/ESPRESSO_S.pl --sort_buffer_size ~{memoryGB} -L ~{OutDir}/Quant/~{samples_filename} -F ~{referenceGenome} -A ~{referenceAnnotation_full} -O ~{OutDir}/Quant -T ~{numThreads}
+ #           perl /usr/src/app/espresso/src/ESPRESSO_C.pl --sort_buffer_size ~{memoryGB} -I ~{OutDir}/Quant -F ~{referenceGenome} -X 0 -T ~{numThreads}
+ #           perl /usr/src/app/espresso/src/ESPRESSO_Q.pl -L ~{OutDir}/Quant/espresso_samples.tsv.updated -A ~{referenceAnnotation_full} -T ~{numThreads}
+ #           mv ~{OutDir}/Quant/espresso_samples_N2_R0_abundance.esp ~{OutDir}/Quant/ESPRESSO_quant.txt
+ #       fi
     >>>
 
     output {
