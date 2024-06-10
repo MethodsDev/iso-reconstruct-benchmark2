@@ -52,7 +52,7 @@ task lrquantTask {
     }
 
     runtime {
-        cpu: cpu
+        cpu: "~{cpu}"
         memory: "~{memoryGB} GiB"
         disks: "local-disk ~{diskSizeGB} HDD"
         docker: docker
