@@ -11,10 +11,10 @@ task espressoTask {
         File? referenceAnnotation_full
         String dataType
         String ID_or_Quant_or_Both
-        Int cpu = 4
-        Int numThreads = 8
-        Int memoryGB = 64
-        Int diskSizeGB = 1024
+        Int cpu = 32
+        Int numThreads = 64
+        Int memoryGB = 512
+        Int diskSizeGB = 512
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/espresso@sha256:f538303f6457c55e7b3c2a45081e6d8e3053e6f76e56bc65631b7f4aa290b026"
         File monitoringScript = "gs://ctat_genome_libs/terra_scripts/cromwell_monitoring_script2.sh"
     }
@@ -34,9 +34,9 @@ task espressoTask {
         echo -e "input.sam\tespresso" > ESPRESSO_out/ID/~{samples_filename}
         
         if [[ "~{referenceAnnotation_reduced}" != "" && ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both" || "~{ID_or_Quant_or_Both}" == "ID") ]]; then
-            perl /usr/src/app/espresso/src/ESPRESSO_S.pl --sort_buffer_size 2G -L ESPRESSO_out/ID/~{samples_filename} -F ~{referenceGenome} -A ~{referenceAnnotation_reduced} -O ESPRESSO_out/ID -T 5
-            perl /usr/src/app/espresso/src/ESPRESSO_C.pl --sort_buffer_size 2G -I ESPRESSO_out/ID -F ~{referenceGenome} -X 0 -T 5
-            perl /usr/src/app/espresso/src/ESPRESSO_Q.pl -L ESPRESSO_out/ID/espresso_samples.tsv.updated -A ~{referenceAnnotation_reduced} -T 5            
+            perl /usr/src/app/espresso/src/ESPRESSO_S.pl --sort_buffer_size 2G -L ESPRESSO_out/ID/~{samples_filename} -F ~{referenceGenome} -A ~{referenceAnnotation_reduced} -O ESPRESSO_out/ID -T ~{numThreads}
+            perl /usr/src/app/espresso/src/ESPRESSO_C.pl --sort_buffer_size 2G -I ESPRESSO_out/ID -F ~{referenceGenome} -X 0 -T ~{numThreads}
+            perl /usr/src/app/espresso/src/ESPRESSO_Q.pl -L ESPRESSO_out/ID/espresso_samples.tsv.updated -A ~{referenceAnnotation_reduced} -T ~{numThreads}            
             mv ESPRESSO_out/ID/espresso_samples_N2_R0_updated.gtf ESPRESSO_out/ID/ESPRESSO_reduced.gtf
         fi
     
