@@ -25,19 +25,19 @@ task espressoTask {
     command <<<
         bash ~{monitoringScript} > monitoring.log &
         mkdir -p ESPRESSO_out
-
+        
         # Convert BAM to SAM
         samtools view -h -o input.sam ~{inputBAM}
-
+        
         # Create espresso_samples.tsv
-        echo -e "input.sam\tespresso" > ~{OutDir}/~{samples_filename}
-
+        echo -e "input.sam\tespresso" > ESPRESSO_out/~{samples_filename}
+        
         if [[ "~{referenceAnnotation_reduced}" != "" && ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both" || "~{ID_or_Quant_or_Both}" == "ID") ]]; then
-            mkdir -p ~{OutDir}/ID
-            perl /usr/src/app/espresso/src/ESPRESSO_S.pl --sort_buffer_size ~{memoryGB} -L ~{OutDir}/ID/~{samples_filename} -F ~{referenceGenome} -A ~{referenceAnnotation_reduced} -O ~{OutDir}/ID -T ~{numThreads}
-            perl /usr/src/app/espresso/src/ESPRESSO_C.pl --sort_buffer_size ~{memoryGB} -I ~{OutDir}/ID -F ~{referenceGenome} -X 0 -T ~{numThreads}
-            perl /usr/src/app/espresso/src/ESPRESSO_Q.pl -L ~{OutDir}/ID/espresso_samples.tsv.updated -A ~{referenceAnnotation_reduced} -T ~{numThreads}            
-            mv ~{OutDir}/ID/espresso_samples_N2_R0_updated.gtf ~{OutDir}/ID/ESPRESSO_reduced.gtf
+            mkdir -p ESPRESSO_out/ID
+            perl /usr/src/app/espresso/src/ESPRESSO_S.pl --sort_buffer_size ~{memoryGB} -L ESPRESSO_out/ID/~{samples_filename} -F ~{referenceGenome} -A ~{referenceAnnotation_reduced} -O ESPRESSO_out/ID -T ~{numThreads}
+            perl /usr/src/app/espresso/src/ESPRESSO_C.pl --sort_buffer_size ~{memoryGB} -I ESPRESSO_out/ID -F ~{referenceGenome} -X 0 -T ~{numThreads}
+            perl /usr/src/app/espresso/src/ESPRESSO_Q.pl -L ESPRESSO_out/ID/espresso_samples.tsv.updated -A ~{referenceAnnotation_reduced} -T ~{numThreads}            
+            mv ESPRESSO_out/ID/espresso_samples_N2_R0_updated.gtf ESPRESSO_out/ID/ESPRESSO_reduced.gtf
         fi
     
  #       if [[ "~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both" ]]; then
