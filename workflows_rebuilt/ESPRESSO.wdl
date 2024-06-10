@@ -30,10 +30,10 @@ task espressoTask {
         samtools view -h -o input.sam ~{inputBAM}
         
         # Create espresso_samples.tsv
+        mkdir -p ESPRESSO_out/ID
         echo -e "input.sam\tespresso" > ESPRESSO_out/ID/~{samples_filename}
         
         if [[ "~{referenceAnnotation_reduced}" != "" && ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both" || "~{ID_or_Quant_or_Both}" == "ID") ]]; then
-            mkdir -p ESPRESSO_out/ID
             perl /usr/src/app/espresso/src/ESPRESSO_S.pl --sort_buffer_size ~{memoryGB} -L ESPRESSO_out/ID/~{samples_filename} -F ~{referenceGenome} -A ~{referenceAnnotation_reduced} -O ESPRESSO_out/ID -T ~{numThreads}
             perl /usr/src/app/espresso/src/ESPRESSO_C.pl --sort_buffer_size ~{memoryGB} -I ESPRESSO_out/ID -F ~{referenceGenome} -X 0 -T ~{numThreads}
             perl /usr/src/app/espresso/src/ESPRESSO_Q.pl -L ESPRESSO_out/ID/espresso_samples.tsv.updated -A ~{referenceAnnotation_reduced} -T ~{numThreads}            
