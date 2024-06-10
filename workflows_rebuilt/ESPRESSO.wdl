@@ -34,9 +34,9 @@ task espressoTask {
         echo -e "input.sam\tespresso" > ESPRESSO_out/ID/~{samples_filename}
         
         if [[ "~{referenceAnnotation_reduced}" != "" && ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both" || "~{ID_or_Quant_or_Both}" == "ID") ]]; then
-            perl /usr/src/app/espresso/src/ESPRESSO_S.pl --sort_buffer_size ~{memoryGB} -L ESPRESSO_out/ID/~{samples_filename} -F ~{referenceGenome} -A ~{referenceAnnotation_reduced} -O ESPRESSO_out/ID -T ~{numThreads}
-            perl /usr/src/app/espresso/src/ESPRESSO_C.pl --sort_buffer_size ~{memoryGB} -I ESPRESSO_out/ID -F ~{referenceGenome} -X 0 -T ~{numThreads}
-            perl /usr/src/app/espresso/src/ESPRESSO_Q.pl -L ESPRESSO_out/ID/espresso_samples.tsv.updated -A ~{referenceAnnotation_reduced} -T ~{numThreads}            
+            perl /usr/src/app/espresso/src/ESPRESSO_S.pl --sort_buffer_size 2G -L ESPRESSO_out/ID/~{samples_filename} -F ~{referenceGenome} -A ~{referenceAnnotation_reduced} -O ESPRESSO_out/ID -T 5
+            perl /usr/src/app/espresso/src/ESPRESSO_C.pl --sort_buffer_size 2G -I ESPRESSO_out/ID -F ~{referenceGenome} -X 0 -T 5
+            perl /usr/src/app/espresso/src/ESPRESSO_Q.pl -L ESPRESSO_out/ID/espresso_samples.tsv.updated -A ~{referenceAnnotation_reduced} -T 5            
             mv ESPRESSO_out/ID/espresso_samples_N2_R0_updated.gtf ESPRESSO_out/ID/ESPRESSO_reduced.gtf
         fi
     
