@@ -11,9 +11,9 @@ task espressoTask {
         File? referenceAnnotation_full
         String dataType
         String ID_or_Quant_or_Both
-        Int cpu = 32
-        Int numThreads = 64
-        Int memoryGB = 2048
+        Int cpu = 4
+        Int numThreads = 4
+        Int memoryGB = 64
         Int diskSizeGB = 2048
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/espresso@sha256:f538303f6457c55e7b3c2a45081e6d8e3053e6f76e56bc65631b7f4aa290b026"
         File monitoringScript = "gs://ctat_genome_libs/terra_scripts/cromwell_monitoring_script2.sh"
