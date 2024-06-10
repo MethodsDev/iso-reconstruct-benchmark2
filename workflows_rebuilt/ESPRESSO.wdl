@@ -56,9 +56,9 @@ task espressoTask {
     }
 
     runtime {
-        cpu: 16
-        memory: "256 GiB"
-        disks: "local-disk 500 HDD"
+        cpu: ~{cpu}
+        memory: "~{memoryGB} GiB"
+        disks: "local-disk ~{diskSizeGB} HDD"
         docker: docker
         errorStrategy: "Continue"
     }
