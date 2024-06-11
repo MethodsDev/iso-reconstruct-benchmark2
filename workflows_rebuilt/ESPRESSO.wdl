@@ -27,12 +27,11 @@ task espressoTask {
         mkdir -p ESPRESSO_out
         
         # Convert BAM to SAM
-#        samtools view -h -o input.sam ~{inputBAM}
-        mv ~{inputBAM} input.bam
+        samtools view -h -o input.sam ~{inputBAM}
         
         # Create espresso_samples.tsv
         mkdir -p ESPRESSO_out/ID
-        echo -e "input.bam\tespresso" > ESPRESSO_out/ID/~{samples_filename}
+        echo -e "input.sam\tespresso" > ESPRESSO_out/ID/~{samples_filename}
         
         if [[ "~{referenceAnnotation_reduced}" != "" && ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both" || "~{ID_or_Quant_or_Both}" == "ID") ]]; then
             perl /usr/src/app/espresso/src/ESPRESSO_S.pl --sort_buffer_size ~{memoryGB} -L ESPRESSO_out/ID/~{samples_filename} -F ~{referenceGenome} -A ~{referenceAnnotation_reduced} -O ESPRESSO_out/ID -T ~{numThreads}
