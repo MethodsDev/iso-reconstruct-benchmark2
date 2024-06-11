@@ -27,7 +27,8 @@ task espressoTask {
         mkdir -p ESPRESSO_out
         
         # Convert BAM to SAM
-        samtools view -h -o input.sam ~{inputBAM}
+#        samtools view -h -o input.sam ~{inputBAM}
+        mv ~{inputBAM} input.sam
         
         # Create espresso_samples.tsv
         mkdir -p ESPRESSO_out/ID
