@@ -11,10 +11,10 @@ task espressoTask {
         File? referenceAnnotation_full
         String dataType
         String ID_or_Quant_or_Both
-        Int cpu = 16
-        Int numThreads = 2
-        Int memoryGB = 256
-        Int diskSizeGB = 2048
+        Int cpu = 4
+        Int numThreads = 8
+        Int memoryGB = 64
+        Int diskSizeGB = 256
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/espresso@sha256:f538303f6457c55e7b3c2a45081e6d8e3053e6f76e56bc65631b7f4aa290b026"
         File monitoringScript = "gs://ctat_genome_libs/terra_scripts/cromwell_monitoring_script2.sh"
     }
@@ -28,11 +28,11 @@ task espressoTask {
         
         # Convert BAM to SAM
 #        samtools view -h -o input.sam ~{inputBAM}
-        mv ~{inputBAM} input.sam
+        mv ~{inputBAM} input.bam
         
         # Create espresso_samples.tsv
         mkdir -p ESPRESSO_out/ID
-        echo -e "input.sam\tespresso" > ESPRESSO_out/ID/~{samples_filename}
+        echo -e "input.bam\tespresso" > ESPRESSO_out/ID/~{samples_filename}
         
         if [[ "~{referenceAnnotation_reduced}" != "" && ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both" || "~{ID_or_Quant_or_Both}" == "ID") ]]; then
             perl /usr/src/app/espresso/src/ESPRESSO_S.pl --sort_buffer_size 2G -L ESPRESSO_out/ID/~{samples_filename} -F ~{referenceGenome} -A ~{referenceAnnotation_reduced} -O ESPRESSO_out/ID -T ~{numThreads}
