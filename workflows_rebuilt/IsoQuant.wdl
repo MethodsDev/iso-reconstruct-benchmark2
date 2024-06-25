@@ -18,7 +18,7 @@ task isoquantTask {
         Int memoryGB = 64
         Int diskSizeGB = 250
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/isoquant:latest"
-        File monitoringScript = "gs://ctat_genome_libs/terra_scripts/cromwell_monitoring_script2.sh"
+        File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
     }
 
     String OutDir = "IsoQuant_out"
