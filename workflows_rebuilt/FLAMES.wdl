@@ -16,7 +16,7 @@ task flamesTask {
         Int memoryGB = 64
         Int diskSizeGB = 250
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/flames-py@sha256:3ce1f2c8c20088945ce885dcbf486ae377873e30975dad55e54235c3873648d4"
-        File monitoringScript = "gs://ctat_genome_libs/terra_scripts/cromwell_monitoring_script2.sh"
+        File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
     }
     
     String OutDir = "FLAMES_out"
