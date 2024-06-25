@@ -16,7 +16,7 @@ task salmonTask {
         Int memoryGB = 64
         Int diskSizeGB = 250
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/salmon@sha256:da4b4eb49e4e28e594e356938763569a1738ed0ea488f04e45fce2b3469c9db5"
-        File monitoringScript = "gs://ctat_genome_libs/terra_scripts/cromwell_monitoring_script2.sh"
+        File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
     }
     String OutDir = "Salmon_out"
 
