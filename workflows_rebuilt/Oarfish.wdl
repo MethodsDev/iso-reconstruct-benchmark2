@@ -16,7 +16,7 @@ task oarfishTask {
         Int memoryGB = 64
         Int diskSizeGB = 250
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/oarfish@sha256:84b87e20aa10e2267e117da7b02c8dfa72f23eba6198ca105d26025dece0058a"
-        File monitoringScript = "gs://ctat_genome_libs/terra_scripts/cromwell_monitoring_script2.sh"
+        File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
     }
     String OutDir = "Oarfish_out"
 
