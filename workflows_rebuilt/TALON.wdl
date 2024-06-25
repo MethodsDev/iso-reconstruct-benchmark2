@@ -16,7 +16,7 @@ task talonTask {
         Int memoryGB = 64
         Int diskSizeGB = 250
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/talon@sha256:a1d019708bd6b98c456011e56f24d9799aeb6ad45c3c5a33bab931d396b9c0b2"
-        File monitoringScript = "gs://ctat_genome_libs/terra_scripts/cromwell_monitoring_script2.sh"
+        File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
     }
 
     String OutDir = "TALON_out"
