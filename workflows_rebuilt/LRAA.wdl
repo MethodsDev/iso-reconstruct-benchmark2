@@ -16,7 +16,7 @@ task lraaTask {
         Int cpu = 8
         Int numThreads = 16
         Int memoryGB = 128
-        Int diskSizeGB = 500
+        Int diskSizeGB = 1024
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/lraa/lraa:latest"
         File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
     }
