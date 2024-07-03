@@ -11,10 +11,10 @@ task flairTask {
         File? referenceAnnotation_full
         String dataType
         String ID_or_Quant_or_Both
-        Int cpu = 4
-        Int numThreads = 8
-        Int memoryGB = 64
-        Int diskSizeGB = 250
+        Int cpu = 8
+        Int numThreads = 16
+        Int memoryGB = 128
+        Int diskSizeGB = 2024
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/flair@sha256:0e677e58a0cc5c43c25c669c0722d3770c553693698d041fe1f87339b2597732"
         File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
     }
