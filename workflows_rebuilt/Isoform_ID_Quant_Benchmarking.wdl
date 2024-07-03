@@ -80,7 +80,7 @@ task relocateOutputs {
     
         # Loop over the files for each directory
         for file in "${reduced_files[@]}"; do
-          [ -f "$file" ] && mv "$file" ID_reduced/v
+          [ -f "$file" ] && mv "$file" ID_reduced/
         done
     
         for file in "${id_files[@]}"; do
