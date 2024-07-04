@@ -61,21 +61,8 @@ def execute_commands(transcriptome, reads, genome, annotation, output_path):
     gff_compare_path = 'gffcompare'
     k8_path = 'k8'
 
-    
-    if transcriptome == 'not_exist':
-        print('making transcriptome.fa file')
-        call(f'cd intermediate && {gffread_path} -w transcript.fa -g {genome} {annotation} && cd ..', shell = True)
-    
     print('making juction.bed file')
     call(f'cd intermediate && {k8_path} {paftools_path} gff2bed {annotation} > junction.bed && cd ..', shell = True)    
-    
-    if transcriptome == 'not_exist':
-        print('Calling minimap2 - mapped to transcriptome stats')
-        call(f'{minimap2_path} -a -t 64 intermediate/transcript.fa {reads} | cut -f1,3,6,14,16,20 | grep -v \'^@\' > intermediate/transcript.mapping_stat.tsv', shell=True)
-    else:
-        print('Calling minimap2 - mapped to transcriptome stats')
-        call(f'{minimap2_path} -a -t 64 {transcriptome} {reads} | cut -f1,3,6,14,16,20 | grep -v \'^@\' > intermediate/transcript.mapping_stat.tsv', shell=True)
-    
     
     print('Calling minimap2 - mapped to genome sam')
     call(f'{minimap2_path} -uf -a -y -x splice:hq --junc-bed intermediate/junction.bed -t 64 {genome} {reads} > intermediate/splicing.mapping.sam', shell=True)
@@ -85,8 +72,6 @@ def execute_commands(transcriptome, reads, genome, annotation, output_path):
     
     print('Calling gffcompare')
     call(f'cd intermediate && {gff_compare_path} splicing.mapping.gtf -o splicing.mapping.gff_compare -r {annotation}', shell = True)
-
-
 
 
 #### LRQuant v0.0
@@ -107,8 +92,6 @@ def generate_expression_matrix(df):
 
 def save_expression_matrix(expression_matrix, output_path):
     expression_matrix.to_csv(output_path, sep='\t', index=False)
-
-
 
 
 #### LRQuant later versions
