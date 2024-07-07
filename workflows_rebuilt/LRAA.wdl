@@ -77,14 +77,14 @@ task lraaTask {
                                  --gtf ~{referenceAnnotation_full} \
                                  ~{LRAA_min_mapping_quality_flag} --CPU ~{numThreads}
 
-            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
-                                 --bam ~{inputBAM} \
-                                 --output_prefix ~{OutDir}/Quant_minMapQ/LRAA.minMapQ \
-                                 --quant_only \
-                                 ~{no_norm_flag} \
-                                 --gtf ~{referenceAnnotation_full} \
-                                 ~{LRAA_min_mapping_quality_flag} \
-                                 --EM --CPU ~{numThreads} --CPU ~{numThreads}
+#            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
+#                                 --bam ~{inputBAM} \
+#                                 --output_prefix ~{OutDir}/Quant_minMapQ/LRAA.minMapQ \
+#                                 --quant_only \
+#                                 ~{no_norm_flag} \
+#                                 --gtf ~{referenceAnnotation_full} \
+#                                 ~{LRAA_min_mapping_quality_flag} \
+#                                 --EM --CPU ~{numThreads} --CPU ~{numThreads}
         fi
     >>>
 
