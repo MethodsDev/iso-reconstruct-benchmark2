@@ -13,9 +13,9 @@ task lraaTask {
         String ID_or_Quant_or_Both
         Int? LRAA_min_mapping_quality
         Boolean? LRAA_no_norm
-        Int cpu = 8
-        Int numThreads = 16
-        Int memoryGB = 128
+        Int cpu = 4
+        Int numThreads = 8
+        Int memoryGB = 64
         Int diskSizeGB = 1024
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/lraa/lraa:latest"
         File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
