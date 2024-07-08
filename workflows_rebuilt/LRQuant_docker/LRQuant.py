@@ -66,8 +66,7 @@ def execute_commands(args):
     
     # Call convert_SAM_to_GTF
     print('Calling convert_SAM_to_GTF')
-    call('docker pull us-central1-docker.pkg.dev/methods-dev-lab/lrtools-sqanti3/lrtools-sqanti3-plus', shell=True)
-    call(f'docker run --rm -v /:/mnt/mydata/ --entrypoint=/bin/sh us-central1-docker.pkg.dev/methods-dev-lab/lrtools-sqanti3/lrtools-sqanti3-plus -c "cd /mnt/mydata{args.output_path} && convert_SAM_to_GTF_for_SQANTI3.py --sam_file intermediate/splicing.mapping.sam --output_prefix intermediate/splicing.mapping --reference_genome /mnt/mydata{args.genome} --allow_non_primary && cd /mnt/mydata{args.output_path}/intermediate"', shell=True)
+    call(f'convert_SAM_to_GTF_for_SQANTI3.py --sam_file intermediate/splicing.mapping.sam --output_prefix intermediate/splicing.mapping --reference_genome /mnt/mydata{args.genome} --allow_non_primary && cd /mnt/mydata{args.output_path}/intermediate"', shell=True)
          
     # Call gffcompare
     print('Calling gffcompare')
