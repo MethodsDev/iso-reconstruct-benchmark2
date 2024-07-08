@@ -50,11 +50,11 @@ def execute_commands(args):
     Execute a series of commands for transcriptome analysis.
     """
     # Define paths to tools
-    gffread_path = '/opt/conda/envs/mas_seq/bin/gffread'
-    paftools_path = '/home/jupyter/projects/morf/analysis/reads/Quantification_bechmarking/k8-0.2.4/minimap2/misc/paftools.js'
-    minimap2_path = '/home/jupyter/projects/morf/analysis/reads/Quantification_bechmarking/minimap2/minimap2'
-    gff_compare_path = '/opt/conda/envs/mas_seq/bin/gffcompare'
-    k8_path = '/home/jupyter/projects/iso_quantification_benchmark/mouse_simulation/k8-0.2.4/node-v18.17.0/k8/k8'
+    gffread_path = 'gffread'
+    paftools_path = 'paftools.js'
+    minimap2_path = 'minimap2'
+    gff_compare_path = 'gffcompare'
+    k8_path = 'k8'
 
     # Make junction.bed file
     print('Making junction.bed file')
