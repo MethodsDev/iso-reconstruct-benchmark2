@@ -16,10 +16,6 @@ def parse_args():
         help='genome - fasta'
     )
     parser.add_argument(
-        '--transcriptome', '-t', type=str,
-        help='transcriptome - fasta, optional, will be made from other reference files if not provided', required=False, default='not_exist'
-    )
-    parser.add_argument(
         '--annotation', '-a', type=str, default='',
         help='annotation - gtf'
     )
@@ -35,6 +31,11 @@ def parse_args():
         '--output_path', '-o', type=str, default=os.getcwd(),
         help='working directory'
     )
+    parser.add_argument(
+        '--threads', '-t', type=int, default=4,
+        help='threads'
+    )
+    return parser.parse_args()
     return parser.parse_args()
 
 def create_directory(dir_name):
@@ -61,7 +62,7 @@ def execute_commands(args):
     
     # Call minimap2
     print('Calling minimap2 - mapped to genome sam')
-    call(f'{minimap2_path} -uf -a -y -x splice:hq --junc-bed intermediate/junction.bed -t 8 {args.genome} {args.reads} > intermediate/splicing.mapping.sam', shell=True)
+    call(f'{minimap2_path} -uf -a -y -x splice:hq --junc-bed intermediate/junction.bed -t {args.threads} {args.genome} {args.reads} > intermediate/splicing.mapping.sam', shell=True)
     
     # Call convert_SAM_to_GTF
     print('Calling convert_SAM_to_GTF')
