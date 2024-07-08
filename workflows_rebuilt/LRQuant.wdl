@@ -32,20 +32,20 @@ task lrquantTask {
 
 
             samtools bam2fq --threads ~{numThreads} ~{inputBAM} > LRQuant_tmp.fq
+
+
+
             LRQuant -r LRQuant_tmp.fq \
             -g ~{referenceGenome} \
             -a ~{referenceAnnotation_full} \
-            -p LRQuant_OUT
+            -p LRQuant_OUT \
+            -t ~{numThreads}
 
-
-            mv LRQuant_OUT/gffcompare_out/LRQuant_OUT.gffcompare.tsv Gffcompare_quant.tsv
-            mv LRQuant_OUT/lrquant_out/LRQuant_OUT.lrquant.tsv LRQuant_quant.tsv
-            tar -czf LRQuant_OUT.tar.gz LRQuant_OUT/
         fi
     >>>
 
     output {
-        File? gffcompareCounts = "LRQuant_quant.tsv"
+        File? gffcompareCounts = "LRQuant_OUT_expression_matrix.tsv"
         File? lrquantCounts = "Gffcompare_quant.tsv"
         File? lrquantOUT = "LRQuant_OUT.tar.gz"
         File monitoringLog = "monitoring.log"
