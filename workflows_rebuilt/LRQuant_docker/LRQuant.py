@@ -49,11 +49,11 @@ def execute_commands(args):
     Execute a series of commands for transcriptome analysis.
     """
     # Define paths to tools
-    gffread_path = 'gffread'
-    paftools_path = 'paftools.js'
-    minimap2_path = 'minimap2'
-    gff_compare_path = 'gffcompare'
-    k8_path = 'k8'
+    gffread_path = '/opt/conda/envs/mas_seq/bin/gffread'
+    paftools_path = '/home/jupyter/projects/morf/analysis/reads/Quantification_bechmarking/k8-0.2.4/minimap2/misc/paftools.js'
+    minimap2_path = '/home/jupyter/projects/morf/analysis/reads/Quantification_bechmarking/minimap2/minimap2'
+    gff_compare_path = '/opt/conda/envs/mas_seq/bin/gffcompare'
+    k8_path = '/home/jupyter/projects/iso_quantification_benchmark/mouse_simulation/k8-0.2.4/node-v18.17.0/k8/k8'
 
     # Make junction.bed file
     print('Making junction.bed file')
@@ -61,15 +61,17 @@ def execute_commands(args):
     
     # Call minimap2
     print('Calling minimap2 - mapped to genome sam')
-    call(f'{minimap2_path} -uf -a -y -x splice:hq --junc-bed intermediate/junction.bed -t 64 {args.genome} {args.reads} > intermediate/splicing.mapping.sam', shell=True)
+    call(f'{minimap2_path} -uf -a -y -x splice:hq --junc-bed intermediate/junction.bed -t 8 {args.genome} {args.reads} > intermediate/splicing.mapping.sam', shell=True)
     
-    # Call squanti3
-    print('Calling squanti3')
-    call(f'convert_SAM_to_GTF_for_SQANTI3.py --sam_file intermediate/splicing.mapping.sam --output_prefix intermediate/splicing.mapping --reference_genome {args.genome} --allow_non_primary && cd {args.output_path}/intermediate && sqanti3_qc.py --force_id_ignore splicing.mapping.gtf {args.annotation} {args.genome} -o squanti3_OUT --skipORF --report skip --isoform_hits', shell=True)
-    
+    # Call convert_SAM_to_GTF
+    print('Calling convert_SAM_to_GTF')
+    call('docker pull us-central1-docker.pkg.dev/methods-dev-lab/lrtools-sqanti3/lrtools-sqanti3-plus', shell=True)
+    call(f'docker run --rm -v /:/mnt/mydata/ --entrypoint=/bin/sh us-central1-docker.pkg.dev/methods-dev-lab/lrtools-sqanti3/lrtools-sqanti3-plus -c "cd /mnt/mydata{args.output_path} && convert_SAM_to_GTF_for_SQANTI3.py --sam_file intermediate/splicing.mapping.sam --output_prefix intermediate/splicing.mapping --reference_genome /mnt/mydata{args.genome} --allow_non_primary && cd /mnt/mydata{args.output_path}/intermediate"', shell=True)
+         
     # Call gffcompare
     print('Calling gffcompare')
     call(f'cd intermediate && {gff_compare_path} splicing.mapping.gtf -o splicing.mapping.gff_compare -r {args.annotation}', shell=True)
+
 
 def read_gffcompare_tmap(tmap_path):
     """
