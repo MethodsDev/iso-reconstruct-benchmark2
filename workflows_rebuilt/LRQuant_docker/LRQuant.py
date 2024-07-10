@@ -66,7 +66,7 @@ def execute_commands(args):
     
     # Call convert_SAM_to_GTF
     print('Calling convert_SAM_to_GTF')
-    call(f'convert_SAM_to_GTF_for_SQANTI3.py --sam_file intermediate/splicing.mapping.sam --output_prefix intermediate/splicing.mapping --reference_genome /mnt/mydata{args.genome} --allow_non_primary && cd /mnt/mydata{args.output_path}/intermediate"', shell=True)
+    call(f'convert_SAM_to_GTF_for_SQANTI3.py --sam_file intermediate/splicing.mapping.sam --output_prefix intermediate/splicing.mapping --reference_genome {args.genome} --allow_non_primary"', shell=True)
          
     # Call gffcompare
     print('Calling gffcompare')
