@@ -54,19 +54,19 @@ def execute_commands(args):
     paftools_path = 'paftools.js'
     minimap2_path = 'minimap2'
     gff_compare_path = 'gffcompare'
-    k8_path = 'k8'
+#    k8_path = 'k8'
 
     # Make junction.bed file
     print('Making junction.bed file')
-    call(f'cd intermediate && {k8_path} {paftools_path} gff2bed {args.annotation} > junction.bed && cd ..', shell=True)    
+    call(f'cd intermediate && {paftools_path} gff2bed {args.annotation} > junction.bed && cd ..', shell=True)    
     
     # Call minimap2
     print('Calling minimap2 - mapped to genome sam')
     call(f'{minimap2_path} -uf -a -y -x splice:hq --junc-bed intermediate/junction.bed -t {args.threads} {args.genome} {args.reads} > intermediate/splicing.mapping.sam', shell=True)
     
-    # Call convert_SAM_to_GTF
+    # Corrected command call for convert_SAM_to_GTF
     print('Calling convert_SAM_to_GTF')
-    call(f'convert_SAM_to_GTF_for_SQANTI3.py --sam_file intermediate/splicing.mapping.sam --output_prefix intermediate/splicing.mapping --reference_genome {args.genome} --allow_non_primary"', shell=True)
+    call(f'convert_SAM_to_GTF_for_SQANTI3.py --sam_file intermediate/splicing.mapping.sam --output_prefix intermediate/splicing.mapping --reference_genome {args.genome} --allow_non_primary', shell=True)
          
     # Call gffcompare
     print('Calling gffcompare')
