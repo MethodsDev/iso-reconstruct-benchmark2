@@ -108,6 +108,7 @@ task lraaTask {
         disks: "local-disk ~{diskSizeGB} HDD"
         docker: docker
         errorStrategy: "Continue"
+        bootDiskSizeGb: 30
     }
 }
 
