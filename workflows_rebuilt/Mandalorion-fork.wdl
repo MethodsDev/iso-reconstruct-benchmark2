@@ -64,7 +64,7 @@ task mandalorionforkTask {
 
     output {
         File? mandalorionforkReducedGTF = "~{OutDir}/Mandalorionfork_reduced.gtf"
-        File？mandalorionforkGTF = "~{OutDir}/Mandalorionfork.gtf"
+        File? mandalorionforkGTF = "~{OutDir}/Mandalorionfork.gtf"
         File monitoringLog = "monitoring.log"
     }
 
@@ -102,7 +102,7 @@ workflow mandalorionforkWorkflow {
     }
 
     output {
-        File？mandalorionforkGTF = mandalorionforkTask.mandalorionforkGTF
+        File? mandalorionforkGTF = mandalorionforkTask.mandalorionforkGTF
         File? mandalorionforkReducedGTF = mandalorionforkTask.mandalorionforkReducedGTF
         File monitoringLog = mandalorionforkTask.monitoringLog
     }
