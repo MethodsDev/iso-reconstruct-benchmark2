@@ -107,7 +107,7 @@ EOF
     output {
         File? bambuReducedGTF = "~{OutDir}/Bambu_reduced.gtf"
         File? bambuNDR1ReducedGTF = "~{OutDir}/Bambu_ndr1_reduced.gtf"
-        File？bambuGTF = "~{OutDir}/Bambu.gtf"
+        File? bambuGTF = "~{OutDir}/Bambu.gtf"
         File? bambuCounts = "~{OutDir}/Bambu_quant.txt"
         File monitoringLog = "monitoring.log"
     }
@@ -149,7 +149,7 @@ workflow bambuWorkflow {
     output {
         File? bambuReducedGTF = bambuTask.bambuReducedGTF
         File? bambuNDR1ReducedGTF = bambuTask.bambuNDR1ReducedGTF
-        File？bambuGTF = bambuTask.bambuGTF
+        File? bambuGTF = bambuTask.bambuGTF
         File? bambuCounts = bambuTask.bambuCounts
         File monitoringLog = bambuTask.monitoringLog
     }
