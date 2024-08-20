@@ -110,7 +110,7 @@ task isoquantTask {
     >>>
 
     output {
-        File？isoquantGTF = "~{OutDir}/IsoQuant.gtf"
+        File? isoquantGTF = "~{OutDir}/IsoQuant.gtf"
         File? isoquantReducedGTF = "~{OutDir}/IsoQuant_reduced.gtf"
         File? isoquantCounts = "~{OutDir}/IsoQuant_quant.tsv"
         File? isoquantGTF_with_polyA = "~{OutDir}/IsoQuant_with_polyA.gtf"
@@ -160,7 +160,7 @@ workflow isoquantWorkflow {
     }
 
     output {
-        File？isoquantGTF = isoquantTask.isoquantGTF
+        File? isoquantGTF = isoquantTask.isoquantGTF
         File? isoquantReducedGTF = isoquantTask.isoquantReducedGTF
         File? isoquantCounts = isoquantTask.isoquantCounts
         File? isoquantGTF_with_polyA = isoquantTask.isoquantGTF_with_polyA
