@@ -51,30 +51,30 @@ EOF
                 cut -f1 ~{OutDir}/ID_reduced/expressed_annotations.gtf.counts > ~{OutDir}/ID_reduced/expressed_transcripts.txt
                 grep -Ff ~{OutDir}/ID_reduced/expressed_transcripts.txt ~{OutDir}/ID_reduced/extended_annotations.gtf > ~{OutDir}/Bambu_reduced.gtf
 
-                Rscript -<< EOF
-                library(bambu)
-                fa.file <- "~{referenceGenome}"
-                gtf.file <- "~{referenceAnnotation_reduced}"
-                bambuAnnotations <- prepareAnnotations(gtf.file)
-                lr.bam <- "~{inputBAM}"
-                lr.se <- bambu(reads = lr.bam, rcOutDir = "~{OutDir}/ID_ndr1_reduced", annotations = bambuAnnotations, genome = fa.file, ncore = ~{numThreads}, NDR = 1)
-                writeBambuOutput(lr.se, path = "~{OutDir}/ID_ndr1_reduced")
-EOF
+#                Rscript -<< EOF
+#                library(bambu)
+#                fa.file <- "~{referenceGenome}"
+#                gtf.file <- "~{referenceAnnotation_reduced}"
+#                bambuAnnotations <- prepareAnnotations(gtf.file)
+#                lr.bam <- "~{inputBAM}"
+#                lr.se <- bambu(reads = lr.bam, rcOutDir = "~{OutDir}/ID_ndr1_reduced", annotations = bambuAnnotations, genome = fa.file, ncore = ~{numThreads}, NDR = 1)
+#                writeBambuOutput(lr.se, path = "~{OutDir}/ID_ndr1_reduced")
+#EOF
 
-                awk ' $3 >= 1 ' ~{OutDir}/ID_ndr1_reduced/counts_transcript.txt | sort -k3,3n > ~{OutDir}/ID_ndr1_reduced/expressed_annotations.gtf.counts
-                cut -f1 ~{OutDir}/ID_ndr1_reduced/expressed_annotations.gtf.counts > ~{OutDir}/ID_ndr1_reduced/expressed_transcripts.txt
-                grep -Ff ~{OutDir}/ID_ndr1_reduced/expressed_transcripts.txt ~{OutDir}/ID_ndr1_reduced/extended_annotations.gtf > ~{OutDir}/Bambu_ndr1_reduced.gtf
+#                awk ' $3 >= 1 ' ~{OutDir}/ID_ndr1_reduced/counts_transcript.txt | sort -k3,3n > ~{OutDir}/ID_ndr1_reduced/expressed_annotations.gtf.counts
+#                cut -f1 ~{OutDir}/ID_ndr1_reduced/expressed_annotations.gtf.counts > ~{OutDir}/ID_ndr1_reduced/expressed_transcripts.txt
+#                grep -Ff ~{OutDir}/ID_ndr1_reduced/expressed_transcripts.txt ~{OutDir}/ID_ndr1_reduced/extended_annotations.gtf > ~{OutDir}/Bambu_ndr1_reduced.gtf
 
 
-                Rscript -<< EOF
-                library(bambu)
-                fa.file <- "~{referenceGenome}"
-                lr.bam <- "~{inputBAM}"
-                lr.se <- bambu(reads = lr.bam, rcOutDir = '~{OutDir}/ID_reffree', annotations = NULL, genome = fa.file, quant = FALSE, NDR = 1, ncore = ~{numThreads})
-                writeToGTF(lr.se, "~{OutDir}/ID_reffree/Bambu.gtf")
-EOF
+#                Rscript -<< EOF
+#                library(bambu)
+#                fa.file <- "~{referenceGenome}"
+#                lr.bam <- "~{inputBAM}"
+#                lr.se <- bambu(reads = lr.bam, rcOutDir = '~{OutDir}/ID_reffree', annotations = NULL, genome = fa.file, quant = FALSE, NDR = 1, ncore = ~{numThreads})
+#                writeToGTF(lr.se, "~{OutDir}/ID_reffree/Bambu.gtf")
+#EOF
                 
-                mv ~{OutDir}/ID_reffree/Bambu.gtf  ~{OutDir}/Bambu.gtf
+#                mv ~{OutDir}/ID_reffree/Bambu.gtf  ~{OutDir}/Bambu.gtf
 
             else
                 Rscript -<< EOF
