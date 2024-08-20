@@ -55,7 +55,7 @@ task mandalorionTask {
 
     output {
         File? mandalorionReducedGTF = "~{OutDir}/Mandalorion_reduced.gtf"
-        File？mandalorionGTF = "~{OutDir}/Mandalorion.gtf"
+        File? mandalorionGTF = "~{OutDir}/Mandalorion.gtf"
         File monitoringLog = "monitoring.log"
     }
 
@@ -93,7 +93,7 @@ workflow mandalorionWorkflow {
     }
 
     output {
-        File？mandalorionGTF = mandalorionTask.mandalorionGTF
+        File? mandalorionGTF = mandalorionTask.mandalorionGTF
         File? mandalorionReducedGTF = mandalorionTask.mandalorionReducedGTF
         File monitoringLog = mandalorionTask.monitoringLog
     }
