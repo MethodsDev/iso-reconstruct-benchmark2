@@ -54,7 +54,7 @@ task stringtieTask {
     >>>
     
     output {
-        File stringtieGTF = "~{OutDir}/StringTie.gtf"
+        File？stringtieGTF = "~{OutDir}/StringTie.gtf"
         File? stringtieReducedGTF = "~{OutDir}/StringTie_reduced.gtf"
         File? stringtieCounts = "~{OutDir}/StringTie_quant.csv"
         File monitoringLog = "monitoring.log"
@@ -94,7 +94,7 @@ workflow stringtieWorkflow {
     }
 
     output {
-        File stringtieGTF = stringtieTask.stringtieGTF
+        File？stringtieGTF = stringtieTask.stringtieGTF
         File? stringtieReducedGTF = stringtieTask.stringtieReducedGTF
         File? stringtieCounts = stringtieTask.stringtieCounts
         File monitoringLog = stringtieTask.monitoringLog
