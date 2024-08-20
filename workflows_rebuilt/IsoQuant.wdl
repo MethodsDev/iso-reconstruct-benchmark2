@@ -29,14 +29,14 @@ task isoquantTask {
         rm -rf ~{OutDir} && mkdir ~{OutDir} 
 
         if [ "~{ID_or_Quant_or_Both}" = "ID" ] || [ "~{ID_or_Quant_or_Both}" = "Both" ]; then
-            /usr/local/src/IsoQuant/isoquant.py \
-            --reference ~{referenceGenome} \
-            --bam ~{inputBAM} \
-            --data_type ~{dataType} \
-            --threads ~{numThreads} \
-            --output ~{OutDir}/ID_reffree
+#            /usr/local/src/IsoQuant/isoquant.py \
+#            --reference ~{referenceGenome} \
+#            --bam ~{inputBAM} \
+#            --data_type ~{dataType} \
+#            --threads ~{numThreads} \
+#            --output ~{OutDir}/ID_reffree
             
-            mv ~{OutDir}/ID_reffree/OUT/OUT.transcript_models.gtf ~{OutDir}/IsoQuant.gtf
+#            mv ~{OutDir}/ID_reffree/OUT/OUT.transcript_models.gtf ~{OutDir}/IsoQuant.gtf
             
             if [ -f ~{referenceAnnotation_reduced} ]; then
                 /usr/local/src/IsoQuant/isoquant.py \
