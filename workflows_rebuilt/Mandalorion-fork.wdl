@@ -34,12 +34,12 @@ task mandalorionforkTask {
                 samtools view -h -o samtools.view.sam ~{inputBAM}
             fi
 
-            python3 /usr/local/src/Mandalorion/Mando.py \
-            -G ~{referenceGenome} \
-            -f ~{OutDir}/samtools.bam2fq.fastq \
-            -p ~{OutDir}_reffree \
-            -t ~{numThreads} \
-            -s samtools.view.sam
+#            python3 /usr/local/src/Mandalorion/Mando.py \
+#            -G ~{referenceGenome} \
+#            -f ~{OutDir}/samtools.bam2fq.fastq \
+#            -p ~{OutDir}_reffree \
+#            -t ~{numThreads} \
+#            -s samtools.view.sam
 
             
             if [ -n "~{referenceAnnotation_reduced}" ]; then
