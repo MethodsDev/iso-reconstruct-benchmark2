@@ -77,15 +77,16 @@ task lraaPerChromosome {
 
 task mergeResults {
     input {
-        Array[File] inputFiles
+        Array[File?] inputFiles
         String outputFile
         String docker = "ubuntu:18.04"
     }
     command <<<
         if [ ! -z "~{inputFiles}" ]; then
-            # Take the header from the first file
-            head -n 1 ~{inputFiles[0]} > ~{outputFile}
-            for file in ~{sep=' ' inputFiles}; do
+            # Filter out nulls and take the header from the first file
+            filtered_files=(~{sep=' ' inputFiles})
+            head -n 1 "${filtered_files[0]}" > ~{outputFile}
+            for file in "${filtered_files[@]}"; do
                 # Skip the header for subsequent files
                 tail -n +2 $file >> ~{outputFile}
             done
@@ -164,8 +165,8 @@ workflow lraaWorkflow {
     }
 
     # Merge Quant results (.expr and .tracking files)
-    Array[File] quantExprFiles = select_all(lraaPerChromosome.lraaQuantExpr)
-    Array[File] quantTrackingFiles = select_all(lraaPerChromosome.lraaQuantTracking)
+    Array[File?] quantExprFiles = select_all(lraaPerChromosome.lraaQuantExpr)
+    Array[File?] quantTrackingFiles = select_all(lraaPerChromosome.lraaQuantTracking)
 
     call mergeResults as mergeQuantExpr {
         input:
