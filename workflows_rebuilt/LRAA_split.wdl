@@ -36,7 +36,6 @@ task splitBAMByChromosome {
         docker: docker
     }
 }
-
 task lraaPerChromosome {
     input {
         String ID_or_Quant_or_Both
@@ -51,8 +50,8 @@ task lraaPerChromosome {
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/lraa/lraa:latest"
     }
     command <<<
-        String no_norm_flag = if (defined(LRAA_no_norm) && LRAA_no_norm) then "--no_norm" else ""
-        String LRAA_min_mapping_quality_flag = if (defined(LRAA_min_mapping_quality)) then "--min_mapping_quality=" + LRAA_min_mapping_quality else ""
+        ${if defined(LRAA_no_norm) && LRAA_no_norm then "--no_norm" else ""}
+        ${if defined(LRAA_min_mapping_quality) then "--min_mapping_quality=" + LRAA_min_mapping_quality else ""}
 
         mkdir -p ~{OutDir}/ID_reffree
         mkdir -p ~{OutDir}/ID_reduced
@@ -62,14 +61,14 @@ task lraaPerChromosome {
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                  --bam ~{inputBAM} \
                                  --output_prefix ~{OutDir}/ID_reffree/LRAA \
-                                 ~{no_norm_flag} --CPU ~{numThreads}
+                                 ${if defined(LRAA_no_norm) && LRAA_no_norm then "--no_norm" else ""} --CPU ~{numThreads}
         fi
 
         if [[ ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{referenceAnnotation_reduced}" ]]; then
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                  --bam ~{inputBAM} \
                                  --output_prefix ~{OutDir}/ID_reduced/LRAA_reduced \
-                                 ~{no_norm_flag} \
+                                 ${if defined(LRAA_no_norm) && LRAA_no_norm then "--no_norm" else ""} \
                                  --gtf ~{referenceAnnotation_reduced} --CPU ~{numThreads} 
         fi
 
@@ -78,9 +77,9 @@ task lraaPerChromosome {
                                  --bam ~{inputBAM} \
                                  --output_prefix ~{OutDir}/Quant_noEM_minMapQ/LRAA.noEM.minMapQ \
                                  --quant_only \
-                                 ~{no_norm_flag} \
+                                 ${if defined(LRAA_no_norm) && LRAA_no_norm then "--no_norm" else ""} \
                                  --gtf ~{referenceAnnotation_full} \
-                                 ~{LRAA_min_mapping_quality_flag} --CPU ~{numThreads}
+                                 ${if defined(LRAA_min_mapping_quality) then "--min_mapping_quality=" + LRAA_min_mapping_quality else ""} --CPU ~{numThreads}
         fi
     >>>
     output {
@@ -93,7 +92,6 @@ task lraaPerChromosome {
         docker: docker
     }
 }
-
 task mergeResults {
     input {
         Array[File?] inputFiles
