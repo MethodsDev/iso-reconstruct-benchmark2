@@ -9,26 +9,27 @@ task splitBAMByChromosome {
     }
     command <<<
         set -eo pipefail
-
+        
+        # Index the BAM file if not already indexed
         if [ ! -f "~{inputBAM}.bai" ]; then
             samtools index -@ ~{threads} ~{inputBAM}
         fi
-
-        chromosomes=$(samtools idxstats ~{inputBAM} | cut -f1 | grep -vE '^$|chrM')
-
+        
+        # Prepare the directory for split BAM files
         mkdir -p split_bams
-        other_contigs_bam="split_bams/other_contigs.bam"
-        touch $other_contigs_bam
-
-        for chr in $chromosomes; do
-            if [[ " ~{main_chromosomes} " =~ .*\ $chr\ .* ]]; then
-                samtools view -@ ~{threads} -b ~{inputBAM} $chr > split_bams/$chr.bam
-            else
-                samtools view -@ ~{threads} -b ~{inputBAM} $chr >> $other_contigs_bam
-            fi
+        
+        # Define the main chromosomes
+        main_chromosomes="~{main_chromosomes}"
+        
+        # Extract BAMs for main chromosomes directly
+        for chr in $main_chromosomes; do
+            samtools view -@ ~{threads} -b ~{inputBAM} $chr > split_bams/$chr.bam
         done
-
-        samtools index -@ ~{threads} $other_contigs_bam
+        
+        # Extract BAMs for non-main chromosomes in one go
+        # Construct exclusion list for samtools view
+        exclude_chroms=$(echo $main_chromosomes | sed 's/ / -e /g')
+        samtools view -@ ~{threads} -b ~{inputBAM} -e $exclude_chroms > split_bams/other_contigs.bam
     >>>
     output {
         Array[File] chromosomeBAMs = glob("split_bams/*.bam")
