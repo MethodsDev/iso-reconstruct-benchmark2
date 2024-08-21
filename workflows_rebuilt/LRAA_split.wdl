@@ -146,16 +146,16 @@ workflow lraaWorkflow {
     }
 
     # Merge ID results (GTF files)
-    Array[File] idGTFFiles = flatten(select_all(lraaPerChromosome.lraaIDGTF))
-    Array[File] idReducedGTFFiles = flatten(select_all(lraaPerChromosome.lraaIDReducedGTF))
-
+    Array[File?] idGTFFiles = select_all(lraaPerChromosome.lraaIDGTF)
+    Array[File?] idReducedGTFFiles = select_all(lraaPerChromosome.lraaIDReducedGTF)
+    
     call mergeResults as mergeIDGTF {
         input:
             inputFiles = idGTFFiles,
             outputFile = OutDir + "/merged_ID.gtf",
             docker = docker
     }
-
+    
     call mergeResults as mergeIDReducedGTF {
         input:
             inputFiles = idReducedGTFFiles,
