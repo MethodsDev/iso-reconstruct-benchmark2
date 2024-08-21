@@ -205,7 +205,8 @@ workflow lraaWorkflow {
 
 
     output {
-        File mergedIDGTF = mergeIDGTF.mergedFile
+        File mergeReffreeGTF = mergeReffreeGTF.mergedFile
+        File mergeReducedGTF = mergeReducedGTF.mergedFile
         File mergedQuantExpr = mergeQuantExpr.mergedFile
         File mergedQuantTracking = mergeQuantTracking.mergedFile
     }
