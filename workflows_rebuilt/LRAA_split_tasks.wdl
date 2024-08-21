@@ -49,26 +49,7 @@ task lraaTask {
 
 
         fi
-
-        if [[ ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{referenceAnnotation_full}" && -z "~{LRAA_min_mapping_quality_flag}" ]]; then
-#            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
-#                                 --bam ~{inputBAM} \
-#                                 --output_prefix ~{OutDir}/Quant/LRAA \
-#                                 --quant_only \
-#                                 ~{no_norm_flag} \
-#                                 --gtf ~{referenceAnnotation_full} \
-#                                 --EM --CPU ~{numThreads}
-
-
-            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
-                                 --bam ~{inputBAM} \
-                                 --output_prefix ~{OutDir}/Quant_noEM/LRAA.noEM \
-                                 --quant_only \
-                                 ~{no_norm_flag} \
-                                 --gtf ~{referenceAnnotation_full} --CPU ~{numThreads}
-        fi
-
-        if [[ ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{referenceAnnotation_full}" && -n "~{LRAA_min_mapping_quality}" ]]; then
+        if [[ ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{referenceAnnotation_full}" ]]; then
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                  --bam ~{inputBAM} \
                                  --output_prefix ~{OutDir}/Quant_noEM_minMapQ/LRAA.noEM.minMapQ \
@@ -77,28 +58,14 @@ task lraaTask {
                                  --gtf ~{referenceAnnotation_full} \
                                  ~{LRAA_min_mapping_quality_flag} --CPU ~{numThreads}
 
-#            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
-#                                 --bam ~{inputBAM} \
-#                                 --output_prefix ~{OutDir}/Quant_minMapQ/LRAA.minMapQ \
-#                                 --quant_only \
-#                                 ~{no_norm_flag} \
-#                                 --gtf ~{referenceAnnotation_full} \
-#                                 ~{LRAA_min_mapping_quality_flag} \
-#                                 --EM --CPU ~{numThreads} --CPU ~{numThreads}
         fi
     >>>
 
     output {
         File? lraaGTF = "~{OutDir}/ID/LRAA.gtf"
         File? lraaReducedGTF = "~{OutDir}/ID_reduced/LRAA_reduced.gtf"
-        File? lraaCounts = "~{OutDir}/Quant/LRAA.quant.expr"
-        File? lraaCounts_noEM = "~{OutDir}/Quant_noEM/LRAA.noEM.quant.expr"
-        File? lraa_quant_tracking = "~{OutDir}/Quant/LRAA.quant.tracking"
-        File? lraa_quant_tracking_noEM = "~{OutDir}/Quant_noEM/LRAA.noEM.quant.tracking"
         File? lraaCounts_noEM_minMapQ = "~{OutDir}/Quant_noEM_minMapQ/LRAA.noEM.minMapQ.quant.expr"
         File? lraa_quant_tracking_noEM_minMapQ = "~{OutDir}/Quant_noEM_minMapQ/LRAA.noEM.minMapQ.quant.tracking"
-        File? lraaCounts_minMapQ = "~{OutDir}/Quant_minMapQ/LRAA.minMapQ.quant.expr"
-        File? lraa_quant_tracking_minMapQ = "~{OutDir}/Quant_minMapQ/LRAA.minMapQ.quant.tracking"
         File monitoringLog = "monitoring.log"
     }
 
