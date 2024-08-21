@@ -45,3 +45,6 @@ workflows:
   - name: LRQuant
     subclass: WDL
     primaryDescriptorPath: /workflows_rebuilt/LRQuant.wdl
+  - name: LRAA_split
+    subclass: WDL
+    primaryDescriptorPath: /workflows_rebuilt/LRAA_split.wdl
