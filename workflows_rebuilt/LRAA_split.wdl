@@ -41,7 +41,7 @@ task lraaPerChromosome {
         String? no_norm_flag
         File? referenceAnnotation_reduced
         File? referenceAnnotation_full
-        File monitoringScript
+        File monitoringScript = "gs://mdl-refs/util/cromwell_monitoring_script2.sh"
     }
     command <<<
         bash ~{monitoringScript} > monitoring.log &
