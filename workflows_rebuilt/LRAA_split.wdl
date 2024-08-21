@@ -4,11 +4,20 @@ task splitBAMByChromosome {
     input {
         File inputBAM
         String docker = "biocontainers/samtools:v1.9-4-deb_cv1"
-        Array[String] chromosomes
     }
     command <<<
+        set -eo pipefail
+
+        # Index the BAM file if not already indexed
+        if [ ! -f "~{inputBAM}.bai" ]; then
+            samtools index ~{inputBAM}
+        fi
+
+        # Extract chromosome names and filter out empty lines and special chromosomes (e.g., mitochondrial DNA, depending on your needs)
+        chromosomes=$(samtools idxstats ~{inputBAM} | cut -f1 | grep -vE '^$|chrM')
+
         mkdir -p split_bams
-        for chr in ~{sep=' ' chromosomes}; do
+        for chr in $chromosomes; do
             samtools view -b ~{inputBAM} $chr > split_bams/$chr.bam
         done
     >>>
@@ -105,11 +114,11 @@ task mergeResults {
     }
 }
 
+
 workflow lraaWorkflow {
     input {
         File inputBAM
         File referenceGenome
-        Array[String] chromosomes
         String ID_or_Quant_or_Both
         Int? LRAA_min_mapping_quality
         Boolean? LRAA_no_norm
@@ -130,7 +139,6 @@ workflow lraaWorkflow {
     call splitBAMByChromosome {
         input:
             inputBAM = inputBAM,
-            chromosomes = chromosomes,
             docker = docker
     }
 
