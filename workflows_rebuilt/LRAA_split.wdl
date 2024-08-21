@@ -87,8 +87,7 @@ task lraaPerChromosome {
     >>>
 
     output {
-        File? lraaIDGTF = if (length(glob("~{OutDir}/ID/*.gtf")) > 0) then glob("~{OutDir}/ID/*.gtf")[0] else None
-        File? lraaIDReducedGTF = if (length(glob("~{OutDir}/ID_reduced/*.gtf")) > 0) then glob("~{OutDir}/ID_reduced/*.gtf")[0] else None
+        File? lraaIDGTF = if (length(glob("~{OutDir}/ID_reduced/*.gtf")) > 0) then glob("~{OutDir}/ID_reduced/*.gtf")[0] else None
         File? lraaQuantExpr = if (length(glob("~{OutDir}/Quant_noEM_minMapQ/*.quant.expr")) > 0) then glob("~{OutDir}/Quant_noEM_minMapQ/*.quant.expr")[0] else None
         File? lraaQuantTracking = if (length(glob("~{OutDir}/Quant_noEM_minMapQ/*.quant.tracking")) > 0) then glob("~{OutDir}/Quant_noEM_minMapQ/*.quant.tracking")[0] else None
     }
@@ -173,20 +172,11 @@ workflow lraaWorkflow {
 
     # Merge ID results (GTF files)
     Array[File?] idGTFFiles = select_all(lraaPerChromosome.lraaIDGTF)
-    Array[File?] idReducedGTFFiles = select_all(lraaPerChromosome.lraaIDReducedGTF)
     
     call mergeResults as mergeIDGTF {
         input:
             inputFiles = idGTFFiles,
             outputFile = OutDir + "/merged_ID.gtf",
-            docker = docker,
-            isGTF = true
-    }
-    
-    call mergeResults as mergeIDReducedGTF {
-        input:
-            inputFiles = idReducedGTFFiles,
-            outputFile = OutDir + "/merged_ID_reduced.gtf",
             docker = docker,
             isGTF = true
     }
@@ -213,7 +203,6 @@ workflow lraaWorkflow {
 
     output {
         File mergedIDGTF = mergeIDGTF.mergedFile
-        File mergedIDReducedGTF = mergeIDReducedGTF.mergedFile
         File mergedQuantExpr = mergeQuantExpr.mergedFile
         File mergedQuantTracking = mergeQuantTracking.mergedFile
     }
