@@ -5,12 +5,13 @@ task splitBAMByChromosome {
         File inputBAM
         String main_chromosomes = "chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX chrY"
         String docker = "biocontainers/samtools:v1.9-4-deb_cv1"
+        Int threads
     }
     command <<<
         set -eo pipefail
 
         if [ ! -f "~{inputBAM}.bai" ]; then
-            samtools index ~{inputBAM}
+            samtools index -@ ~{threads} ~{inputBAM}
         fi
 
         chromosomes=$(samtools idxstats ~{inputBAM} | cut -f1 | grep -vE '^$|chrM')
@@ -21,13 +22,13 @@ task splitBAMByChromosome {
 
         for chr in $chromosomes; do
             if [[ " ~{main_chromosomes} " =~ .*\ $chr\ .* ]]; then
-                samtools view -b ~{inputBAM} $chr > split_bams/$chr.bam
+                samtools view -@ ~{threads} -b ~{inputBAM} $chr > split_bams/$chr.bam
             else
-                samtools view -b ~{inputBAM} $chr >> $other_contigs_bam
+                samtools view -@ ~{threads} -b ~{inputBAM} $chr >> $other_contigs_bam
             fi
         done
 
-        samtools index $other_contigs_bam
+        samtools index -@ ~{threads} $other_contigs_bam
     >>>
     output {
         Array[File] chromosomeBAMs = glob("split_bams/*.bam")
@@ -36,6 +37,7 @@ task splitBAMByChromosome {
         docker: docker
     }
 }
+
 task lraaPerChromosome {
     input {
         String ID_or_Quant_or_Both
@@ -143,8 +145,10 @@ workflow lraaWorkflow {
         input:
             inputBAM = inputBAM,
             main_chromosomes = main_chromosomes,
-            docker = docker
+            docker = docker,
+            threads = numThreads
     }
+
 
     scatter (chrBAM in splitBAMByChromosome.chromosomeBAMs) {
         call lraaPerChromosome {
