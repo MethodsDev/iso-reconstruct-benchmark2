@@ -129,7 +129,7 @@ workflow lraaWorkflow {
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/lraa/lraa:latest"
         File? referenceAnnotation_reduced
         File? referenceAnnotation_full
-        File monitoringScript
+        File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
     }
 
     String OutDir = "LRAA_out"
