@@ -164,12 +164,22 @@ workflow lraaWorkflow {
         }
     }
 
-    Array[File?] idGTFFiles = select_all(lraaPerChromosome.lraaIDGTF)
-    
-    call mergeResults as mergeIDGTF {
+    # Collect and merge reffree GTF files
+    Array[File?] reffreeGTFFiles = select_all(lraaPerChromosome.lraaID_reffree_GTF)
+    call mergeResults as mergeReffreeGTF {
         input:
-            inputFiles = idGTFFiles,
-            outputFile = OutDir + "/merged_ID.gtf",
+            inputFiles = reffreeGTFFiles,
+            outputFile = OutDir + "/merged_reffree_ID.gtf",
+            docker = docker,
+            isGTF = true
+    }
+
+    # Collect and merge reduced GTF files
+    Array[File?] reducedGTFFiles = select_all(lraaPerChromosome.lraaID_reduced_GTF)
+    call mergeResults as mergeReducedGTF {
+        input:
+            inputFiles = reducedGTFFiles,
+            outputFile = OutDir + "/merged_reduced_ID.gtf",
             docker = docker,
             isGTF = true
     }
@@ -192,6 +202,7 @@ workflow lraaWorkflow {
             docker = docker,
             isGTF = false
     }
+
 
     output {
         File mergedIDGTF = mergeIDGTF.mergedFile
