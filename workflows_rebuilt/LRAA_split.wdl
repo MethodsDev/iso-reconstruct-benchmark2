@@ -55,6 +55,10 @@ task lraaPerChromosome {
         String? LRAA_min_mapping_quality_flag
     }
 
+    # Define command line flags based on conditions before the command section
+    String no_norm_cmd = if no_norm_flag then "--no_norm" else ""
+    String min_mapping_quality_cmd = if defined(LRAA_min_mapping_quality_flag) then "--min_mapping_quality " + LRAA_min_mapping_quality_flag else ""
+
     command <<<
         mkdir -p ~{OutDir}/ID_reduced
         mkdir -p ~{OutDir}/Quant_noEM_minMapQ
@@ -64,7 +68,7 @@ task lraaPerChromosome {
                 /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                          --bam ~{inputBAM} \
                                          --output_prefix ~{OutDir}/ID_reduced/LRAA_reduced \
-                                         ~{"--no_norm" if no_norm_flag else ""} \
+                                         ~{no_norm_cmd} \
                                          --gtf ~{referenceAnnotation_reduced} --CPU ~{numThreads}
             fi
         fi
@@ -75,9 +79,9 @@ task lraaPerChromosome {
                                          --bam ~{inputBAM} \
                                          --output_prefix ~{OutDir}/Quant_noEM_minMapQ/LRAA.noEM.minMapQ \
                                          --quant_only \
-                                         ~{"--no_norm" if no_norm_flag else ""} \
+                                         ~{no_norm_cmd} \
                                          --gtf ~{referenceAnnotation_full} \
-                                         ~{"--min_mapping_quality " + LRAA_min_mapping_quality_flag if defined(LRAA_min_mapping_quality_flag) else ""} --CPU ~{numThreads}
+                                         ~{min_mapping_quality_cmd} --CPU ~{numThreads}
             fi
         fi
     >>>
