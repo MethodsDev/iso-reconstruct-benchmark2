@@ -127,7 +127,6 @@ task mergeResults {
     }
 }
 
-
 workflow lraaWorkflow {
     input {
         File inputBAM
@@ -142,13 +141,12 @@ workflow lraaWorkflow {
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/lraa/lraa:latest"
         File? referenceAnnotation_reduced
         File? referenceAnnotation_full
-        File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
         String main_chromosomes = "chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX chrY"
     }
 
     String OutDir = "LRAA_out"
     String LRAA_min_mapping_quality_flag = if (defined(LRAA_min_mapping_quality)) then "--min_mapping_quality=" + LRAA_min_mapping_quality else ""
-    String no_norm_flag = if (defined(LRAA_no_norm) && LRAA_no_norm) then "--no_norm" else ""
+    Boolean no_norm_flag = if (defined(LRAA_no_norm) && LRAA_no_norm) then true else false
 
     call splitBAMByChromosome {
         input:
@@ -169,8 +167,7 @@ workflow lraaWorkflow {
                 LRAA_min_mapping_quality_flag = LRAA_min_mapping_quality_flag,
                 no_norm_flag = no_norm_flag,
                 referenceAnnotation_reduced = referenceAnnotation_reduced,
-                referenceAnnotation_full = referenceAnnotation_full,
-                monitoringScript = monitoringScript
+                referenceAnnotation_full = referenceAnnotation_full
         }
     }
 
