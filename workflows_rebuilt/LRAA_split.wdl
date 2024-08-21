@@ -13,13 +13,28 @@ task splitBAMByChromosome {
             samtools index ~{inputBAM}
         fi
 
-        # Extract chromosome names and filter out empty lines and special chromosomes (e.g., mitochondrial DNA, depending on your needs)
+        # Define main chromosomes for a human genome
+        main_chromosomes="chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX chrY"
+
+        # Extract chromosome names
         chromosomes=$(samtools idxstats ~{inputBAM} | cut -f1 | grep -vE '^$|chrM')
 
         mkdir -p split_bams
+        other_contigs_bam="split_bams/other_contigs.bam"
+        touch $other_contigs_bam
+
         for chr in $chromosomes; do
-            samtools view -b ~{inputBAM} $chr > split_bams/$chr.bam
+            if [[ " $main_chromosomes " =~ .*\ $chr\ .* ]]; then
+                # Split main chromosomes
+                samtools view -b ~{inputBAM} $chr > split_bams/$chr.bam
+            else
+                # Combine other contigs/scaffolds
+                samtools view -b ~{inputBAM} $chr >> $other_contigs_bam
+            fi
         done
+
+        # Index the combined other contigs BAM file
+        samtools index $other_contigs_bam
     >>>
     output {
         Array[File] chromosomeBAMs = glob("split_bams/*.bam")
