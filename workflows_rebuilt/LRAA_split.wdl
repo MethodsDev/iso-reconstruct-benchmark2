@@ -56,35 +56,42 @@ task lraaPerChromosome {
     }
 
     # Define command line flags based on conditions before the command section
-    String no_norm_cmd = if no_norm_flag then "--no_norm" else ""
-    String min_mapping_quality_cmd = if defined(LRAA_min_mapping_quality_flag) then "--min_mapping_quality " + LRAA_min_mapping_quality_flag else ""
+    String no_norm_flag = if (defined(LRAA_no_norm) && LRAA_no_norm) then "--no_norm" else ""
+    String LRAA_min_mapping_quality_flag = if (defined(LRAA_min_mapping_quality)) then "--min_mapping_quality=" + LRAA_min_mapping_quality else ""
 
     command <<<
         mkdir -p ~{OutDir}/ID_reduced
         mkdir -p ~{OutDir}/Quant_noEM_minMapQ
 
         if [[ "~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both" ]]; then
-            if [ -n "~{referenceAnnotation_reduced}" ]; then
-                /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
-                                         --bam ~{inputBAM} \
-                                         --output_prefix ~{OutDir}/ID_reduced/LRAA_reduced \
-                                         ~{no_norm_cmd} \
-                                         --gtf ~{referenceAnnotation_reduced} --CPU ~{numThreads}
-            fi
+            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
+                                 --bam ~{inputBAM} \
+                                 --output_prefix ~{OutDir}/ID/LRAA \
+                                 ~{no_norm_flag} --CPU ~{numThreads}
+
         fi
 
-        if [[ "~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both" ]]; then
-            if [ -n "~{referenceAnnotation_full}" ]; then
-                /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
-                                         --bam ~{inputBAM} \
-                                         --output_prefix ~{OutDir}/Quant_noEM_minMapQ/LRAA.noEM.minMapQ \
-                                         --quant_only \
-                                         ~{no_norm_cmd} \
-                                         --gtf ~{referenceAnnotation_full} \
-                                         ~{min_mapping_quality_cmd} --CPU ~{numThreads}
-            fi
+        if [[ ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{referenceAnnotation_reduced}" ]]; then
+            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
+                                 --bam ~{inputBAM} \
+                                 --output_prefix ~{OutDir}/ID_reduced/LRAA_reduced \
+                                 ~{no_norm_flag} \
+                                 --gtf ~{referenceAnnotation_reduced} --CPU ~{numThreads} 
+
+
+        fi
+
+        if [[ ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{referenceAnnotation_full}" && -n "~{LRAA_min_mapping_quality}" ]]; then
+            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
+                                 --bam ~{inputBAM} \
+                                 --output_prefix ~{OutDir}/Quant_noEM_minMapQ/LRAA.noEM.minMapQ \
+                                 --quant_only \
+                                 ~{no_norm_flag} \
+                                 --gtf ~{referenceAnnotation_full} \
+                                 ~{LRAA_min_mapping_quality_flag} --CPU ~{numThreads}
         fi
     >>>
+
 
     output {
         File? lraaIDGTF = if (length(glob("~{OutDir}/ID_reduced/*.gtf")) > 0) then glob("~{OutDir}/ID_reduced/*.gtf")[0] else None
