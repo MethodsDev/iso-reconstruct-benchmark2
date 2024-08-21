@@ -80,16 +80,21 @@ task mergeResults {
         Array[File?] inputFiles
         String outputFile
         String docker = "ubuntu:18.04"
+        Boolean isGTF = false
     }
     command <<<
         if [ ! -z "~{inputFiles}" ]; then
             # Filter out nulls and take the header from the first file
             filtered_files=(~{sep=' ' inputFiles})
-            head -n 1 "${filtered_files[0]}" > ~{outputFile}
-            for file in "${filtered_files[@]}"; do
-                # Skip the header for subsequent files
-                tail -n +2 $file >> ~{outputFile}
-            done
+            if [[ "~{isGTF}" == "true" ]]; then
+                cat "${filtered_files[@]}" > ~{outputFile}
+            else
+                head -n 1 "${filtered_files[0]}" > ~{outputFile}
+                for file in "${filtered_files[@]}"; do
+                    # Skip the header for subsequent files
+                    tail -n +2 $file >> ~{outputFile}
+                done
+            fi
         fi
     >>>
     output {
@@ -154,14 +159,16 @@ workflow lraaWorkflow {
         input:
             inputFiles = idGTFFiles,
             outputFile = OutDir + "/merged_ID.gtf",
-            docker = docker
+            docker = docker,
+            isGTF = true
     }
     
     call mergeResults as mergeIDReducedGTF {
         input:
             inputFiles = idReducedGTFFiles,
             outputFile = OutDir + "/merged_ID_reduced.gtf",
-            docker = docker
+            docker = docker,
+            isGTF = true
     }
 
     # Merge Quant results (.expr and .tracking files)
@@ -172,14 +179,16 @@ workflow lraaWorkflow {
         input:
             inputFiles = quantExprFiles,
             outputFile = OutDir + "/merged_Quant.expr",
-            docker = docker
+            docker = docker,
+            isGTF = false
     }
 
     call mergeResults as mergeQuantTracking {
         input:
             inputFiles = quantTrackingFiles,
             outputFile = OutDir + "/merged_Quant.tracking",
-            docker = docker
+            docker = docker,
+            isGTF = false
     }
 
     output {
