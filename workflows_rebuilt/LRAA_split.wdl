@@ -4,7 +4,7 @@ task splitBAMByChromosome {
     input {
         File inputBAM
         String main_chromosomes = "chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX chrY"
-        String docker = "biocontainers/samtools:v1.9-4-deb_cv1"
+        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/lraa/lraa:latest"
         Int threads
     }
     command <<<
@@ -98,7 +98,7 @@ task mergeResults {
     input {
         Array[File?] inputFiles
         String outputFile
-        String docker = "ubuntu:18.04"
+        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/lraa/lraa:latest"
         Boolean isGTF = false
     }
     command <<<
