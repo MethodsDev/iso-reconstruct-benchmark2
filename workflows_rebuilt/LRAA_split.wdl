@@ -3,6 +3,7 @@ version 1.0
 task splitBAMByChromosome {
     input {
         File inputBAM
+        String main_chromosomes = "chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX chrY"
         String docker = "biocontainers/samtools:v1.9-4-deb_cv1"
     }
     command <<<
@@ -13,9 +14,6 @@ task splitBAMByChromosome {
             samtools index ~{inputBAM}
         fi
 
-        # Define main chromosomes for a human genome
-        main_chromosomes="chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX chrY"
-
         # Extract chromosome names
         chromosomes=$(samtools idxstats ~{inputBAM} | cut -f1 | grep -vE '^$|chrM')
 
@@ -24,7 +22,7 @@ task splitBAMByChromosome {
         touch $other_contigs_bam
 
         for chr in $chromosomes; do
-            if [[ " $main_chromosomes " =~ .*\ $chr\ .* ]]; then
+            if [[ " ~{main_chromosomes} " =~ .*\ $chr\ .* ]]; then
                 # Split main chromosomes
                 samtools view -b ~{inputBAM} $chr > split_bams/$chr.bam
             else
@@ -145,6 +143,7 @@ workflow lraaWorkflow {
         File? referenceAnnotation_reduced
         File? referenceAnnotation_full
         File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
+        String main_chromosomes = "chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX chrY"
     }
 
     String OutDir = "LRAA_out"
@@ -154,6 +153,7 @@ workflow lraaWorkflow {
     call splitBAMByChromosome {
         input:
             inputBAM = inputBAM,
+            main_chromosomes = main_chromosomes,
             docker = docker
     }
 
