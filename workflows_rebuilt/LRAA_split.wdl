@@ -49,11 +49,13 @@ task lraaPerChromosome {
         File inputBAM
         String OutDir
         Int numThreads
-        Boolean no_norm_flag
+        Boolean? LRAA_no_norm
         File? referenceAnnotation_reduced
         File? referenceAnnotation_full
-        String? LRAA_min_mapping_quality_flag
+        Int? LRAA_min_mapping_quality
     }
+
+
 
     # Define command line flags based on conditions before the command section
     String no_norm_flag = if (defined(LRAA_no_norm) && LRAA_no_norm) then "--no_norm" else ""
