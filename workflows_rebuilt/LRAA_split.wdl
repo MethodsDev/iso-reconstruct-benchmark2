@@ -53,6 +53,7 @@ task lraaPerChromosome {
         File? referenceAnnotation_reduced
         File? referenceAnnotation_full
         Int? LRAA_min_mapping_quality
+        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/lraa/lraa:latest"
     }
 
 
