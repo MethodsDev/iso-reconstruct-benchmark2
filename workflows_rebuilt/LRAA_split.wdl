@@ -164,7 +164,7 @@ workflow lraaWorkflow {
     }
 
     # Merge Quant results (.expr and .tracking files)
-    Array[File] quantExprFiles = flatten(select_all(lraaPerChromosome.lraaQuantExpr))
+    Array[File] quantExprFiles = select_all(lraaPerChromosome.lraaQuantExpr)
     Array[File] quantTrackingFiles = select_all(lraaPerChromosome.lraaQuantTracking)
 
     call mergeResults as mergeQuantExpr {
