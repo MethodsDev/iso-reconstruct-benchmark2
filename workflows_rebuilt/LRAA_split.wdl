@@ -65,14 +65,15 @@ task lraaPerChromosome {
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                      --bam ~{inputBAM} \
                                      --output_prefix ~{OutDir}/ID/LRAA \
-                                     ~{default=no_norm_flag ""} --CPU ~{numThreads}
+                                     ~{no_norm_flag} \
+                                     --CPU ~{numThreads}
         fi
 
         if [[ ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") && defined(~{referenceAnnotation_reduced}) ]]; then
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                      --bam ~{inputBAM} \
                                      --output_prefix ~{OutDir}/ID_reduced/LRAA_reduced \
-                                     ~{default=no_norm_flag ""} \
+                                     ~{no_norm_flag} \
                                      --gtf ~{referenceAnnotation_reduced} --CPU ~{numThreads}
         fi
 
@@ -81,9 +82,9 @@ task lraaPerChromosome {
                                      --bam ~{inputBAM} \
                                      --output_prefix ~{OutDir}/Quant_noEM_minMapQ/LRAA.noEM.minMapQ \
                                      --quant_only \
-                                     ~{default=no_norm_flag ""} \
+                                     ~{no_norm_flag} \
                                      --gtf ~{referenceAnnotation_full} \
-                                     ~{default=LRAA_min_mapping_quality_flag ""} --CPU ~{numThreads}
+                                     ~{LRAA_min_mapping_quality_flag} --CPU ~{numThreads}
         fi
     >>>
     output {
