@@ -9,12 +9,10 @@ task splitBAMByChromosome {
     command <<<
         set -eo pipefail
 
-        # Index the BAM file if not already indexed
         if [ ! -f "~{inputBAM}.bai" ]; then
             samtools index ~{inputBAM}
         fi
 
-        # Extract chromosome names
         chromosomes=$(samtools idxstats ~{inputBAM} | cut -f1 | grep -vE '^$|chrM')
 
         mkdir -p split_bams
@@ -23,15 +21,12 @@ task splitBAMByChromosome {
 
         for chr in $chromosomes; do
             if [[ " ~{main_chromosomes} " =~ .*\ $chr\ .* ]]; then
-                # Split main chromosomes
                 samtools view -b ~{inputBAM} $chr > split_bams/$chr.bam
             else
-                # Combine other contigs/scaffolds
                 samtools view -b ~{inputBAM} $chr >> $other_contigs_bam
             fi
         done
 
-        # Index the combined other contigs BAM file
         samtools index $other_contigs_bam
     >>>
     output {
@@ -54,14 +49,9 @@ task lraaPerChromosome {
         File? referenceAnnotation_full
         Int? LRAA_min_mapping_quality
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/lraa/lraa:latest"
+        String no_norm_flag = if (defined(LRAA_no_norm) && LRAA_no_norm) then "--no_norm" else ""
+        String LRAA_min_mapping_quality_flag = if (defined(LRAA_min_mapping_quality)) then "--min_mapping_quality=" + LRAA_min_mapping_quality else ""
     }
-
-
-
-    # Define command line flags based on conditions before the command section
-    String no_norm_flag = if (defined(LRAA_no_norm) && LRAA_no_norm) then "--no_norm" else ""
-    String LRAA_min_mapping_quality_flag = if (defined(LRAA_min_mapping_quality)) then "--min_mapping_quality=" + LRAA_min_mapping_quality else ""
-
     command <<<
         mkdir -p ~{OutDir}/ID_reduced
         mkdir -p ~{OutDir}/Quant_noEM_minMapQ
@@ -71,7 +61,6 @@ task lraaPerChromosome {
                                  --bam ~{inputBAM} \
                                  --output_prefix ~{OutDir}/ID/LRAA \
                                  ~{no_norm_flag} --CPU ~{numThreads}
-
         fi
 
         if [[ ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{referenceAnnotation_reduced}" ]]; then
@@ -80,8 +69,6 @@ task lraaPerChromosome {
                                  --output_prefix ~{OutDir}/ID_reduced/LRAA_reduced \
                                  ~{no_norm_flag} \
                                  --gtf ~{referenceAnnotation_reduced} --CPU ~{numThreads} 
-
-
         fi
 
         if [[ ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{referenceAnnotation_full}" && -n "~{LRAA_min_mapping_quality}" ]]; then
@@ -94,8 +81,6 @@ task lraaPerChromosome {
                                  ~{LRAA_min_mapping_quality_flag} --CPU ~{numThreads}
         fi
     >>>
-
-
     output {
         File? lraaIDGTF = if (length(glob("~{OutDir}/ID_reduced/*.gtf")) > 0) then glob("~{OutDir}/ID_reduced/*.gtf")[0] else ""
         File? lraaQuantExpr = if (length(glob("~{OutDir}/Quant_noEM_minMapQ/*.quant.expr")) > 0) then glob("~{OutDir}/Quant_noEM_minMapQ/*.quant.expr")[0] else ""
@@ -115,14 +100,12 @@ task mergeResults {
     }
     command <<<
         if [ ! -z "~{inputFiles}" ]; then
-            # Filter out nulls and take the header from the first file
             filtered_files=(~{sep=' ' inputFiles})
             if [[ "~{isGTF}" == "true" ]]; then
                 cat "${filtered_files[@]}" > ~{outputFile}
             else
                 head -n 1 "${filtered_files[0]}" > ~{outputFile}
                 for file in "${filtered_files[@]}"; do
-                    # Skip the header for subsequent files
                     tail -n +2 $file >> ~{outputFile}
                 done
             fi
@@ -154,8 +137,6 @@ workflow lraaWorkflow {
     }
 
     String OutDir = "LRAA_out"
-    String LRAA_min_mapping_quality_flag = if (defined(LRAA_min_mapping_quality)) then "--min_mapping_quality=" + LRAA_min_mapping_quality else ""
-    Boolean no_norm_flag = if (defined(LRAA_no_norm) && LRAA_no_norm) then true else false
 
     call splitBAMByChromosome {
         input:
@@ -173,14 +154,13 @@ workflow lraaWorkflow {
                 docker = docker,
                 numThreads = numThreads,
                 ID_or_Quant_or_Both = ID_or_Quant_or_Both,
-                LRAA_min_mapping_quality_flag = LRAA_min_mapping_quality_flag,
-                no_norm_flag = no_norm_flag,
+                LRAA_no_norm = LRAA_no_norm,
+                LRAA_min_mapping_quality = LRAA_min_mapping_quality,
                 referenceAnnotation_reduced = referenceAnnotation_reduced,
                 referenceAnnotation_full = referenceAnnotation_full
         }
     }
 
-    # Merge ID results (GTF files)
     Array[File?] idGTFFiles = select_all(lraaPerChromosome.lraaIDGTF)
     
     call mergeResults as mergeIDGTF {
@@ -191,7 +171,6 @@ workflow lraaWorkflow {
             isGTF = true
     }
 
-    # Merge Quant results (.expr and .tracking files)
     Array[File?] quantExprFiles = select_all(lraaPerChromosome.lraaQuantExpr)
     Array[File?] quantTrackingFiles = select_all(lraaPerChromosome.lraaQuantTracking)
 
