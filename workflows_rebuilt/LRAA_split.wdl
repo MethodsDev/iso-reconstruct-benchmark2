@@ -44,49 +44,44 @@ task splitBAMByChromosome {
 
 task lraaPerChromosome {
     input {
-        File inputBAM
-        File referenceGenome
-        String OutDir
-        String docker
-        Int numThreads
         String ID_or_Quant_or_Both
-        String? LRAA_min_mapping_quality_flag
-        String? no_norm_flag
+        File referenceGenome
+        File inputBAM
+        String OutDir
+        Int numThreads
+        Boolean no_norm_flag
         File? referenceAnnotation_reduced
         File? referenceAnnotation_full
-        File monitoringScript = "gs://mdl-refs/util/cromwell_monitoring_script2.sh"
+        String? LRAA_min_mapping_quality_flag
     }
+
     command <<<
-        bash ~{monitoringScript} > monitoring.log &
-        
-        mkdir -p ~{OutDir}/ID ~{OutDir}/ID_reduced ~{OutDir}/Quant ~{OutDir}/Quant_noEM ~{OutDir}/Quant_minMapQ ~{OutDir}/Quant_noEM_minMapQ
+        mkdir -p ~{OutDir}/ID_reduced
+        mkdir -p ~{OutDir}/Quant_noEM_minMapQ
 
         if [[ "~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both" ]]; then
-            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
-                                     --bam ~{inputBAM} \
-                                     --output_prefix ~{OutDir}/ID/LRAA \
-                                     ~{no_norm_flag} \
-                                     --CPU ~{numThreads}
+            if [ -n "~{referenceAnnotation_reduced}" ]; then
+                /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
+                                         --bam ~{inputBAM} \
+                                         --output_prefix ~{OutDir}/ID_reduced/LRAA_reduced \
+                                         ~{"--no_norm" if no_norm_flag else ""} \
+                                         --gtf ~{referenceAnnotation_reduced} --CPU ~{numThreads}
+            fi
         fi
 
-        if [[ ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") && defined(~{referenceAnnotation_reduced}) ]]; then
-            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
-                                     --bam ~{inputBAM} \
-                                     --output_prefix ~{OutDir}/ID_reduced/LRAA_reduced \
-                                     ~{no_norm_flag} \
-                                     --gtf ~{referenceAnnotation_reduced} --CPU ~{numThreads}
-        fi
-
-        if [[ ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both") && defined(~{referenceAnnotation_full}) ]]; then
-            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
-                                     --bam ~{inputBAM} \
-                                     --output_prefix ~{OutDir}/Quant_noEM_minMapQ/LRAA.noEM.minMapQ \
-                                     --quant_only \
-                                     ~{no_norm_flag} \
-                                     --gtf ~{referenceAnnotation_full} \
-                                     ~{LRAA_min_mapping_quality_flag} --CPU ~{numThreads}
+        if [[ "~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both" ]]; then
+            if [ -n "~{referenceAnnotation_full}" ]; then
+                /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
+                                         --bam ~{inputBAM} \
+                                         --output_prefix ~{OutDir}/Quant_noEM_minMapQ/LRAA.noEM.minMapQ \
+                                         --quant_only \
+                                         ~{"--no_norm" if no_norm_flag else ""} \
+                                         --gtf ~{referenceAnnotation_full} \
+                                         ~{"--min_mapping_quality " + LRAA_min_mapping_quality_flag if defined(LRAA_min_mapping_quality_flag) else ""} --CPU ~{numThreads}
+            fi
         fi
     >>>
+
     output {
         File? lraaIDGTF = if (length(glob("~{OutDir}/ID/*.gtf")) > 0) then glob("~{OutDir}/ID/*.gtf")[0] else None
         File? lraaIDReducedGTF = if (length(glob("~{OutDir}/ID_reduced/*.gtf")) > 0) then glob("~{OutDir}/ID_reduced/*.gtf")[0] else None
