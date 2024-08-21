@@ -1,44 +1,76 @@
 version 1.0
 
-# This task uses LRAA version 0.0.8
-task lraaTask {
+task splitBAMByChromosome {
     input {
         File inputBAM
-        File inputBAMIndex
+        String main_chromosomes = "chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX chrY"
+        String docker = "biocontainers/samtools:v1.9-4-deb_cv1"
+    }
+    command <<<
+        set -eo pipefail
+
+        # Index the BAM file if not already indexed
+        if [ ! -f "~{inputBAM}.bai" ]; then
+            samtools index ~{inputBAM}
+        fi
+
+        # Extract chromosome names
+        chromosomes=$(samtools idxstats ~{inputBAM} | cut -f1 | grep -vE '^$|chrM')
+
+        mkdir -p split_bams
+        other_contigs_bam="split_bams/other_contigs.bam"
+        touch $other_contigs_bam
+
+        for chr in $chromosomes; do
+            if [[ " ~{main_chromosomes} " =~ .*\ $chr\ .* ]]; then
+                # Split main chromosomes
+                samtools view -b ~{inputBAM} $chr > split_bams/$chr.bam
+            else
+                # Combine other contigs/scaffolds
+                samtools view -b ~{inputBAM} $chr >> $other_contigs_bam
+            fi
+        done
+
+        # Index the combined other contigs BAM file
+        samtools index $other_contigs_bam
+    >>>
+    output {
+        Array[File] chromosomeBAMs = glob("split_bams/*.bam")
+    }
+    runtime {
+        docker: docker
+    }
+}
+
+task lraaPerChromosome {
+    input {
+        String ID_or_Quant_or_Both
         File referenceGenome
-        File referenceGenomeIndex
+        File inputBAM
+        String OutDir
+        Int numThreads
+        Boolean? LRAA_no_norm
         File? referenceAnnotation_reduced
         File? referenceAnnotation_full
-        String dataType
-        String ID_or_Quant_or_Both
         Int? LRAA_min_mapping_quality
-        Boolean? LRAA_no_norm
-        Int cpu = 4
-        Int numThreads = 8
-        Int memoryGB = 64
-        Int diskSizeGB = 2048
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/lraa/lraa:latest"
-        File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
     }
 
-    String OutDir = "LRAA_out"
+    # Define command line flags based on conditions before the command section
+    String no_norm_flag = if (defined(LRAA_no_norm) && LRAA_no_norm) then "--no_norm" else ""
     String LRAA_min_mapping_quality_flag = if (defined(LRAA_min_mapping_quality)) then "--min_mapping_quality=" + LRAA_min_mapping_quality else ""
 
-    String no_norm_flag = if (defined(LRAA_no_norm) && LRAA_no_norm) then "--no_norm" else ""
-
-
     command <<<
-        bash ~{monitoringScript} > monitoring.log &
-        
-        mkdir -p ~{OutDir}/ID ~{OutDir}/ID_reduced ~{OutDir}/Quant ~{OutDir}/Quant_noEM ~{OutDir}/Quant_minMapQ ~{OutDir}/Quant_noEM_minMapQ
+        mkdir -p ~{OutDir}/ID_reduced
+        mkdir -p ~{OutDir}/Quant_noEM_minMapQ
 
-   #     if [[ "~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both" ]]; then
-   #         /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
-   #                              --bam ~{inputBAM} \
-   #                              --output_prefix ~{OutDir}/ID/LRAA \
-   #                              ~{no_norm_flag} --CPU ~{numThreads}
+        if [[ "~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both" ]]; then
+            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
+                                 --bam ~{inputBAM} \
+                                 --output_prefix ~{OutDir}/ID/LRAA \
+                                 ~{no_norm_flag} --CPU ~{numThreads}
 
-   #     fi
+        fi
 
         if [[ ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{referenceAnnotation_reduced}" ]]; then
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
@@ -50,24 +82,6 @@ task lraaTask {
 
         fi
 
-        if [[ ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{referenceAnnotation_full}" && -z "~{LRAA_min_mapping_quality_flag}" ]]; then
-            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
-                                 --bam ~{inputBAM} \
-                                 --output_prefix ~{OutDir}/Quant/LRAA \
-                                 --quant_only \
-                                 ~{no_norm_flag} \
-                                 --gtf ~{referenceAnnotation_full} \
-                                 --EM --CPU ~{numThreads}
-
-
-            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
-                                 --bam ~{inputBAM} \
-                                 --output_prefix ~{OutDir}/Quant_noEM/LRAA.noEM \
-                                 --quant_only \
-                                 ~{no_norm_flag} \
-                                 --gtf ~{referenceAnnotation_full} --CPU ~{numThreads}
-        fi
-
         if [[ ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{referenceAnnotation_full}" && -n "~{LRAA_min_mapping_quality}" ]]; then
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                  --bam ~{inputBAM} \
@@ -76,81 +90,127 @@ task lraaTask {
                                  ~{no_norm_flag} \
                                  --gtf ~{referenceAnnotation_full} \
                                  ~{LRAA_min_mapping_quality_flag} --CPU ~{numThreads}
-
-#            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
-#                                 --bam ~{inputBAM} \
-#                                 --output_prefix ~{OutDir}/Quant_minMapQ/LRAA.minMapQ \
-#                                 --quant_only \
-#                                 ~{no_norm_flag} \
-#                                 --gtf ~{referenceAnnotation_full} \
-#                                 ~{LRAA_min_mapping_quality_flag} \
-#                                 --EM --CPU ~{numThreads} --CPU ~{numThreads}
         fi
     >>>
 
     output {
-        File? lraaGTF = "~{OutDir}/ID/LRAA.gtf"
-        File? lraaReducedGTF = "~{OutDir}/ID_reduced/LRAA_reduced.gtf"
-        File? lraaCounts = "~{OutDir}/Quant/LRAA.quant.expr"
-        File? lraaCounts_noEM = "~{OutDir}/Quant_noEM/LRAA.noEM.quant.expr"
-        File? lraa_quant_tracking = "~{OutDir}/Quant/LRAA.quant.tracking"
-        File? lraa_quant_tracking_noEM = "~{OutDir}/Quant_noEM/LRAA.noEM.quant.tracking"
-        File? lraaCounts_noEM_minMapQ = "~{OutDir}/Quant_noEM_minMapQ/LRAA.noEM.minMapQ.quant.expr"
-        File? lraa_quant_tracking_noEM_minMapQ = "~{OutDir}/Quant_noEM_minMapQ/LRAA.noEM.minMapQ.quant.tracking"
-        File? lraaCounts_minMapQ = "~{OutDir}/Quant_minMapQ/LRAA.minMapQ.quant.expr"
-        File? lraa_quant_tracking_minMapQ = "~{OutDir}/Quant_minMapQ/LRAA.minMapQ.quant.tracking"
-        File monitoringLog = "monitoring.log"
+        File? lraaIDGTF = if (length(glob("~{OutDir}/ID_reduced/*.gtf")) > 0) then glob("~{OutDir}/ID_reduced/*.gtf")[0] else ""
+        File? lraaQuantExpr = if (length(glob("~{OutDir}/Quant_noEM_minMapQ/*.quant.expr")) > 0) then glob("~{OutDir}/Quant_noEM_minMapQ/*.quant.expr")[0] else ""
+        File? lraaQuantTracking = if (length(glob("~{OutDir}/Quant_noEM_minMapQ/*.quant.tracking")) > 0) then glob("~{OutDir}/Quant_noEM_minMapQ/*.quant.tracking")[0] else ""
     }
-
     runtime {
-        cpu: "~{cpu}"
-        memory: "~{memoryGB} GiB"
-        disks: "local-disk ~{diskSizeGB} HDD"
         docker: docker
-        errorStrategy: "Continue"
-        bootDiskSizeGb: 30
+    }
+}
+
+task mergeResults {
+    input {
+        Array[File?] inputFiles
+        String outputFile
+        String docker = "ubuntu:18.04"
+        Boolean isGTF = false
+    }
+    command <<<
+        if [ ! -z "~{inputFiles}" ]; then
+            # Filter out nulls and take the header from the first file
+            filtered_files=(~{sep=' ' inputFiles})
+            if [[ "~{isGTF}" == "true" ]]; then
+                cat "${filtered_files[@]}" > ~{outputFile}
+            else
+                head -n 1 "${filtered_files[0]}" > ~{outputFile}
+                for file in "${filtered_files[@]}"; do
+                    # Skip the header for subsequent files
+                    tail -n +2 $file >> ~{outputFile}
+                done
+            fi
+        fi
+    >>>
+    output {
+        File mergedFile = outputFile
+    }
+    runtime {
+        docker: docker
     }
 }
 
 workflow lraaWorkflow {
     input {
         File inputBAM
-        File inputBAMIndex
         File referenceGenome
-        File referenceGenomeIndex
-        File? referenceAnnotation_reduced
-        File? referenceAnnotation_full
-        String dataType
         String ID_or_Quant_or_Both
         Int? LRAA_min_mapping_quality
         Boolean? LRAA_no_norm
+        Int cpu = 4
+        Int numThreads = 8
+        Int memoryGB = 64
+        Int diskSizeGB = 2048
+        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/lraa/lraa:latest"
+        File? referenceAnnotation_reduced
+        File? referenceAnnotation_full
+        String main_chromosomes = "chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX chrY"
     }
 
-    call lraaTask {
+    String OutDir = "LRAA_out"
+    String LRAA_min_mapping_quality_flag = if (defined(LRAA_min_mapping_quality)) then "--min_mapping_quality=" + LRAA_min_mapping_quality else ""
+    Boolean no_norm_flag = if (defined(LRAA_no_norm) && LRAA_no_norm) then true else false
+
+    call splitBAMByChromosome {
         input:
             inputBAM = inputBAM,
-            inputBAMIndex = inputBAMIndex,
-            referenceGenome = referenceGenome,
-            referenceGenomeIndex = referenceGenomeIndex,
-            referenceAnnotation_reduced = referenceAnnotation_reduced,
-            referenceAnnotation_full = referenceAnnotation_full,
-            dataType = dataType,
-            ID_or_Quant_or_Both = ID_or_Quant_or_Both,
-            LRAA_min_mapping_quality = LRAA_min_mapping_quality,
-            LRAA_no_norm = LRAA_no_norm
+            main_chromosomes = main_chromosomes,
+            docker = docker
+    }
+
+    scatter (chrBAM in splitBAMByChromosome.chromosomeBAMs) {
+        call lraaPerChromosome {
+            input:
+                inputBAM = chrBAM,
+                referenceGenome = referenceGenome,
+                OutDir = OutDir,
+                docker = docker,
+                numThreads = numThreads,
+                ID_or_Quant_or_Both = ID_or_Quant_or_Both,
+                LRAA_min_mapping_quality_flag = LRAA_min_mapping_quality_flag,
+                no_norm_flag = no_norm_flag,
+                referenceAnnotation_reduced = referenceAnnotation_reduced,
+                referenceAnnotation_full = referenceAnnotation_full
+        }
+    }
+
+    # Merge ID results (GTF files)
+    Array[File?] idGTFFiles = select_all(lraaPerChromosome.lraaIDGTF)
+    
+    call mergeResults as mergeIDGTF {
+        input:
+            inputFiles = idGTFFiles,
+            outputFile = OutDir + "/merged_ID.gtf",
+            docker = docker,
+            isGTF = true
+    }
+
+    # Merge Quant results (.expr and .tracking files)
+    Array[File?] quantExprFiles = select_all(lraaPerChromosome.lraaQuantExpr)
+    Array[File?] quantTrackingFiles = select_all(lraaPerChromosome.lraaQuantTracking)
+
+    call mergeResults as mergeQuantExpr {
+        input:
+            inputFiles = quantExprFiles,
+            outputFile = OutDir + "/merged_Quant.expr",
+            docker = docker,
+            isGTF = false
+    }
+
+    call mergeResults as mergeQuantTracking {
+        input:
+            inputFiles = quantTrackingFiles,
+            outputFile = OutDir + "/merged_Quant.tracking",
+            docker = docker,
+            isGTF = false
     }
 
     output {
-        File? lraaGTF = lraaTask.lraaGTF
-        File? lraaReducedGTF = lraaTask.lraaReducedGTF
-        File? lraaCounts = lraaTask.lraaCounts
-        File? lraaCounts_noEM = lraaTask.lraaCounts_noEM
-        File? lraa_quant_tracking = lraaTask.lraa_quant_tracking
-        File? lraa_quant_tracking_noEM = lraaTask.lraa_quant_tracking_noEM
-        File? lraaCounts_noEM_minMapQ = lraaTask.lraaCounts_noEM_minMapQ
-        File? lraa_quant_tracking_noEM_minMapQ = lraaTask.lraa_quant_tracking_noEM_minMapQ
-        File? lraaCounts_minMapQ = lraaTask.lraaCounts_minMapQ
-        File? lraa_quant_tracking_minMapQ = lraaTask.lraa_quant_tracking_minMapQ
-        File monitoringLog = lraaTask.monitoringLog
+        File mergedIDGTF = mergeIDGTF.mergedFile
+        File mergedQuantExpr = mergeQuantExpr.mergedFile
+        File mergedQuantTracking = mergeQuantTracking.mergedFile
     }
 }
