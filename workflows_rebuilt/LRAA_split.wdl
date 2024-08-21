@@ -65,25 +65,25 @@ task lraaPerChromosome {
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                      --bam ~{inputBAM} \
                                      --output_prefix ~{OutDir}/ID/LRAA \
-                                     ~{no_norm_flag} --CPU ~{numThreads}
+                                     ~{default=no_norm_flag ""} --CPU ~{numThreads}
         fi
 
-        if [[ ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{referenceAnnotation_reduced}" ]]; then
+        if [[ ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") && defined(~{referenceAnnotation_reduced}) ]]; then
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                      --bam ~{inputBAM} \
                                      --output_prefix ~{OutDir}/ID_reduced/LRAA_reduced \
-                                     ~{no_norm_flag} \
+                                     ~{default=no_norm_flag ""} \
                                      --gtf ~{referenceAnnotation_reduced} --CPU ~{numThreads}
         fi
 
-        if [[ ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{referenceAnnotation_full}" ]]; then
+        if [[ ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both") && defined(~{referenceAnnotation_full}) ]]; then
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                      --bam ~{inputBAM} \
                                      --output_prefix ~{OutDir}/Quant_noEM_minMapQ/LRAA.noEM.minMapQ \
                                      --quant_only \
-                                     ~{no_norm_flag} \
+                                     ~{default=no_norm_flag ""} \
                                      --gtf ~{referenceAnnotation_full} \
-                                     ~{LRAA_min_mapping_quality_flag} --CPU ~{numThreads}
+                                     ~{default=LRAA_min_mapping_quality_flag ""} --CPU ~{numThreads}
         fi
     >>>
     output {
@@ -96,7 +96,6 @@ task lraaPerChromosome {
         docker: docker
     }
 }
-
 task mergeResults {
     input {
         Array[File?] inputFiles
