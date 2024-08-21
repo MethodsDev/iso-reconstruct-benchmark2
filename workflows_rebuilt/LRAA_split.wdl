@@ -10,24 +10,18 @@ task splitBAMByChromosome {
     command <<<
         set -eo pipefail
         
-        # Index the BAM file if not already indexed
         if [ ! -f "~{inputBAM}.bai" ]; then
             samtools index -@ ~{threads} ~{inputBAM}
         fi
         
-        # Prepare the directory for split BAM files
         mkdir -p split_bams
         
-        # Define the main chromosomes
         main_chromosomes="~{main_chromosomes}"
         
-        # Extract BAMs for main chromosomes directly
         for chr in $main_chromosomes; do
             samtools view -@ ~{threads} -b ~{inputBAM} $chr > split_bams/$chr.bam
         done
         
-        # Extract BAMs for non-main chromosomes in one go
-        # Construct exclusion list for samtools view
         exclude_chroms=$(echo $main_chromosomes | sed 's/ / -e /g')
         samtools view -@ ~{threads} -b ~{inputBAM} -e $exclude_chroms > split_bams/other_contigs.bam
     >>>
