@@ -97,6 +97,7 @@ task lraaPerChromosome {
         docker: docker
     }
 }
+
 task mergeResults {
     input {
         Array[File?] inputFiles
