@@ -32,8 +32,12 @@ task splitBAMByChromosome {
             fi
         done
         
-        exclude_chroms=$(echo $main_chromosomes | sed 's/ / -e /g')
-        samtools view -@ ~{threads} -b ~{inputBAM} -e $exclude_chroms > split_bams/other_contigs.bam
+        # Handle other contigs by first creating a list of all contigs in the BAM file
+        samtools idxstats ${inputBAM} | cut -f1 | grep -v -E $(echo $main_chromosomes | sed 's/ /|/g') > other_contigs.txt
+        
+        # Then, use samtools view to create a BAM file for other contigs
+        samtools view -@ ${threads} -b ${inputBAM} -o split_bams/other_contigs.bam -L other_contigs.txt
+
         if [ -f "~{referenceAnnotation_reduced}" ]; then
             grep -vE "($(echo $main_chromosomes | sed 's/ /|/g'))" ~{referenceAnnotation_reduced} > split_gtf_reduced/other_contigs.gtf
         fi
