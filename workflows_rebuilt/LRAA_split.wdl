@@ -33,24 +33,6 @@ task splitBAMByChromosome {
                 grep "^$chr" ~{referenceAnnotation_full} > split_gtf_full/$chr.gtf || true
             fi
         done
-        
-        # Handle other contigs
-        samtools idxstats ~{inputBAM} | cut -f1 | grep -v -E $(echo $main_chromosomes | sed 's/ /|/g') > other_contigs.txt
-        
-        # Ensure other_contigs.txt is not empty and has valid content before proceeding
-        if [ -s other_contigs.txt ] && grep -qE '^[^#]' other_contigs.txt; then
-            samtools view -@ ~{threads} -b ~{inputBAM} -o split_bams/other_contigs.bam -L other_contigs.txt
-        else
-            touch split_bams/other_contigs.bam
-        fi
-        
-        # Split GTF files for other contigs, ensuring files exist before attempting to grep
-        if [ -f "~{referenceAnnotation_reduced}" ] && [ -s "~{referenceAnnotation_reduced}" ]; then
-            grep -vE "($(echo $main_chromosomes | sed 's/ /|/g'))" ~{referenceAnnotation_reduced} > split_gtf_reduced/other_contigs.gtf || true
-        fi
-        if [ -f "~{referenceAnnotation_full}" ] && [ -s "~{referenceAnnotation_full}" ]; then
-            grep -vE "($(echo $main_chromosomes | sed 's/ /|/g'))" ~{referenceAnnotation_full} > split_gtf_full/other_contigs.gtf || true
-        fi
     >>>
     output {
         Array[File] chromosomeBAMs = glob("split_bams/*.bam")
@@ -120,13 +102,8 @@ task lraaPerChromosome {
         mkdir -p ~{OutDir}/ID_reduced
         mkdir -p ~{OutDir}/Quant_noEM_minMapQ
     
-        # Extract chromosome name or handle 'other_contigs'
-        contig_names=$(if [[ "~{inputBAM}" =~ .*other_contigs.bam ]]; then
-            awk '{print $1}' ~{FilterFullGTF} | sort | uniq | tr '\n' ','
-        else
-            echo "~{chrName}"
-        fi)
-        contig_names=${contig_names%,} # Remove trailing comma
+        # Extract chromosome name
+        contig_names="~{chrName}"
     
         # Use contig_names in the LRAA command
         if [[ ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") && -f "~{FilterReducedGTF}" ]]; then
