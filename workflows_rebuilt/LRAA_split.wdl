@@ -45,10 +45,10 @@ task splitBAMByChromosome {
         fi
         
         # Split GTF files for other contigs, ensuring files exist before attempting to grep
-        if [ -f "~{referenceAnnotation_reduced}" ]; then
+        if [ -f "~{referenceAnnotation_reduced}" ] && [ -s "~{referenceAnnotation_reduced}" ]; then
             grep -vE "($(echo $main_chromosomes | sed 's/ /|/g'))" ~{referenceAnnotation_reduced} > split_gtf_reduced/other_contigs.gtf || true
         fi
-        if [ -f "~{referenceAnnotation_full}" ]; then
+        if [ -f "~{referenceAnnotation_full}" ] && [ -s "~{referenceAnnotation_full}" ]; then
             grep -vE "($(echo $main_chromosomes | sed 's/ /|/g'))" ~{referenceAnnotation_full} > split_gtf_full/other_contigs.gtf || true
         fi
     >>>
