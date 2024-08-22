@@ -91,6 +91,7 @@ task lraaPerChromosome {
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/lraa/lraa:latest"
         File? FilterReducedGTF
         File? FilterFullGTF
+    }
 
     String chrName = basename(inputBAM, '.bam')
     String no_norm_flag = if defined(LRAA_no_norm) && LRAA_no_norm then "--no_norm" else ""
@@ -101,46 +102,44 @@ task lraaPerChromosome {
         mkdir -p ~{OutDir}/ID_reduced
         mkdir -p ~{OutDir}/Quant_noEM_minMapQ
     
-    # Extract chromosome name or handle 'other_contigs'
-    if [[ ~{inputBAM} =~ .*other_contigs.bam ]]; then
-        # Extract all unique contig names from the 'other_contigs.gtf'
-        contig_names=$(awk '{print $1}' ~{selectedFullGTF} | sort | uniq | tr '\n' ',')
+        # Extract chromosome name or handle 'other_contigs'
+        contig_names=$(if [[ "~{inputBAM}" =~ .*other_contigs.bam ]]; then
+            awk '{print $1}' ~{FilterFullGTF} | sort | uniq | tr '\n' ','
+        else
+            echo "~{chrName}"
+        fi)
         contig_names=${contig_names%,} # Remove trailing comma
-    else
-        # Extract chromosome name from BAM file name
-        contig_names=$(basename ~{inputBAM} .bam)
-    fi
     
-    # Use contig_names in the LRAA command
-    if [[ ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") && -f "~{selectedReducedGTF}" ]]; then
-        /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
-                                 --bam ~{inputBAM} \
-                                 --output_prefix ~{OutDir}/ID_reffree/LRAA \
-                                 ~{no_norm_flag} --CPU 1 \
-                                 --contig $contig_names
-    fi
+        # Use contig_names in the LRAA command
+        if [[ ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") && -f "~{FilterReducedGTF}" ]]; then
+            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
+                                     --bam ~{inputBAM} \
+                                     --output_prefix ~{OutDir}/ID_reffree/LRAA \
+                                     ~{no_norm_flag} --CPU ~{numThreads} \
+                                     --contig $contig_names
+        fi
     
-    if [[ ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{selectedReducedGTF}" ]]; then
-        /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
-                                 --bam ~{inputBAM} \
-                                 --output_prefix ~{OutDir}/ID_reduced/LRAA_reduced \
-                                 ~{no_norm_flag} \
-                                 --gtf ~{FilterReducedGTF} --CPU 1 \
-                                 --contig $contig_names
-    fi
+        if [[ ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") && -f "~{FilterReducedGTF}" ]]; then
+            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
+                                     --bam ~{inputBAM} \
+                                     --output_prefix ~{OutDir}/ID_reduced/LRAA_reduced \
+                                     ~{no_norm_flag} \
+                                     --gtf ~{FilterReducedGTF} --CPU ~{numThreads} \
+                                     --contig $contig_names
+        fi
     
-    if [[ ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{selectedFullGTF}" && -n "~{LRAA_min_mapping_quality}" ]]; then
-        /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
-                                 --bam ~{inputBAM} \
-                                 --output_prefix ~{OutDir}/Quant_noEM_minMapQ/LRAA.noEM.minMapQ \
-                                 --quant_only \
-                                 ~{no_norm_flag} \
-                                 --gtf ~{FilterFullGTF} \
-                                 ~{min_mapping_quality_flag} --CPU 1 \
-                                 --contig $contig_names
-    fi
-
+        if [[ ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both") && -f "~{FilterFullGTF}" && defined(LRAA_min_mapping_quality) ]]; then
+            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
+                                     --bam ~{inputBAM} \
+                                     --output_prefix ~{OutDir}/Quant_noEM_minMapQ/LRAA.noEM.minMapQ \
+                                     --quant_only \
+                                     ~{no_norm_flag} \
+                                     --gtf ~{FilterFullGTF} \
+                                     ~{min_mapping_quality_flag} --CPU ~{numThreads} \
+                                     --contig $contig_names
+        fi
     >>>
+
     output {
         File? lraaID_reffree_GTF = if (length(glob("~{OutDir}/ID_reffree/*.gtf")) > 0) then glob("~{OutDir}/ID_reffree/*.gtf")[0] else ""
         File? lraaID_reduced_GTF = if (length(glob("~{OutDir}/ID_reduced/*.gtf")) > 0) then glob("~{OutDir}/ID_reduced/*.gtf")[0] else ""
