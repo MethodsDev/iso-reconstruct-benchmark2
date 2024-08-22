@@ -73,8 +73,8 @@ task lraaPerChromosome {
     String min_mapping_quality_flag = if defined(LRAA_min_mapping_quality) then "--min_mapping_quality=" + LRAA_min_mapping_quality else ""
 
     # Select the correct GTF files based on the chromosome name
-    File? selectedReducedGTF = select_first([for gtf in referenceAnnotation_reduced_chroms if basename(gtf, '.gtf') == chrName])
-    File? selectedFullGTF = select_first([for gtf in referenceAnnotation_full_chroms if basename(gtf, '.gtf') == chrName])
+    File? selectedReducedGTF = select_first([gtf for gtf in referenceAnnotation_reduced_chroms if basename(gtf, '.gtf') == chrName])
+    File? selectedFullGTF = select_first([gtf for gtf in referenceAnnotation_full_chroms if basename(gtf, '.gtf') == chrName])
 
     command <<<
         mkdir -p ~{OutDir}/ID_reffree
