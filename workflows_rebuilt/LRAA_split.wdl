@@ -107,7 +107,6 @@ task lraaPerChromosome {
             chrName = chrName
     }
 
-
     command <<<
         mkdir -p ~{OutDir}/ID_reffree
         mkdir -p ~{OutDir}/ID_reduced
