@@ -95,18 +95,6 @@ task lraaPerChromosome {
     String no_norm_flag = if defined(LRAA_no_norm) && LRAA_no_norm then "--no_norm" else ""
     String min_mapping_quality_flag = if defined(LRAA_min_mapping_quality) then "--min_mapping_quality=" + LRAA_min_mapping_quality else ""
 
-    call FilterGTF as FilterReducedGTF {
-        input:
-            gtfFiles = referenceAnnotation_reduced_chroms,
-            chrName = chrName
-    }
-
-    call FilterGTF as FilterFullGTF {
-        input:
-            gtfFiles = referenceAnnotation_full_chroms,
-            chrName = chrName
-    }
-
     command <<<
         mkdir -p ~{OutDir}/ID_reffree
         mkdir -p ~{OutDir}/ID_reduced
@@ -189,8 +177,21 @@ workflow lraaWorkflow {
             threads = numThreads
     }
 
-
     scatter (chrBAM in splitBAMByChromosome.chromosomeBAMs) {
+        String chrName = basename(chrBAM, '.bam')
+
+        call FilterGTF as FilterReducedGTF {
+            input:
+                gtfFiles = splitBAMByChromosome.chromosomeGTFs_reduced,
+                chrName = chrName
+        }
+
+        call FilterGTF as FilterFullGTF {
+            input:
+                gtfFiles = splitBAMByChromosome.chromosomeGTFs_full,
+                chrName = chrName
+        }
+
         call lraaPerChromosome {
             input:
                 inputBAM = chrBAM,
@@ -201,10 +202,11 @@ workflow lraaWorkflow {
                 ID_or_Quant_or_Both = ID_or_Quant_or_Both,
                 LRAA_no_norm = LRAA_no_norm,
                 LRAA_min_mapping_quality = LRAA_min_mapping_quality,
-                referenceAnnotation_reduced_chroms = splitBAMByChromosome.chromosomeGTFs_reduced,
-                referenceAnnotation_full_chroms = splitBAMByChromosome.chromosomeGTFs_full
+                referenceAnnotation_reduced_chroms = [FilterReducedGTF.selectedGTF],
+                referenceAnnotation_full_chroms = [FilterFullGTF.selectedGTF]
         }
     }
+
 
     # Collect and merge reffree GTF files
     Array[File?] reffreeGTFFiles = select_all(lraaPerChromosome.lraaID_reffree_GTF)
