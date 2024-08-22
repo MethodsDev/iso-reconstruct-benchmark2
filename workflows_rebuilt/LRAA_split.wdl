@@ -51,6 +51,32 @@ task splitBAMByChromosome {
     }
 }
 
+task FilterGTF {
+    input {
+        Array[File] gtfFiles
+        String chrName
+    }
+
+    command <<<
+        #!/bin/bash
+        for gtf in "~{sep=' ' gtfFiles}"; do
+            if [[ $(basename "$gtf" .gtf) == "~{chrName}" ]]; then
+                echo "$gtf"
+                break
+            fi
+        done
+    >>>
+
+    output {
+        File? selectedGTF = read_string(stdout())
+    }
+
+    runtime {
+        docker: "ubuntu:latest"
+    }
+}
+
+
 task lraaPerChromosome {
     input {
         String ID_or_Quant_or_Both
@@ -65,67 +91,44 @@ task lraaPerChromosome {
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/lraa/lraa:latest"
     }
 
-    # Extract chromosome name from BAM file name
     String chrName = basename(inputBAM, '.bam')
-
-    # Pre-calculate flags
     String no_norm_flag = if defined(LRAA_no_norm) && LRAA_no_norm then "--no_norm" else ""
     String min_mapping_quality_flag = if defined(LRAA_min_mapping_quality) then "--min_mapping_quality=" + LRAA_min_mapping_quality else ""
 
-    # Select the correct GTF files based on the chromosome name
-    File? selectedReducedGTF = select_first([gtf for gtf in referenceAnnotation_reduced_chroms if basename(gtf, '.gtf') == chrName])
-    File? selectedFullGTF = select_first([gtf for gtf in referenceAnnotation_full_chroms if basename(gtf, '.gtf') == chrName])
+    call FilterGTF as FilterReducedGTF {
+        input:
+            gtfFiles = referenceAnnotation_reduced_chroms,
+            chrName = chrName
+    }
+
+    call FilterGTF as FilterFullGTF {
+        input:
+            gtfFiles = referenceAnnotation_full_chroms,
+            chrName = chrName
+    }
 
     command <<<
         mkdir -p ~{OutDir}/ID_reffree
         mkdir -p ~{OutDir}/ID_reduced
         mkdir -p ~{OutDir}/Quant_noEM_minMapQ
 
-    # Extract chromosome name or handle 'other_contigs'
-    if [[ ~{inputBAM} =~ .*other_contigs.bam ]]; then
-        # Extract all unique contig names from the 'other_contigs.gtf'
-        contig_names=$(awk '{print $1}' ~{selectedFullGTF} | sort | uniq | tr '\n' ',')
-        contig_names=${contig_names%,} # Remove trailing comma
-    else
-        # Extract chromosome name from BAM file name
-        contig_names=$(basename ~{inputBAM} .bam)
-    fi
-    
-    # Use contig_names in the LRAA command
-    if [[ ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") && -f "~{selectedReducedGTF}" ]]; then
-        /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
-                                 --bam ~{inputBAM} \
-                                 --output_prefix ~{OutDir}/ID_reffree/LRAA \
-                                 ~{no_norm_flag} --CPU 1 \
-                                 --contig $contig_names
-    fi
-    
-    if [[ ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{selectedReducedGTF}" ]]; then
-        /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
-                                 --bam ~{inputBAM} \
-                                 --output_prefix ~{OutDir}/ID_reduced/LRAA_reduced \
-                                 ~{no_norm_flag} \
-                                 --gtf ~{selectedReducedGTF} --CPU 1 \
-                                 --contig $contig_names
-    fi
-    
-    if [[ ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{selectedFullGTF}" && -n "~{LRAA_min_mapping_quality}" ]]; then
-        /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
-                                 --bam ~{inputBAM} \
-                                 --output_prefix ~{OutDir}/Quant_noEM_minMapQ/LRAA.noEM.minMapQ \
-                                 --quant_only \
-                                 ~{no_norm_flag} \
-                                 --gtf ~{selectedFullGTF} \
-                                 ~{min_mapping_quality_flag} --CPU 1 \
-                                 --contig $contig_names
-    fi
+        lraa ~{ID_or_Quant_or_Both} \
+            --reference ~{referenceGenome} \
+            --bam ~{inputBAM} \
+            --out_dir ~{OutDir} \
+            --threads ~{numThreads} \
+            ~{no_norm_flag} \
+            ~{min_mapping_quality_flag} \
+            --gtf_reduced ~{FilterReducedGTF.filteredGTF} \
+            --gtf_full ~{FilterFullGTF.filteredGTF}
     >>>
+
     output {
-        File? lraaID_reffree_GTF = if (length(glob("~{OutDir}/ID_reffree/*.gtf")) > 0) then glob("~{OutDir}/ID_reffree/*.gtf")[0] else ""
-        File? lraaID_reduced_GTF = if (length(glob("~{OutDir}/ID_reduced/*.gtf")) > 0) then glob("~{OutDir}/ID_reduced/*.gtf")[0] else ""
-        File? lraaQuantExpr = if (length(glob("~{OutDir}/Quant_noEM_minMapQ/*.quant.expr")) > 0) then glob("~{OutDir}/Quant_noEM_minMapQ/*.quant.expr")[0] else ""
-        File? lraaQuantTracking = if (length(glob("~{OutDir}/Quant_noEM_minMapQ/*.quant.tracking")) > 0) then glob("~{OutDir}/Quant_noEM_minMapQ/*.quant.tracking")[0] else ""
+        File ID_reffree = "~{OutDir}/ID_reffree"
+        File ID_reduced = "~{OutDir}/ID_reduced"
+        File Quant_noEM_minMapQ = "~{OutDir}/Quant_noEM_minMapQ"
     }
+
     runtime {
         docker: docker
     }
