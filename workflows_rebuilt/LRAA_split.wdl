@@ -119,7 +119,7 @@ task mergeResults {
     >>>
 
     output {
-        File mergedFile = "~{outputFile}" + ext
+        File mergedFile = "~{outputFile}" + (if isGTF then ".gtf" else ".expr")
     }
 
     runtime {
