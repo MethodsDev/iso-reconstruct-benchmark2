@@ -25,24 +25,27 @@ task splitBAMByChromosome {
         for chr in $main_chromosomes; do
             samtools view -@ ~{threads} -b ~{inputBAM} $chr > split_bams/$chr.bam
             if [ -f "~{referenceAnnotation_reduced}" ]; then
-                grep "^$chr" ~{referenceAnnotation_reduced} > split_gtf_reduced/$chr.gtf || echo "" > split_gtf_reduced/$chr.gtf
+                grep "^$chr" ~{referenceAnnotation_reduced} > split_gtf_reduced/$chr.gtf || true
             fi
             if [ -f "~{referenceAnnotation_full}" ]; then
-                grep "^$chr" ~{referenceAnnotation_full} > split_gtf_full/$chr.gtf || echo "" > split_gtf_full/$chr.gtf
+                grep "^$chr" ~{referenceAnnotation_full} > split_gtf_full/$chr.gtf || true
             fi
         done
         
-        # Handle other contigs by first creating a list of all contigs in the BAM file
-        samtools idxstats ${inputBAM} | cut -f1 | grep -v -E $(echo $main_chromosomes | sed 's/ /|/g') > other_contigs.txt
+        # Handle other contigs
+        samtools idxstats ~{inputBAM} | cut -f1 | grep -v -E $(echo $main_chromosomes | sed 's/ /|/g') > other_contigs.txt
         
-        # Then, use samtools view to create a BAM file for other contigs
-        samtools view -@ ${threads} -b ${inputBAM} -o split_bams/other_contigs.bam -L other_contigs.txt
-
+        if [ -s other_contigs.txt ]; then
+            samtools view -@ ~{threads} -b ~{inputBAM} -o split_bams/other_contigs.bam -L other_contigs.txt
+        else
+            touch split_bams/other_contigs.bam
+        fi
+        
         if [ -f "~{referenceAnnotation_reduced}" ]; then
-            grep -vE "($(echo $main_chromosomes | sed 's/ /|/g'))" ~{referenceAnnotation_reduced} > split_gtf_reduced/other_contigs.gtf
+            grep -vE "($(echo $main_chromosomes | sed 's/ /|/g'))" ~{referenceAnnotation_reduced} > split_gtf_reduced/other_contigs.gtf || true
         fi
         if [ -f "~{referenceAnnotation_full}" ]; then
-            grep -vE "($(echo $main_chromosomes | sed 's/ /|/g'))" ~{referenceAnnotation_full} > split_gtf_full/other_contigs.gtf
+            grep -vE "($(echo $main_chromosomes | sed 's/ /|/g'))" ~{referenceAnnotation_full} > split_gtf_full/other_contigs.gtf || true
         fi
     >>>
     output {
