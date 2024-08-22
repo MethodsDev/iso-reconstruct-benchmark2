@@ -40,19 +40,43 @@ task lraaPerChromosome {
         File? referenceAnnotation_full
     }
 
+    String chrName = basename(inputBAM, '.bam')
+    String no_norm_flag = if defined(LRAA_no_norm) && LRAA_no_norm then "--no_norm" else ""
+    String min_mapping_quality_flag = if defined(LRAA_min_mapping_quality) then "--min_mapping_quality=" + LRAA_min_mapping_quality else ""
+    
     command <<<
-        set -eo pipefail
-        mkdir -p ~{OutDir}
-        lraa \
-            --bam ~{inputBAM} \
-            --genome ~{referenceGenome} \
-            --out ~{OutDir} \
-            --threads ~{numThreads} \
-            --mode ~{ID_or_Quant_or_Both} \
-            ~{"--no-norm" if defined(LRAA_no_norm) and LRAA_no_norm == true else ""} \
-            ~{"--min-mapping-quality " + LRAA_min_mapping_quality if defined(LRAA_min_mapping_quality) else ""} \
-            ~{"--annotation-reduced " + referenceAnnotation_reduced if defined(referenceAnnotation_reduced) else ""} \
-            ~{"--annotation-full " + referenceAnnotation_full if defined(referenceAnnotation_full) else ""}
+        mkdir -p ~{OutDir}/ID_reffree
+        mkdir -p ~{OutDir}/ID_reduced
+        mkdir -p ~{OutDir}/Quant_noEM_minMapQ
+    
+        # Use contig_names in the LRAA command
+        if [[ ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") && -f "~{referenceAnnotation_reduced}" ]]; then
+            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
+                                     --bam ~{inputBAM} \
+                                     --output_prefix ~{OutDir}/ID_reffree/LRAA \
+                                     ~{no_norm_flag} --CPU ~{numThreads} \
+                                     --contig ~{chrName}
+        fi
+    
+        if [[ ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") && -f "~{referenceAnnotation_reduced}" ]]; then
+            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
+                                     --bam ~{inputBAM} \
+                                     --output_prefix ~{OutDir}/ID_reduced/LRAA_reduced \
+                                     ~{no_norm_flag} \
+                                     --gtf ~{referenceAnnotation_reduced} --CPU ~{numThreads} \
+                                     --contig ~{chrName}
+        fi
+    
+        if [[ ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both") && -f "~{referenceAnnotation_full}" ]]; then
+            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
+                                     --bam ~{inputBAM} \
+                                     --output_prefix ~{OutDir}/Quant_noEM_minMapQ/LRAA.noEM.minMapQ \
+                                     --quant_only \
+                                     ~{no_norm_flag} \
+                                     --gtf ~{referenceAnnotation_full} \
+                                     ~{min_mapping_quality_flag} --CPU ~{numThreads} \
+                                     --contig ~{chrName}
+        fi
     >>>
 
     output {
