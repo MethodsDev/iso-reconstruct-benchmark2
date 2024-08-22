@@ -32,7 +32,7 @@ task splitBAMByChromosome {
             if [ -f "~{referenceAnnotation_full}" ]; then
                 egrep "^~{chr}\b" ~{referenceAnnotation_full} > split_gtf_full/~{chr}.gtf
             fi
-done
+        done
     >>>
     output {
         Array[File] chromosomeBAMs = glob("split_bams/*.bam")
