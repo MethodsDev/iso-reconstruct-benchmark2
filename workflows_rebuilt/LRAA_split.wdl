@@ -85,7 +85,7 @@ task lraaPerChromosome {
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                  --bam ~{inputBAM} \
                                  --output_prefix ~{OutDir}/ID_reffree/LRAA \
-                                 ~{no_norm_flag} --CPU ~{numThreads}
+                                 ~{no_norm_flag} --CPU 1
         fi
 
         if [[ ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{selectedReducedGTF}" ]]; then
@@ -93,7 +93,7 @@ task lraaPerChromosome {
                                  --bam ~{inputBAM} \
                                  --output_prefix ~{OutDir}/ID_reduced/LRAA_reduced \
                                  ~{no_norm_flag} \
-                                 --gtf ~{selectedReducedGTF} --CPU ~{numThreads} 
+                                 --gtf ~{selectedReducedGTF} --CPU 1
         fi
 
         if [[ ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{selectedFullGTF}" && -n "~{LRAA_min_mapping_quality}" ]]; then
@@ -103,7 +103,7 @@ task lraaPerChromosome {
                                  --quant_only \
                                  ~{no_norm_flag} \
                                  --gtf ~{selectedFullGTF} \
-                                 ~{min_mapping_quality_flag} --CPU ~{numThreads}
+                                 ~{min_mapping_quality_flag} --CPU 1
         fi
     >>>
     output {
@@ -152,10 +152,10 @@ workflow lraaWorkflow {
         String ID_or_Quant_or_Both
         Int? LRAA_min_mapping_quality
         Boolean? LRAA_no_norm
-        Int cpu = 4
-        Int numThreads = 8
-        Int memoryGB = 64
-        Int diskSizeGB = 2048
+        Int cpu = 2
+        Int numThreads = 4
+        Int memoryGB = 32
+        Int diskSizeGB = 512
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/lraa/lraa:latest"
         File? referenceAnnotation_reduced
         File? referenceAnnotation_full
