@@ -59,16 +59,24 @@ task FilterGTF {
     input {
         Array[File] gtfFiles
         String chrName
+        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/lraa/lraa:latest"
     }
 
     command <<<
         #!/bin/bash
+        outputFile=""
         for gtf in "~{sep=' ' gtfFiles}"; do
             if [[ $(basename "$gtf" .gtf) == "~{chrName}" ]]; then
-                echo "$gtf"
+                outputFile="$gtf"
                 break
             fi
         done
+        if [[ -z "$outputFile" ]]; then
+            # Create a placeholder file if no GTF matches
+            touch placeholder.gtf
+            outputFile="placeholder.gtf"
+        fi
+        echo "$outputFile"
     >>>
 
     output {
@@ -76,10 +84,9 @@ task FilterGTF {
     }
 
     runtime {
-        docker: "ubuntu:latest"
+        docker: docker
     }
 }
-
 
 task lraaPerChromosome {
     input {
