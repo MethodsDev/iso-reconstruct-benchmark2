@@ -184,8 +184,8 @@ workflow lraaWorkflow {
                 ID_or_Quant_or_Both = ID_or_Quant_or_Both,
                 LRAA_no_norm = LRAA_no_norm,
                 LRAA_min_mapping_quality = LRAA_min_mapping_quality,
-                referenceAnnotation_reduced = referenceAnnotation_reduced,
-                referenceAnnotation_full = referenceAnnotation_full
+                referenceAnnotation_reduced_chroms = splitBAMByChromosome.chromosomeGTFs_reduced,
+                referenceAnnotation_full_chroms = splitBAMByChromosome.chromosomeGTFs_full
         }
     }
 
