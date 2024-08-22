@@ -12,6 +12,7 @@ task splitBAMByChromosome {
     command <<<
         set -eo pipefail
         
+        # Index the BAM file if the index does not exist
         if [ ! -f "~{inputBAM}.bai" ]; then
             samtools index -@ ~{threads} ~{inputBAM}
         fi
@@ -22,6 +23,7 @@ task splitBAMByChromosome {
         
         main_chromosomes="~{main_chromosomes}"
         
+        # Split BAM by main chromosomes
         for chr in $main_chromosomes; do
             samtools view -@ ~{threads} -b ~{inputBAM} $chr > split_bams/$chr.bam
             if [ -f "~{referenceAnnotation_reduced}" ]; then
@@ -35,12 +37,14 @@ task splitBAMByChromosome {
         # Handle other contigs
         samtools idxstats ~{inputBAM} | cut -f1 | grep -v -E $(echo $main_chromosomes | sed 's/ /|/g') > other_contigs.txt
         
-        if [ -s other_contigs.txt ]; then
+        # Ensure other_contigs.txt is not empty and has valid content before proceeding
+        if [ -s other_contigs.txt ] && grep -qE '^[^#]' other_contigs.txt; then
             samtools view -@ ~{threads} -b ~{inputBAM} -o split_bams/other_contigs.bam -L other_contigs.txt
         else
             touch split_bams/other_contigs.bam
         fi
         
+        # Split GTF files for other contigs, ensuring files exist before attempting to grep
         if [ -f "~{referenceAnnotation_reduced}" ]; then
             grep -vE "($(echo $main_chromosomes | sed 's/ /|/g'))" ~{referenceAnnotation_reduced} > split_gtf_reduced/other_contigs.gtf || true
         fi
