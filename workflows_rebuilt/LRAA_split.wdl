@@ -89,9 +89,8 @@ task lraaPerChromosome {
         Array[File] referenceAnnotation_full_chroms
         Int? LRAA_min_mapping_quality
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/lraa/lraa:latest"
-        File? FilterReducedGTF = FilterReducedGTF.selectedGTF
-        File? FilterFullGTF = FilterFullGTF.selectedGTF
-    }
+        File? FilterReducedGTF
+        File? FilterFullGTF
 
     String chrName = basename(inputBAM, '.bam')
     String no_norm_flag = if defined(LRAA_no_norm) && LRAA_no_norm then "--no_norm" else ""
