@@ -3,6 +3,8 @@ version 1.0
 task splitBAMByChromosome {
     input {
         File inputBAM
+        File? referenceAnnotation_reduced
+        File? referenceAnnotation_full
         String main_chromosomes = "chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX chrY"
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/lraa/lraa:latest"
         Int threads
@@ -15,18 +17,34 @@ task splitBAMByChromosome {
         fi
         
         mkdir -p split_bams
+        mkdir -p split_gtf_reduced
+        mkdir -p split_gtf_full
         
         main_chromosomes="~{main_chromosomes}"
         
         for chr in $main_chromosomes; do
             samtools view -@ ~{threads} -b ~{inputBAM} $chr > split_bams/$chr.bam
+            if [ -f "~{referenceAnnotation_reduced}" ]; then
+                grep "^$chr" ~{referenceAnnotation_reduced} > split_gtf_reduced/$chr.gtf || echo "" > split_gtf_reduced/$chr.gtf
+            fi
+            if [ -f "~{referenceAnnotation_full}" ]; then
+                grep "^$chr" ~{referenceAnnotation_full} > split_gtf_full/$chr.gtf || echo "" > split_gtf_full/$chr.gtf
+            fi
         done
         
         exclude_chroms=$(echo $main_chromosomes | sed 's/ / -e /g')
         samtools view -@ ~{threads} -b ~{inputBAM} -e $exclude_chroms > split_bams/other_contigs.bam
+        if [ -f "~{referenceAnnotation_reduced}" ]; then
+            grep -vE "($(echo $main_chromosomes | sed 's/ /|/g'))" ~{referenceAnnotation_reduced} > split_gtf_reduced/other_contigs.gtf
+        fi
+        if [ -f "~{referenceAnnotation_full}" ]; then
+            grep -vE "($(echo $main_chromosomes | sed 's/ /|/g'))" ~{referenceAnnotation_full} > split_gtf_full/other_contigs.gtf
+        fi
     >>>
     output {
         Array[File] chromosomeBAMs = glob("split_bams/*.bam")
+        Array[File] chromosomeGTFs_reduced = glob("split_gtf_reduced/*.gtf")
+        Array[File] chromosomeGTFs_full = glob("split_gtf_full/*.gtf")
     }
     runtime {
         docker: docker
@@ -41,43 +59,50 @@ task lraaPerChromosome {
         String OutDir
         Int numThreads
         Boolean? LRAA_no_norm
-        File? referenceAnnotation_reduced
-        File? referenceAnnotation_full
+        Array[File] referenceAnnotation_reduced_chroms
+        Array[File] referenceAnnotation_full_chroms
         Int? LRAA_min_mapping_quality
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/lraa/lraa:latest"
     }
 
+    # Extract chromosome name from BAM file name
+    String chrName = basename(inputBAM, '.bam')
+
     # Pre-calculate flags
     String no_norm_flag = if defined(LRAA_no_norm) && LRAA_no_norm then "--no_norm" else ""
     String min_mapping_quality_flag = if defined(LRAA_min_mapping_quality) then "--min_mapping_quality=" + LRAA_min_mapping_quality else ""
+
+    # Select the correct GTF files based on the chromosome name
+    File? selectedReducedGTF = select_first([for gtf in referenceAnnotation_reduced_chroms if basename(gtf, '.gtf') == chrName])
+    File? selectedFullGTF = select_first([for gtf in referenceAnnotation_full_chroms if basename(gtf, '.gtf') == chrName])
 
     command <<<
         mkdir -p ~{OutDir}/ID_reffree
         mkdir -p ~{OutDir}/ID_reduced
         mkdir -p ~{OutDir}/Quant_noEM_minMapQ
 
-        if [[ ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") && -f "~{referenceAnnotation_reduced}" ]]; then
+        if [[ ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") && -f "~{selectedReducedGTF}" ]]; then
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                  --bam ~{inputBAM} \
                                  --output_prefix ~{OutDir}/ID_reffree/LRAA \
                                  ~{no_norm_flag} --CPU ~{numThreads}
         fi
 
-        if [[ ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{referenceAnnotation_reduced}" ]]; then
+        if [[ ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{selectedReducedGTF}" ]]; then
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                  --bam ~{inputBAM} \
                                  --output_prefix ~{OutDir}/ID_reduced/LRAA_reduced \
                                  ~{no_norm_flag} \
-                                 --gtf ~{referenceAnnotation_reduced} --CPU ~{numThreads} 
+                                 --gtf ~{selectedReducedGTF} --CPU ~{numThreads} 
         fi
 
-        if [[ ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{referenceAnnotation_full}" && -n "~{LRAA_min_mapping_quality}" ]]; then
+        if [[ ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{selectedFullGTF}" && -n "~{LRAA_min_mapping_quality}" ]]; then
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                  --bam ~{inputBAM} \
                                  --output_prefix ~{OutDir}/Quant_noEM_minMapQ/LRAA.noEM.minMapQ \
                                  --quant_only \
                                  ~{no_norm_flag} \
-                                 --gtf ~{referenceAnnotation_full} \
+                                 --gtf ~{selectedFullGTF} \
                                  ~{min_mapping_quality_flag} --CPU ~{numThreads}
         fi
     >>>
