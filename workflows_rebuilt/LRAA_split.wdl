@@ -209,19 +209,19 @@ workflow lraaWorkflow {
 
     scatter (chrBAM in splitBAMByChromosome.chromosomeBAMs) {
         String chrName = basename(chrBAM, '.bam')
-
+    
         call FilterGTF as FilterReducedGTF {
             input:
                 gtfFiles = splitBAMByChromosome.chromosomeGTFs_reduced,
                 chrName = chrName
         }
-
+    
         call FilterGTF as FilterFullGTF {
             input:
                 gtfFiles = splitBAMByChromosome.chromosomeGTFs_full,
                 chrName = chrName
         }
-
+    
         call lraaPerChromosome {
             input:
                 inputBAM = chrBAM,
@@ -232,8 +232,8 @@ workflow lraaWorkflow {
                 ID_or_Quant_or_Both = ID_or_Quant_or_Both,
                 LRAA_no_norm = LRAA_no_norm,
                 LRAA_min_mapping_quality = LRAA_min_mapping_quality,
-                referenceAnnotation_reduced_chroms = [FilterReducedGTF.selectedGTF],
-                referenceAnnotation_full_chroms = [FilterFullGTF.selectedGTF]
+                referenceAnnotation_reduced_chroms = select_all([FilterReducedGTF.selectedGTF]),
+                referenceAnnotation_full_chroms = select_all([FilterFullGTF.selectedGTF])
         }
     }
 
