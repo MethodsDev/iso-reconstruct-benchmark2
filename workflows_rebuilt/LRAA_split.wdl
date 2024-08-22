@@ -26,10 +26,10 @@ task splitBAMByChromosome {
         # Split BAM by main chromosomes
         for chr in $main_chromosomes; do
             samtools view -@ ~{threads} -b ~{inputBAM} $chr > split_bams/$chr.bam
-            if [ -f "~{referenceAnnotation_reduced}" ]; then
+            if [ -n "~{referenceAnnotation_reduced}" ]; then
                 egrep ^$chr\b ~{referenceAnnotation_reduced} > split_gtf_reduced/$chr.gtf
             fi
-            if [ -f "~{referenceAnnotation_full}" ]; then
+            if [ -n "~{referenceAnnotation_full}" ]; then
                 egrep ^$chr\b ~{referenceAnnotation_full} > split_gtf_full/$chr.gtf
             fi
         done
