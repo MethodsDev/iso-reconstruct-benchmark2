@@ -28,17 +28,17 @@ task splitBAMByChromosome {
             samtools view -@ ~{threads} -b ~{inputBAM} $chr > split_bams/$chr.bam
             
             # Generate chromosome-specific FASTA from the whole genome
-            samtools faidx -@ ~{threads} ~{referenceGenome} $chr > split_bams/$chr.genome.fasta
+            samtools faidx ~{referenceGenome} $chr > split_bams/$chr.genome.fasta
             
-            # Generate chromosome-specific GTF for reduced annotation, if available
-            if [ -f "~{referenceAnnotation_reduced}" ]; then
-                awk -v chr=$chr '$1 == chr {print;}' ~{referenceAnnotation_reduced} > split_bams/$chr.reduced.annot.gtf
-            fi
-            
-            # Generate chromosome-specific GTF for full annotation, if available
-            if [ -f "~{referenceAnnotation_full}" ]; then
-                awk -v chr=$chr '$1 == chr {print;}' ~{referenceAnnotation_full} > split_bams/$chr.full.annot.gtf
-            fi
+        # Generate chromosome-specific GTF for reduced annotation, if available
+        if [ -f "~{referenceAnnotation_reduced}" ]; then
+            cat ~{referenceAnnotation_reduced} | perl -lane 'if ($F[0] eq "'$chr'") { print; }' > split_bams/$chr.reduced.annot.gtf
+        fi
+        
+        # Generate chromosome-specific GTF for full annotation, if available
+        if [ -f "~{referenceAnnotation_full}" ]; then
+            cat ~{referenceAnnotation_full} | perl -lane 'if ($F[0] eq "'$chr'") { print; }' > split_bams/$chr.full.annot.gtf
+        fi
         done
     >>>
 
