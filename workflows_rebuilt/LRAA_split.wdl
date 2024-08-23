@@ -171,7 +171,7 @@ workflow lraaWorkflow {
         Int cpu = 2
         Int numThreads = 4
         Int memoryGB = 32
-        Int diskSizeGB = 512
+        Int diskSizeGB = 1024
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/lraa/lraa:latest"
         File? referenceAnnotation_reduced
         File? referenceAnnotation_full
