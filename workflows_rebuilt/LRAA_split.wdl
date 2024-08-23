@@ -49,6 +49,7 @@ task splitBAMByChromosome {
 
     runtime {
         docker: docker
+        bootDiskSizeGb: 30
     }
 }
 
@@ -111,6 +112,7 @@ task lraaPerChromosome {
 
     runtime {
         docker: docker
+        bootDiskSizeGb: 30
     }
 }
 
