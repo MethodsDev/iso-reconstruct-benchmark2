@@ -58,8 +58,8 @@ task lraaPerChromosome {
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                      --bam ~{inputBAM} \
                                      --output_prefix ~{OutDir}/ID_reffree/LRAA \
-                                     ~{no_norm_flag} --CPU ~{numThreads} \
-                                     --contig ~{chrName}
+                                     ~{no_norm_flag} --CPU ~{numThreads} #\
+#                                     --contig ~{chrName}
         fi
     
         if [[ ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") && -f "~{referenceAnnotation_reduced}" ]]; then
@@ -67,8 +67,8 @@ task lraaPerChromosome {
                                      --bam ~{inputBAM} \
                                      --output_prefix ~{OutDir}/ID_reduced/LRAA_reduced \
                                      ~{no_norm_flag} \
-                                     --gtf ~{referenceAnnotation_reduced} --CPU ~{numThreads} \
-                                     --contig ~{chrName}
+                                     --gtf ~{referenceAnnotation_reduced} --CPU ~{numThreads} #\
+#                                     --contig ~{chrName}
         fi
     
         if [[ ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both") && -f "~{referenceAnnotation_full}" ]]; then
@@ -78,8 +78,8 @@ task lraaPerChromosome {
                                      --quant_only \
                                      ~{no_norm_flag} \
                                      --gtf ~{referenceAnnotation_full} \
-                                     ~{min_mapping_quality_flag} --CPU ~{numThreads} \
-                                     --contig ~{chrName}
+                                     ~{min_mapping_quality_flag} --CPU ~{numThreads} #\
+#                                     --contig ~{chrName}
         fi
     >>>
 
