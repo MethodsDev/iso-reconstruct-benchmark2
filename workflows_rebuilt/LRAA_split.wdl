@@ -186,7 +186,7 @@ workflow lraaWorkflow {
             main_chromosomes = main_chromosomes,
             docker = docker,
             threads = numThreads,
-            ref_genome_fasta = referenceGenome,
+            referenceGenome = referenceGenome,
             referenceAnnotation_reduced = referenceAnnotation_reduced,
             referenceAnnotation_full = referenceAnnotation_full
     }
