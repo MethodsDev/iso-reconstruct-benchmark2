@@ -10,14 +10,23 @@ task splitBAMByChromosome {
 
     command <<<
         set -eo pipefail
-        mkdir split_bams
-
+        mkdir -p split_bams
+        
+        # Check if BAM index exists, if not, index the input BAM
         if [ ! -f "~{inputBAM}.bai" ]; then
             samtools index -@ ~{threads} ~{inputBAM}
         fi
-
+        
+        # Loop through each chromosome
         for chr in ~{main_chromosomes}; do
+            # Generate chromosome-specific BAM
             samtools view -@ ~{threads} -b ~{inputBAM} $chr > split_bams/$chr.bam
+            
+            # Generate chromosome-specific FASTA from the whole genome
+            samtools faidx ~{ref_genome_fasta} $chr > split_bams/$chr.genome.fasta
+            
+            # Generate chromosome-specific GTF using awk
+            awk -v chr=$chr '$1 == chr {print;}' ~{annotation_gtf} > split_bams/$chr.annot.gtf
         done
     >>>
 
