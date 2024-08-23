@@ -12,7 +12,6 @@ task splitBAMByChromosome {
         set -eo pipefail
         mkdir split_bams
 
-        # Check if BAM index exists, if not, create it
         if [ ! -f "~{inputBAM}.bai" ]; then
             samtools index -@ ~{threads} ~{inputBAM}
         fi
