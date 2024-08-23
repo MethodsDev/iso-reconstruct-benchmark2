@@ -58,7 +58,7 @@ task lraaPerChromosome {
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                      --bam ~{inputBAM} \
                                      --output_prefix ~{OutDir}/ID_reffree/LRAA \
-                                     ~{no_norm_flag} --CPU ~{numThreads} #\
+                                     ~{no_norm_flag} --CPU 1 #\
 #                                     --contig ~{chrName}
         fi
     
@@ -67,7 +67,7 @@ task lraaPerChromosome {
                                      --bam ~{inputBAM} \
                                      --output_prefix ~{OutDir}/ID_reduced/LRAA_reduced \
                                      ~{no_norm_flag} \
-                                     --gtf ~{referenceAnnotation_reduced} --CPU ~{numThreads} #\
+                                     --gtf ~{referenceAnnotation_reduced} --CPU 1 #\
 #                                     --contig ~{chrName}
         fi
     
@@ -78,7 +78,7 @@ task lraaPerChromosome {
                                      --quant_only \
                                      ~{no_norm_flag} \
                                      --gtf ~{referenceAnnotation_full} \
-                                     ~{min_mapping_quality_flag} --CPU ~{numThreads} #\
+                                     ~{min_mapping_quality_flag} --CPU 1 #\
 #                                     --contig ~{chrName}
         fi
     >>>
