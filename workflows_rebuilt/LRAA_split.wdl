@@ -43,10 +43,10 @@ task splitBAMByChromosome {
     >>>
 
     output {
-        Array[File] chromosomeBAMs = glob("split_bams/*.bam")
-        Array[File] chromosomeFASTAs = glob("split_bams/*.genome.fasta")
-        Array[File] reducedAnnotations = glob("split_bams/*.reduced.annot.gtf")
-        Array[File] fullAnnotations = glob("split_bams/*.full.annot.gtf")
+        Array[File] chromosomeBAMs = select_first(glob("split_bams/*.bam"))
+        Array[File] chromosomeFASTAs = select_first(glob("split_bams/*.genome.fasta"))
+        Array[File] reducedAnnotations = select_first(glob("split_bams/*.reduced.annot.gtf"))
+        Array[File] fullAnnotations = select_first(glob("split_bams/*.full.annot.gtf"))
     }
 
     runtime {
