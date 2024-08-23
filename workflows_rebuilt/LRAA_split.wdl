@@ -50,6 +50,9 @@ task splitBAMByChromosome {
     runtime {
         docker: docker
         bootDiskSizeGb: 30
+        cpu: "~{cpu}"
+        memory: "~{memoryGB} GiB"
+        disks: "local-disk ~{diskSizeGB} HDD"
     }
 }
 
@@ -113,6 +116,9 @@ task lraaPerChromosome {
     runtime {
         docker: docker
         bootDiskSizeGb: 30
+        cpu: "~{cpu}"
+        memory: "~{memoryGB} GiB"
+        disks: "local-disk ~{diskSizeGB} HDD"
     }
 }
 
@@ -149,6 +155,9 @@ task mergeResults {
 
     runtime {
         docker: docker
+        cpu: "~{cpu}"
+        memory: "~{memoryGB} GiB"
+        disks: "local-disk ~{diskSizeGB} HDD"
     }
 }
 
