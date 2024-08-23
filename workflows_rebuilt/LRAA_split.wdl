@@ -9,6 +9,8 @@ task splitBAMByChromosome {
         File referenceGenome
         File? referenceAnnotation_reduced
         File? referenceAnnotation_full
+        Int memoryGB
+        Int diskSizeGB
     }
 
     command <<<
@@ -67,6 +69,8 @@ task lraaPerChromosome {
         Int? LRAA_min_mapping_quality
         File? referenceAnnotation_reduced
         File? referenceAnnotation_full
+        Int memoryGB
+        Int diskSizeGB
     }
 
     String chrName = basename(inputBAM, '.bam')
@@ -115,7 +119,7 @@ task lraaPerChromosome {
     runtime {
         docker: docker
         bootDiskSizeGb: 30
-        cpu: "~{cpu}"
+        cpu: "~{numThreads}"
         memory: "~{memoryGB} GiB"
         disks: "local-disk ~{diskSizeGB} HDD"
     }
@@ -127,6 +131,8 @@ task mergeResults {
         String outputFile
         String docker
         Boolean isGTF
+        Int memoryGB
+        Int diskSizeGB
     }
 
     command <<<
@@ -154,7 +160,7 @@ task mergeResults {
 
     runtime {
         docker: docker
-        cpu: "~{cpu}"
+        cpu: 1
         memory: "~{memoryGB} GiB"
         disks: "local-disk ~{diskSizeGB} HDD"
     }
@@ -187,7 +193,9 @@ workflow lraaWorkflow {
             threads = numThreads,
             referenceGenome = referenceGenome,
             referenceAnnotation_reduced = referenceAnnotation_reduced,
-            referenceAnnotation_full = referenceAnnotation_full
+            referenceAnnotation_full = referenceAnnotation_full,
+            memoryGB = memoryGB,
+            diskSizeGB = diskSizeGB
     }
 
     scatter (i in range(length(splitBAMByChromosome.chromosomeBAMs))) {
@@ -202,7 +210,9 @@ workflow lraaWorkflow {
                 LRAA_no_norm = LRAA_no_norm,
                 LRAA_min_mapping_quality = LRAA_min_mapping_quality,
                 referenceAnnotation_reduced = select_first([splitBAMByChromosome.reducedAnnotations[i]]),
-                referenceAnnotation_full = select_first([splitBAMByChromosome.fullAnnotations[i]])
+                referenceAnnotation_full = select_first([splitBAMByChromosome.fullAnnotations[i]]),
+                memoryGB = memoryGB,
+                diskSizeGB = diskSizeGB
         }
     }
 
@@ -213,7 +223,9 @@ workflow lraaWorkflow {
             inputFiles = reffreeGTFFiles,
             outputFile = OutDir + "/merged_reffree_ID",
             docker = docker,
-            isGTF = true
+            isGTF = true,
+            memoryGB = memoryGB,
+            diskSizeGB = diskSizeGB
     }
 
     # Collect and merge reduced GTF files
@@ -223,7 +235,9 @@ workflow lraaWorkflow {
             inputFiles = reducedGTFFiles,
             outputFile = OutDir + "/merged_reduced_ID",
             docker = docker,
-            isGTF = true
+            isGTF = true,
+            memoryGB = memoryGB,
+            diskSizeGB = diskSizeGB
     }
 
     Array[File?] quantExprFiles = select_all(lraaPerChromosome.lraaQuantExpr)
@@ -234,7 +248,9 @@ workflow lraaWorkflow {
             inputFiles = quantExprFiles,
             outputFile = OutDir + "/merged_Quant",
             docker = docker,
-            isGTF = false
+            isGTF = false,
+            memoryGB = memoryGB,
+            diskSizeGB = diskSizeGB
     }
 
     call mergeResults as mergeQuantTracking {
@@ -242,7 +258,9 @@ workflow lraaWorkflow {
             inputFiles = quantTrackingFiles,
             outputFile = OutDir + "/merged_Quant.tracking",
             docker = docker,
-            isGTF = false
+            isGTF = false,
+            memoryGB = memoryGB,
+            diskSizeGB = diskSizeGB
     }
 
     output {
