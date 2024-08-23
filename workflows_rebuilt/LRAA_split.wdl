@@ -80,8 +80,7 @@ task lraaPerChromosome {
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                      --bam ~{inputBAM} \
                                      --output_prefix ~{OutDir}/ID_reffree/LRAA \
-                                     ~{no_norm_flag} --CPU 1 #\
-#                                     --contig ~{chrName}
+                                     ~{no_norm_flag} --CPU 1
         fi
     
         if [[ ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") && -f "~{referenceAnnotation_reduced}" ]]; then
@@ -89,8 +88,7 @@ task lraaPerChromosome {
                                      --bam ~{inputBAM} \
                                      --output_prefix ~{OutDir}/ID_reduced/LRAA_reduced \
                                      ~{no_norm_flag} \
-                                     --gtf ~{referenceAnnotation_reduced} --CPU 1 #\
-#                                     --contig ~{chrName}
+                                     --gtf ~{referenceAnnotation_reduced} --CPU 1
         fi
     
         if [[ ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both") && -f "~{referenceAnnotation_full}" ]]; then
@@ -100,8 +98,7 @@ task lraaPerChromosome {
                                      --quant_only \
                                      ~{no_norm_flag} \
                                      --gtf ~{referenceAnnotation_full} \
-                                     ~{min_mapping_quality_flag} --CPU 1 #\
-#                                     --contig ~{chrName}
+                                     ~{min_mapping_quality_flag} --CPU 1
         fi
     >>>
 
@@ -183,19 +180,19 @@ workflow lraaWorkflow {
             referenceAnnotation_full = referenceAnnotation_full
     }
 
-    scatter (chrBAM in splitBAMByChromosome.chromosomeBAMs) {
+    scatter (i in range(length(splitBAMByChromosome.chromosomeBAMs))) {
         call lraaPerChromosome {
             input:
-                inputBAM = chrBAM,
-                referenceGenome = splitBAMByChromosome.chromosomeFASTAs[chrBAM],
+                inputBAM = splitBAMByChromosome.chromosomeBAMs[i],
+                referenceGenome = splitBAMByChromosome.chromosomeFASTAs[i],
                 OutDir = OutDir,
                 docker = docker,
                 numThreads = numThreads,
                 ID_or_Quant_or_Both = ID_or_Quant_or_Both,
                 LRAA_no_norm = LRAA_no_norm,
                 LRAA_min_mapping_quality = LRAA_min_mapping_quality,
-                referenceAnnotation_reduced = splitBAMByChromosome.reducedAnnotations[chrBAM],
-                referenceAnnotation_full = splitBAMByChromosome.fullAnnotations[chrBAM]
+                referenceAnnotation_reduced = splitBAMByChromosome.reducedAnnotations[i],
+                referenceAnnotation_full = splitBAMByChromosome.fullAnnotations[i]
         }
     }
 
