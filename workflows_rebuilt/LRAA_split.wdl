@@ -110,12 +110,11 @@ task lraaPerChromosome {
     >>>
 
     output {
-        File? lraaID_reffree_GTF = glob("~{OutDir}/*_reffree.gtf")[0]
-        File? lraaID_reduced_GTF = glob("~{OutDir}/*_reduced.gtf")[0]
-        File? lraaQuantExpr = glob("~{OutDir}/*.expr")[0]
-        File? lraaQuantTracking = glob("~{OutDir}/*.tracking")[0]
+        Array[File?] lraaID_reffree_GTF = glob("~{OutDir}/*_reffree.gtf")
+        Array[File?] lraaID_reduced_GTF = glob("~{OutDir}/*_reduced.gtf")
+        Array[File?] lraaQuantExpr = glob("~{OutDir}/*.expr")
+        Array[File?] lraaQuantTracking = glob("~{OutDir}/*.tracking")
     }
-
     runtime {
         docker: docker
         bootDiskSizeGb: 30
