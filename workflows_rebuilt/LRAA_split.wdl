@@ -191,8 +191,8 @@ workflow lraaWorkflow {
                 ID_or_Quant_or_Both = ID_or_Quant_or_Both,
                 LRAA_no_norm = LRAA_no_norm,
                 LRAA_min_mapping_quality = LRAA_min_mapping_quality,
-                referenceAnnotation_reduced = splitBAMByChromosome.reducedAnnotations[i],
-                referenceAnnotation_full = splitBAMByChromosome.fullAnnotations[i]
+                referenceAnnotation_reduced = select_first([splitBAMByChromosome.reducedAnnotations[i]]),
+                referenceAnnotation_full = select_first([splitBAMByChromosome.fullAnnotations[i]])
         }
     }
 
