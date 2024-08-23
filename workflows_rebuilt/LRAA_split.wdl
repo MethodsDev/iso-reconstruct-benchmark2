@@ -43,10 +43,10 @@ task splitBAMByChromosome {
     >>>
 
     output {
-        Array[File] chromosomeBAMs = select_first(glob("split_bams/*.bam"))
-        Array[File] chromosomeFASTAs = select_first(glob("split_bams/*.genome.fasta"))
-        Array[File] reducedAnnotations = select_first(glob("split_bams/*.reduced.annot.gtf"))
-        Array[File] fullAnnotations = select_first(glob("split_bams/*.full.annot.gtf"))
+        Array[File] chromosomeBAMs = glob("split_bams/*.bam")
+        Array[File] chromosomeFASTAs = glob("split_bams/*.genome.fasta")
+        Array[File] reducedAnnotations = glob("split_bams/*.reduced.annot.gtf")
+        Array[File] fullAnnotations = glob("split_bams/*.full.annot.gtf")
     }
 
     runtime {
@@ -110,10 +110,10 @@ task lraaPerChromosome {
     >>>
 
     output {
-        Array[File?] lraaID_reffree_GTF = glob("~{OutDir}/*_reffree.gtf")
-        Array[File?] lraaID_reduced_GTF = glob("~{OutDir}/*_reduced.gtf")
-        Array[File?] lraaQuantExpr = glob("~{OutDir}/*.expr")
-        Array[File?] lraaQuantTracking = glob("~{OutDir}/*.tracking")
+        Array[File?] lraaID_reffree_GTF = select_first(glob("~{OutDir}/*_reffree.gtf"))
+        Array[File?] lraaID_reduced_GTF = select_first(glob("~{OutDir}/*_reduced.gtf"))
+        Array[File?] lraaQuantExpr = select_first(glob("~{OutDir}/*.expr"))
+        Array[File?] lraaQuantTracking = select_first(glob("~{OutDir}/*.tracking"))
     }
     runtime {
         docker: docker
