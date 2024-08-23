@@ -188,7 +188,7 @@ workflow lraaWorkflow {
         input:
             inputBAM = inputBAM,
             main_chromosomes = main_chromosomes,
-            docker = docker,x
+            docker = docker,
             threads = numThreads,
             referenceGenome = referenceGenome,
             referenceAnnotation_reduced = referenceAnnotation_reduced,
