@@ -50,7 +50,6 @@ task splitBAMByChromosome {
     runtime {
         docker: docker
         bootDiskSizeGb: 30
-        cpu: "~{cpu}"
         memory: "~{memoryGB} GiB"
         disks: "local-disk ~{diskSizeGB} HDD"
     }
