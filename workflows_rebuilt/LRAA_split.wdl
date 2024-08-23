@@ -11,7 +11,12 @@ task splitBAMByChromosome {
     command <<<
         set -eo pipefail
         mkdir split_bams
-        samtools view -@ ~{threads} -H ~{inputBAM} > header.sam
+
+        # Check if BAM index exists, if not, create it
+        if [ ! -f "~{inputBAM}.bai" ]; then
+            samtools index -@ ~{threads} ~{inputBAM}
+        fi
+
         for chr in ~{main_chromosomes}; do
             samtools view -@ ~{threads} -b ~{inputBAM} $chr > split_bams/$chr.bam
         done
