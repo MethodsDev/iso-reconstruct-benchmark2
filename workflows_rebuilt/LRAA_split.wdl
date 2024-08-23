@@ -177,22 +177,25 @@ workflow lraaWorkflow {
             inputBAM = inputBAM,
             main_chromosomes = main_chromosomes,
             docker = docker,
-            threads = numThreads
+            threads = numThreads,
+            ref_genome_fasta = referenceGenome,
+            referenceAnnotation_reduced = referenceAnnotation_reduced,
+            referenceAnnotation_full = referenceAnnotation_full
     }
 
     scatter (chrBAM in splitBAMByChromosome.chromosomeBAMs) {
         call lraaPerChromosome {
             input:
                 inputBAM = chrBAM,
-                referenceGenome = referenceGenome,
+                referenceGenome = splitBAMByChromosome.chromosomeFASTAs[chrBAM],
                 OutDir = OutDir,
                 docker = docker,
                 numThreads = numThreads,
                 ID_or_Quant_or_Both = ID_or_Quant_or_Both,
                 LRAA_no_norm = LRAA_no_norm,
                 LRAA_min_mapping_quality = LRAA_min_mapping_quality,
-                referenceAnnotation_reduced = referenceAnnotation_reduced,
-                referenceAnnotation_full = referenceAnnotation_full
+                referenceAnnotation_reduced = splitBAMByChromosome.reducedAnnotations[chrBAM],
+                referenceAnnotation_full = splitBAMByChromosome.fullAnnotations[chrBAM]
         }
     }
 
