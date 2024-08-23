@@ -6,7 +6,7 @@ task splitBAMByChromosome {
         String main_chromosomes
         String docker
         Int threads
-        File ref_genome_fasta
+        File referenceGenome
         File? referenceAnnotation_reduced
         File? referenceAnnotation_full
     }
@@ -26,7 +26,7 @@ task splitBAMByChromosome {
             samtools view -@ ~{threads} -b ~{inputBAM} $chr > split_bams/$chr.bam
             
             # Generate chromosome-specific FASTA from the whole genome
-            samtools faidx -@ ~{threads} ~{ref_genome_fasta} $chr > split_bams/$chr.genome.fasta
+            samtools faidx -@ ~{threads} ~{referenceGenome} $chr > split_bams/$chr.genome.fasta
             
             # Generate chromosome-specific GTF for reduced annotation, if available
             if [ -f "~{referenceAnnotation_reduced}" ]; then
