@@ -6,6 +6,9 @@ task splitBAMByChromosome {
         String main_chromosomes
         String docker
         Int threads
+        File ref_genome_fasta
+        File? referenceAnnotation_reduced
+        File? referenceAnnotation_full
     }
 
     command <<<
@@ -25,13 +28,23 @@ task splitBAMByChromosome {
             # Generate chromosome-specific FASTA from the whole genome
             samtools faidx ~{ref_genome_fasta} $chr > split_bams/$chr.genome.fasta
             
-            # Generate chromosome-specific GTF using awk
-            awk -v chr=$chr '$1 == chr {print;}' ~{annotation_gtf} > split_bams/$chr.annot.gtf
+            # Generate chromosome-specific GTF for reduced annotation, if available
+            if [ -f "~{referenceAnnotation_reduced}" ]; then
+                awk -v chr=$chr '$1 == chr {print;}' ~{referenceAnnotation_reduced} > split_bams/$chr.reduced.annot.gtf
+            fi
+            
+            # Generate chromosome-specific GTF for full annotation, if available
+            if [ -f "~{referenceAnnotation_full}" ]; then
+                awk -v chr=$chr '$1 == chr {print;}' ~{referenceAnnotation_full} > split_bams/$chr.full.annot.gtf
+            fi
         done
     >>>
 
     output {
         Array[File] chromosomeBAMs = glob("split_bams/*.bam")
+        Array[File] chromosomeFASTAs = glob("split_bams/*.genome.fasta")
+        Array[File] reducedAnnotations = glob("split_bams/*.reduced.annot.gtf")
+        Array[File] fullAnnotations = glob("split_bams/*.full.annot.gtf")
     }
 
     runtime {
