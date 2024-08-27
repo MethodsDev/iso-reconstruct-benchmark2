@@ -219,10 +219,10 @@ workflow lraaWorkflow {
         }
     }
 
-    Array[File] reffreeGTFFiles = flatten(select_all(lraaPerChromosome.lraaID_reffree_GTF))
-    Array[File] reducedGTFFiles = flatten(select_all(lraaPerChromosome.lraaID_reduced_GTF))
-    Array[File] quantExprFiles = flatten(select_all(lraaPerChromosome.lraaQuantExpr))
-    Array[File] quantTrackingFiles = flatten(select_all(lraaPerChromosome.lraaQuantTracking))
+    Array[File?] reffreeGTFFiles = flatten(select_all(lraaPerChromosome.lraaID_reffree_GTF))
+    Array[File?] reducedGTFFiles = flatten(select_all(lraaPerChromosome.lraaID_reduced_GTF))
+    Array[File?] quantExprFiles = flatten(select_all(lraaPerChromosome.lraaQuantExpr))
+    Array[File?] quantTrackingFiles = flatten(select_all(lraaPerChromosome.lraaQuantTracking))
         
     call mergeResults as mergeReffreeGTF {
         input:
