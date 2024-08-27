@@ -256,7 +256,7 @@ workflow lraaWorkflow {
 
     call mergeResults as mergeQuantTracking {
         input:
-            inputFiles = lraaPerChromosome.lraaQuantTrackin,
+            inputFiles = lraaPerChromosome.lraaQuantTracking,  # Corrected typo here
             outputFile = OutDir + "/merged_Quant.tracking",
             docker = docker,
             isGTF = false,
