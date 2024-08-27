@@ -131,6 +131,7 @@ task mergeResults {
         String outputFile
         String docker
         Boolean isGTF
+        Boolean isTracking = false  # Add a flag for tracking files
         Int memoryGB
         Int diskSizeGB
     }
@@ -142,6 +143,8 @@ task mergeResults {
         ext=""
         if [[ ~{isGTF} == true ]]; then
             ext=".gtf"
+        elif [[ ~{isTracking} == true ]]; then
+            ext=".tracking"  # Handle .tracking extension
         else
             ext=".expr"
         fi
@@ -155,7 +158,7 @@ task mergeResults {
     >>>
 
     output {
-        File mergedFile = "~{outputFile}" + (if isGTF then ".gtf" else ".expr")
+        File mergedFile = "~{outputFile}" + (if isGTF then ".gtf" else if isTracking then ".tracking" else ".expr")
     }
 
     runtime {
