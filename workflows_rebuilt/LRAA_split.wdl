@@ -224,7 +224,7 @@ workflow lraaWorkflow {
     
     call mergeResults as mergeReffreeGTF {
         input:
-            inputFiles = flatten(lraaPerChromosome.lraaID_reffree_GTF),
+            inputFiles = reffreeGTFFiles,
             outputFile = OutDir + "/merged_reffree_ID",
             docker = docker,
             isGTF = true,
