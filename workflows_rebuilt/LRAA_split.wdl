@@ -110,10 +110,10 @@ task lraaPerChromosome {
     >>>
 
     output {
-        File? lraaID_reffree_GTF = [select_first(glob("~{OutDir}/ID_reffree/*_reffree.gtf"))]
-        File? lraaID_reduced_GTF = [select_first(glob("~{OutDir}/ID_reduced/*_reduced.gtf"))]
-        File? lraaQuantExpr = [select_first(glob("~{OutDir}/Quant_noEM_minMapQ/*.expr"))]
-        File? lraaQuantTracking = [select_first(glob("~{OutDir}/Quant_noEM_minMapQ/*.tracking"))]
+        File lraaID_reffree_GTF = select_first(glob("~{OutDir}/ID_reffree/*_reffree.gtf"))
+        File lraaID_reduced_GTF = select_first(glob("~{OutDir}/ID_reduced/*_reduced.gtf"))
+        File lraaQuantExpr = select_first(glob("~{OutDir}/Quant_noEM_minMapQ/*.expr"))
+        File lraaQuantTracking = select_first(glob("~{OutDir}/Quant_noEM_minMapQ/*.tracking"))
     }
 
     runtime {
