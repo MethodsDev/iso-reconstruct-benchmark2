@@ -177,10 +177,13 @@ task mergeResults {
                 echo "File $file does not exist."
             fi
         done < input_files_list.txt
+
+        # Write the final output_file path to a file
+        echo $output_file > output_file_path.txt
     >>>
 
     output {
-        File mergedFile = output_file
+        File mergedFile = read_string("output_file_path.txt")
     }
 
     runtime {
