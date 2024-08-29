@@ -138,9 +138,8 @@ task mergeResults {
     command <<<
         set -eo pipefail
 
-        # Initialize output file name with the correct extension based on input flags
+        # Dynamically set the file extension based on input flags
         output_file="~{outputFile}"
-
         if [[ ~{isGTF} == true ]]; then
             output_file="$output_file.gtf"
         elif [[ ~{isTracking} == true ]]; then
@@ -151,34 +150,27 @@ task mergeResults {
 
         touch $output_file
 
-        # Write input files to a temporary file for better handling
+        # Process input files
         for file in ~{sep=" " inputFiles}; do
             echo $file >> input_files_list.txt
         done
 
-        # Check if inputFiles array is not empty
         if [ ! -s input_files_list.txt ]; then
             echo "No input files provided."
             exit 1
         fi
 
-        # Initialize a variable to track if the header has been added
         headerAdded=false
 
-        # Merge files
         while IFS= read -r file; do
             if [[ -f "$file" ]]; then
-                echo "Processing file: $file"
                 if [[ ~{isTracking} == true || "${file##*.}" == "expr" ]]; then
-                    # For the first file of tracking or quant type, extract and add the header
                     if [[ $headerAdded == false ]]; then
                         head -n 1 $file >> $output_file
                         headerAdded=true
                     fi
-                    # Append the rest of the file without the header
                     tail -n +2 $file >> $output_file
                 else
-                    # For GTF files or the first file if not tracking/quant, append the entire file
                     cat $file >> $output_file
                 fi
             else
@@ -198,6 +190,7 @@ task mergeResults {
         disks: "local-disk ~{diskSizeGB} HDD"
     }
 }
+
 
 workflow lraaWorkflow {
     input {
