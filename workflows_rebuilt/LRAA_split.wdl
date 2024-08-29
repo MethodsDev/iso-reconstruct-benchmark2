@@ -138,52 +138,42 @@ task mergeResults {
     command <<<
         set -eo pipefail
 
-        # Dynamically set the file extension based on input flags
-        output_file="~{outputFile}"
+        # Determine file extension based on file type
+        ext=""
         if [[ ~{isGTF} == true ]]; then
-            output_file="$output_file.gtf"
+            ext=".gtf"
         elif [[ ~{isTracking} == true ]]; then
-            output_file="$output_file.tracking"
+            ext=".tracking"
         else
-            output_file="$output_file.expr"
+            ext=".expr"
         fi
-
+        output_file="~{outputFile}"$ext
         touch $output_file
 
-        # Process input files
+        # Write input files to a temporary file for better handling
         for file in ~{sep=" " inputFiles}; do
             echo $file >> input_files_list.txt
         done
 
+        # Check if inputFiles array is not empty
         if [ ! -s input_files_list.txt ]; then
             echo "No input files provided."
             exit 1
         fi
 
-        headerAdded=false
-
+        # Merge files
         while IFS= read -r file; do
             if [[ -f "$file" ]]; then
-                if [[ ~{isTracking} == true || "${file##*.}" == "expr" ]]; then
-                    if [[ $headerAdded == false ]]; then
-                        head -n 1 $file >> $output_file
-                        headerAdded=true
-                    fi
-                    tail -n +2 $file >> $output_file
-                else
-                    cat $file >> $output_file
-                fi
+                echo "Processing file: $file"
+                cat $file >> $output_file
             else
                 echo "File $file does not exist."
             fi
         done < input_files_list.txt
-
-        # Write the final output_file path to a file
-        echo $output_file > output_file_path.txt
     >>>
 
     output {
-        File mergedFile = read_string("output_file_path.txt")
+        File mergedFile = "~{outputFile}" + (if isGTF then ".gtf" else if isTracking then ".tracking" else ".expr")
     }
 
     runtime {
@@ -193,7 +183,6 @@ task mergeResults {
         disks: "local-disk ~{diskSizeGB} HDD"
     }
 }
-
 
 workflow lraaWorkflow {
     input {
