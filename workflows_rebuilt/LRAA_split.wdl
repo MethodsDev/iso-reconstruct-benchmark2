@@ -161,11 +161,25 @@ task mergeResults {
             exit 1
         fi
 
+        # Initialize a variable to track if the header has been added
+        headerAdded=false
+
         # Merge files
         while IFS= read -r file; do
             if [[ -f "$file" ]]; then
                 echo "Processing file: $file"
-                cat $file >> $output_file
+                if [[ ~{isTracking} == true || ~{ext} == ".expr" ]]; then
+                    # For the first file of tracking or quant type, extract and add the header
+                    if [[ $headerAdded == false ]]; then
+                        head -n 1 $file >> $output_file
+                        headerAdded=true
+                    fi
+                    # Append the rest of the file without the header
+                    tail -n +2 $file >> $output_file
+                else
+                    # For GTF files or the first file if not tracking/quant, append the entire file
+                    cat $file >> $output_file
+                fi
             else
                 echo "File $file does not exist."
             fi
