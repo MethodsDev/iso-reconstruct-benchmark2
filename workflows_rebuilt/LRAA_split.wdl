@@ -138,16 +138,17 @@ task mergeResults {
     command <<<
         set -eo pipefail
 
-        # Determine file extension based on file type
-        ext=""
+        # Initialize output file name with the correct extension based on input flags
+        output_file="~{outputFile}"
+
         if [[ ~{isGTF} == true ]]; then
-            ext=".gtf"
+            output_file="$output_file.gtf"
         elif [[ ~{isTracking} == true ]]; then
-            ext=".tracking"
+            output_file="$output_file.tracking"
         else
-            ext=".expr"
+            output_file="$output_file.expr"
         fi
-        output_file="~{outputFile}"$ext
+
         touch $output_file
 
         # Write input files to a temporary file for better handling
@@ -168,7 +169,6 @@ task mergeResults {
         while IFS= read -r file; do
             if [[ -f "$file" ]]; then
                 echo "Processing file: $file"
-                # Adjusted condition to not use 'ext'
                 if [[ ~{isTracking} == true || "${file##*.}" == "expr" ]]; then
                     # For the first file of tracking or quant type, extract and add the header
                     if [[ $headerAdded == false ]]; then
@@ -188,7 +188,7 @@ task mergeResults {
     >>>
 
     output {
-        File mergedFile = "~{outputFile}" + (if isGTF then ".gtf" else if isTracking then ".tracking" else ".expr")
+        File mergedFile = output_file
     }
 
     runtime {
