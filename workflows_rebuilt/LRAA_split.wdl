@@ -161,11 +161,25 @@ task mergeResults {
             exit 1
         fi
 
+        # Initialize a variable to track if the first file is being processed
+        isFirstFile=true
+
         # Merge files
         while IFS= read -r file; do
             if [[ -f "$file" ]]; then
                 echo "Processing file: $file"
-                cat $file >> $output_file
+                # For the first file, always include the header
+                if [[ $isFirstFile == true ]]; then
+                    cat $file >> $output_file
+                    isFirstFile=false
+                else
+                    # For tracking and quant files, skip the header (assumed to be the first line)
+                    if [[ ~{isTracking} == true || ~{ext} == ".expr" ]]; then
+                        tail -n +2 $file >> $output_file
+                    else
+                        cat $file >> $output_file
+                    fi
+                fi
             else
                 echo "File $file does not exist."
             fi
