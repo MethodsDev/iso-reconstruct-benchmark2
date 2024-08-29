@@ -150,20 +150,26 @@ task mergeResults {
         output_file="~{outputFile}"$ext
         touch $output_file
 
+        # Write input files to a temporary file for better handling
+        for file in ~{sep=" " inputFiles}; do
+            echo $file >> input_files_list.txt
+        done
+
         # Check if inputFiles array is not empty
-        if [ ${#inputFiles[@]} -eq 0 ]; then
+        if [ ! -s input_files_list.txt ]; then
             echo "No input files provided."
             exit 1
         fi
 
         # Merge files
-        for file in ~{sep=" " inputFiles}; do
+        while IFS= read -r file; do
             if [[ -f "$file" ]]; then
+                echo "Processing file: $file"
                 cat $file >> $output_file
             else
                 echo "File $file does not exist."
             fi
-        done
+        done < input_files_list.txt
     >>>
 
     output {
@@ -177,6 +183,7 @@ task mergeResults {
         disks: "local-disk ~{diskSizeGB} HDD"
     }
 }
+
 workflow lraaWorkflow {
     input {
         File inputBAM
