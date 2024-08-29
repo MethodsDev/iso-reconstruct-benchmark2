@@ -228,14 +228,10 @@ workflow lraaWorkflow {
         }
     }
 
-#    Array[File?] reffreeGTFFiles = flatten(select_all(lraaPerChromosome.lraaID_reffree_GTF))
-#    Array[File?] reducedGTFFiles = flatten(select_all(lraaPerChromosome.lraaID_reduced_GTF))
-#    Array[File?] quantExprFiles = flatten(select_all(lraaPerChromosome.lraaQuantExpr))
-#    Array[File?] quantTrackingFiles = flatten(select_all(lraaPerChromosome.lraaQuantTracking))
-        
+
     call mergeResults as mergeReffreeGTF {
         input:
-            inputFiles = lraaPerChromosome.lraaID_reffree_GTF,
+            inputFiles = select_all(lraaPerChromosome.lraaID_reffree_GTF),
             outputFile = OutDir + "/merged_reffree_ID",
             docker = docker,
             isGTF = true,
@@ -246,7 +242,7 @@ workflow lraaWorkflow {
     
     call mergeResults as mergeReducedGTF {
         input:
-            inputFiles = lraaPerChromosome.lraaID_reduced_GTF,
+            inputFiles = select_all(lraaPerChromosome.lraaID_reduced_GTF),
             outputFile = OutDir + "/merged_reduced_ID",
             docker = docker,
             isGTF = true,
@@ -257,7 +253,7 @@ workflow lraaWorkflow {
     
     call mergeResults as mergeQuantExpr {
         input:
-            inputFiles = lraaPerChromosome.lraaQuantExpr,
+            inputFiles = select_all(lraaPerChromosome.lraaQuantExpr),
             outputFile = OutDir + "/merged_Quant",
             docker = docker,
             isGTF = false,
@@ -268,7 +264,7 @@ workflow lraaWorkflow {
     
     call mergeResults as mergeQuantTracking {
         input:
-            inputFiles = lraaPerChromosome.lraaQuantTracking,
+            inputFiles = select_all(lraaPerChromosome.lraaQuantTracking),
             outputFile = OutDir + "/merged_Quant.tracking",
             docker = docker,
             isGTF = false,
