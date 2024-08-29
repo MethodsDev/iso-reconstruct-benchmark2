@@ -168,7 +168,8 @@ task mergeResults {
         while IFS= read -r file; do
             if [[ -f "$file" ]]; then
                 echo "Processing file: $file"
-                if [[ ~{isTracking} == true || ~{ext} == ".expr" ]]; then
+                # Adjusted condition to not use 'ext'
+                if [[ ~{isTracking} == true || "${file##*.}" == "expr" ]]; then
                     # For the first file of tracking or quant type, extract and add the header
                     if [[ $headerAdded == false ]]; then
                         head -n 1 $file >> $output_file
