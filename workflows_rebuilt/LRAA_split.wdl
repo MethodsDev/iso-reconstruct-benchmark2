@@ -147,7 +147,6 @@ task mergeResults {
         else
             ext=".expr"
         fi
-
         output_file="~{outputFile}"$ext
         touch $output_file
 
@@ -232,7 +231,7 @@ workflow lraaWorkflow {
     call mergeResults as mergeReffreeGTF {
         input:
             inputFiles = select_all(lraaPerChromosome.lraaID_reffree_GTF),
-            outputFile = OutDir + "/merged_reffree_ID",
+            outputFile = "merged_reffree_ID",
             docker = docker,
             isGTF = true,
             isTracking = false,
@@ -243,7 +242,7 @@ workflow lraaWorkflow {
     call mergeResults as mergeReducedGTF {
         input:
             inputFiles = select_all(lraaPerChromosome.lraaID_reduced_GTF),
-            outputFile = OutDir + "/merged_reduced_ID",
+            outputFile = "merged_reduced_ID",
             docker = docker,
             isGTF = true,
             isTracking = false,
@@ -254,7 +253,7 @@ workflow lraaWorkflow {
     call mergeResults as mergeQuantExpr {
         input:
             inputFiles = select_all(lraaPerChromosome.lraaQuantExpr),
-            outputFile = OutDir + "/merged_Quant",
+            outputFile = "merged_Quant",
             docker = docker,
             isGTF = false,
             isTracking = true,
@@ -265,7 +264,7 @@ workflow lraaWorkflow {
     call mergeResults as mergeQuantTracking {
         input:
             inputFiles = select_all(lraaPerChromosome.lraaQuantTracking),
-            outputFile = OutDir + "/merged_Quant.tracking",
+            outputFile = "merged_Quant.tracking",
             docker = docker,
             isGTF = false,
             isTracking = false,            
