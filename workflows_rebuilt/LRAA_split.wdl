@@ -12,7 +12,7 @@ task splitBAMByChromosome {
         Int memoryGB
         Int diskSizeGB
     }
- 
+
     command <<<
         set -eo pipefail
         mkdir -p split_bams
