@@ -130,7 +130,7 @@ task mergeResults {
         String outputFile
         String docker
         Boolean isGTF
-        Boolean isTracking = false
+        Boolean isTracking
         Int memoryGB
         Int diskSizeGB
     }
@@ -239,6 +239,7 @@ workflow lraaWorkflow {
             outputFile = OutDir + "/merged_reffree_ID",
             docker = docker,
             isGTF = true,
+            isTracking = false,
             memoryGB = memoryGB,
             diskSizeGB = diskSizeGB
     }
@@ -249,6 +250,7 @@ workflow lraaWorkflow {
             outputFile = OutDir + "/merged_reduced_ID",
             docker = docker,
             isGTF = true,
+            isTracking = false,
             memoryGB = memoryGB,
             diskSizeGB = diskSizeGB
     }
@@ -259,6 +261,7 @@ workflow lraaWorkflow {
             outputFile = OutDir + "/merged_Quant",
             docker = docker,
             isGTF = false,
+            isTracking = true,
             memoryGB = memoryGB,
             diskSizeGB = diskSizeGB
     }
@@ -269,14 +272,15 @@ workflow lraaWorkflow {
             outputFile = OutDir + "/merged_Quant.tracking",
             docker = docker,
             isGTF = false,
+            isTracking = false,            
             memoryGB = memoryGB,
             diskSizeGB = diskSizeGB
     }
 
     output {
-        File mergedReffreeGTF = mergeReffreeGTF.mergedFile
-        File mergedReducedGTF = mergeReducedGTF.mergedFile
-        File mergedQuantExpr = mergeQuantExpr.mergedFile
-        File mergedQuantTracking = mergeQuantTracking.mergedFile
+        File? mergedReffreeGTF = mergeReffreeGTF.mergedFile
+        File? mergedReducedGTF = mergeReducedGTF.mergedFile
+        File? mergedQuantExpr = mergeQuantExpr.mergedFile
+        File? mergedQuantTracking = mergeQuantTracking.mergedFile
     }
 }
