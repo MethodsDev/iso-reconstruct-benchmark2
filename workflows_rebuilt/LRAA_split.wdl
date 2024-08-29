@@ -130,7 +130,7 @@ task mergeResults {
         String outputFile
         String docker
         Boolean isGTF
-        Boolean isTracking = false  # Add a flag for tracking files
+        Boolean isTracking = false
         Int memoryGB
         Int diskSizeGB
     }
@@ -143,15 +143,26 @@ task mergeResults {
         if [[ ~{isGTF} == true ]]; then
             ext=".gtf"
         elif [[ ~{isTracking} == true ]]; then
-            ext=".tracking"  # Handle .tracking extension
+            ext=".tracking"
         else
             ext=".expr"
+        fi
+
+        output_file="~{outputFile}"$ext
+        touch $output_file
+
+        # Check if inputFiles array is not empty
+        if [ ${#inputFiles[@]} -eq 0 ]; then
+            echo "No input files provided."
+            exit 1
         fi
 
         # Merge files
         for file in ~{sep=" " inputFiles}; do
             if [[ -f "$file" ]]; then
-                cat $file >> ~{outputFile}$ext
+                cat $file >> $output_file
+            else
+                echo "File $file does not exist."
             fi
         done
     >>>
@@ -167,7 +178,6 @@ task mergeResults {
         disks: "local-disk ~{diskSizeGB} HDD"
     }
 }
-
 workflow lraaWorkflow {
     input {
         File inputBAM
