@@ -135,6 +135,9 @@ task mergeResults {
         Int diskSizeGB
     }
 
+    # Preprocess inputFiles to remove nulls and convert to a space-separated string
+    String filteredInputFiles = join(" ", select_all(inputFiles))
+
     command <<<
         set -eo pipefail
 
@@ -151,14 +154,8 @@ task mergeResults {
         output_file="~{outputFile}"$ext
         touch $output_file
 
-        # Check if inputFiles array is not empty
-        if [ ${#inputFiles[@]} -eq 0 ]; then
-            echo "No input files provided."
-            exit 1
-        fi
-
         # Merge files
-        for file in ~{sep=" " inputFiles}; do
+        for file in ~{filteredInputFiles}; do
             if [[ -f "$file" ]]; then
                 cat $file >> $output_file
             else
@@ -178,6 +175,7 @@ task mergeResults {
         disks: "local-disk ~{diskSizeGB} HDD"
     }
 }
+
 workflow lraaWorkflow {
     input {
         File inputBAM
