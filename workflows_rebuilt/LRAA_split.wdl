@@ -161,11 +161,26 @@ task mergeResults {
             exit 1
         fi
 
-        # Merge files
+        # Initialize a variable to track if the header has been added (for tracking or quant files)
+        header_added=false
+
+        # Merge files with conditions
         while IFS= read -r file; do
             if [[ -f "$file" ]]; then
                 echo "Processing file: $file"
-                cat $file >> $output_file
+                if [[ ~{isGTF} == true ]]; then
+                    # For GTF files, concatenate all files
+                    cat $file >> $output_file
+                else
+                    # For tracking or quant files, handle header
+                    if [[ $header_added == false ]]; then
+                        cat $file >> $output_file
+                        header_added=true
+                    else
+                        # Skip the header line(s) and append the rest
+                        tail -n +2 $file >> $output_file
+                    fi
+                fi
             else
                 echo "File $file does not exist."
             fi
@@ -183,7 +198,6 @@ task mergeResults {
         disks: "local-disk ~{diskSizeGB} HDD"
     }
 }
-
 workflow lraaWorkflow {
     input {
         File inputBAM
