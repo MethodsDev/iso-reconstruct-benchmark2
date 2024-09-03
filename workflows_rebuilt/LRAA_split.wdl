@@ -75,7 +75,7 @@ task lraaPerChromosome {
 
     String chrName = basename(inputBAM, '.bam')
     String no_norm_flag = if defined(LRAA_no_norm) && LRAA_no_norm then "--no_norm" else ""
-    String min_mapping_quality_flag = if defined(LRAA_min_mapping_quality) then "--min_mapping_quality=" + LRAA_min_mapping_quality else ""
+    String min_mapping_quality_flag = "--min_mapping_quality=" + select_first([LRAA_min_mapping_quality, 0])
     
     command <<<
         mkdir -p ~{OutDir}/ID_reffree
@@ -83,7 +83,7 @@ task lraaPerChromosome {
         mkdir -p ~{OutDir}/Quant_noEM_minMapQ
     
         # Use contig_names in the LRAA command
-        if [[ ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") ]]; then   #&& -z "~{referenceAnnotation_reduced}"
+        if [[ ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") ]]; then
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                      --bam ~{inputBAM} \
                                      --output_prefix ~{OutDir}/ID_reffree/LRAA_reffree \
