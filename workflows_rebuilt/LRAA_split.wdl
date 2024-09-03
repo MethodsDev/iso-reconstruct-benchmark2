@@ -202,7 +202,7 @@ workflow lraaWorkflow {
     input {
         File inputBAM
         File referenceGenome
-        String IDQuantQuant_or_QuantOnly_or_Both
+        String IDQuant_or_QuantOnly_or_Both
         Int? LRAA_min_mapping_quality
         Boolean? LRAA_no_norm
         Int cpu = 2
