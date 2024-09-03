@@ -83,14 +83,14 @@ task lraaPerChromosome {
         mkdir -p ~{OutDir}/Quant_noEM_minMapQ
     
         # Use contig_names in the LRAA command
-        if [[ ("~{IDQuantQuant_or_QuantOnly_or_Both}" == "IDQuantQuant" || "~{IDQuant_or_QuantOnly_or_Both}" == "Both") && -z "~{referenceAnnotation_reduced}" ]]; then
+        if [[ ("~{IDQuant_or_QuantOnly_or_Both}" == "IDQuant" || "~{IDQuant_or_QuantOnly_or_Both}" == "Both") && -z "~{referenceAnnotation_reduced}" ]]; then
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                      --bam ~{inputBAM} \
                                      --output_prefix ~{OutDir}/ID_reffree/LRAA_reffree \
                                      ~{no_norm_flag} --CPU 1
         fi
     
-        if [[ ("~{IDQuant_or_QuantOnly_or_Both}" == "IDQuantQuant" || "~{IDQuant_or_QuantOnly_or_Both}" == "Both") && -f "~{referenceAnnotation_reduced}" ]]; then
+        if [[ ("~{IDQuant_or_QuantOnly_or_Both}" == "IDQuant" || "~{IDQuant_or_QuantOnly_or_Both}" == "Both") && -f "~{referenceAnnotation_reduced}" ]]; then
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                      --bam ~{inputBAM} \
                                      --output_prefix ~{OutDir}/ID_reduced/LRAA_reduced \
