@@ -238,7 +238,7 @@ workflow lraaWorkflow {
                 OutDir = OutDir,
                 docker = docker,
                 numThreads = numThreads,
-                IDQuantQuant_or_QuantOnly_or_Both = IDQuantQuant_or_QuantOnly_or_Both,
+                IDQuant_or_QuantOnly_or_Both = IDQuant_or_QuantOnly_or_Both,
                 LRAA_no_norm = LRAA_no_norm,
                 LRAA_min_mapping_quality = LRAA_min_mapping_quality,
                 referenceAnnotation_reduced = select_first([splitBAMByChromosome.reducedAnnotations[i]]),
