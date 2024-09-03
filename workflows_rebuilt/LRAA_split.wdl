@@ -64,7 +64,7 @@ task lraaPerChromosome {
         String OutDir
         String docker
         Int numThreads
-        String ID&Quant_or_QuantOnly_or_Both
+        String IDQuantQuant_or_QuantOnly_or_Both
         Boolean? LRAA_no_norm
         Int? LRAA_min_mapping_quality
         File? referenceAnnotation_reduced
@@ -83,14 +83,14 @@ task lraaPerChromosome {
         mkdir -p ~{OutDir}/Quant_noEM_minMapQ
     
         # Use contig_names in the LRAA command
-        if [[ ("~{ID&Quant_or_QuantOnly_or_Both}" == "ID&Quant" || "~{ID&Quant_or_QuantOnly_or_Both}" == "Both") && -z "~{referenceAnnotation_reduced}" ]]; then
+        if [[ ("~{IDQuantQuant_or_QuantOnly_or_Both}" == "IDQuantQuant" || "~{IDQuantQuant_or_QuantOnly_or_Both}" == "Both") && -z "~{referenceAnnotation_reduced}" ]]; then
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                      --bam ~{inputBAM} \
                                      --output_prefix ~{OutDir}/ID_reffree/LRAA_reffree \
                                      ~{no_norm_flag} --CPU 1
         fi
     
-        if [[ ("~{ID&Quant_or_QuantOnly_or_Both}" == "ID&Quant" || "~{ID&Quant_or_QuantOnly_or_Both}" == "Both") && -f "~{referenceAnnotation_reduced}" ]]; then
+        if [[ ("~{IDQuantQuant_or_QuantOnly_or_Both}" == "IDQuantQuant" || "~{IDQuantQuant_or_QuantOnly_or_Both}" == "Both") && -f "~{referenceAnnotation_reduced}" ]]; then
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                      --bam ~{inputBAM} \
                                      --output_prefix ~{OutDir}/ID_reduced/LRAA_reduced \
@@ -98,7 +98,7 @@ task lraaPerChromosome {
                                      --gtf ~{referenceAnnotation_reduced} --CPU 1
         fi
     
-        if [[ ("~{ID&Quant_or_QuantOnly_or_Both}" == "QuantOnly" || "~{ID&Quant_or_QuantOnly_or_Both}" == "Both") && -f "~{referenceAnnotation_full}" ]]; then
+        if [[ ("~{IDQuantQuant_or_QuantOnly_or_Both}" == "QuantOnly" || "~{IDQuantQuant_or_QuantOnly_or_Both}" == "Both") && -f "~{referenceAnnotation_full}" ]]; then
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                      --bam ~{inputBAM} \
                                      --output_prefix ~{OutDir}/Quant_noEM_minMapQ/LRAA.quant \
@@ -202,7 +202,7 @@ workflow lraaWorkflow {
     input {
         File inputBAM
         File referenceGenome
-        String ID&Quant_or_QuantOnly_or_Both
+        String IDQuantQuant_or_QuantOnly_or_Both
         Int? LRAA_min_mapping_quality
         Boolean? LRAA_no_norm
         Int cpu = 2
@@ -238,7 +238,7 @@ workflow lraaWorkflow {
                 OutDir = OutDir,
                 docker = docker,
                 numThreads = numThreads,
-                ID&Quant_or_QuantOnly_or_Both = ID&Quant_or_QuantOnly_or_Both,
+                IDQuantQuant_or_QuantOnly_or_Both = IDQuantQuant_or_QuantOnly_or_Both,
                 LRAA_no_norm = LRAA_no_norm,
                 LRAA_min_mapping_quality = LRAA_min_mapping_quality,
                 referenceAnnotation_reduced = select_first([splitBAMByChromosome.reducedAnnotations[i]]),
