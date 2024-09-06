@@ -186,10 +186,10 @@ task mergeResults {
     >>>
 
     output {
-        File? mergedGtfFile = if defined(gtfFiles) then "~{outputFilePrefix}_merged.gtf" else None
-        File? mergedReducedGtfFile = if defined(reducedGtfFiles) then "~{outputFilePrefix}_merged_reduced.gtf" else None
-        File? mergedQuantExprFile = if defined(quantExprFiles) then "~{outputFilePrefix}_merged_quant.expr" else None
-        File? mergedQuantTrackingFile = if defined(quantTrackingFiles) then "~{outputFilePrefix}_merged_quant.tracking" else None
+        File? mergedGtfFile = "~{outputFilePrefix}_merged.gtf"
+        File? mergedReducedGtfFile = "~{outputFilePrefix}_merged_reduced.gtf"
+        File? mergedQuantExprFile = "~{outputFilePrefix}_merged_quant.expr"
+        File? mergedQuantTrackingFile = "~{outputFilePrefix}_merged_quant.tracking"
     }
 
     runtime {
