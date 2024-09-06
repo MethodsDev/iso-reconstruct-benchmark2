@@ -251,18 +251,18 @@ workflow lraaWorkflow {
     }
 
 
-call mergeResults {
-    input:
-        gtfFiles = lraaPerChromosome.lraaID_reffree_GTF,
-        reducedGtfFiles = lraaPerChromosome.lraaID_reduced_GTF,
-        quantExprFiles = lraaPerChromosome.lraaQuantExpr,
-        quantTrackingFiles = lraaPerChromosome.lraaQuantTracking,
-        outputFilePrefix = "merged",
-        docker = docker,
-        memoryGB = memoryGB,
-        diskSizeGB = diskSizeGB
-}
-
+    call mergeResults {
+        input:
+            gtfFiles = lraaPerChromosome.lraaID_reffree_GTF,
+            reducedGtfFiles = lraaPerChromosome.lraaID_reduced_GTF,
+            quantExprFiles = lraaPerChromosome.lraaQuantExpr,
+            quantTrackingFiles = lraaPerChromosome.lraaQuantTracking,
+            outputFilePrefix = "merged",
+            docker = docker,
+            memoryGB = memoryGB,
+            diskSizeGB = diskSizeGB
+    }
+    
     output {
         File? mergedReffreeGTF = mergeReffreeGTF.mergedFile
         File? mergedReducedGTF = mergeReducedGTF.mergedFile
