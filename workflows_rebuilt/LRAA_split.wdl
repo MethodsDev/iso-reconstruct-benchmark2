@@ -45,8 +45,8 @@ task splitBAMByChromosome {
     output {
         Array[File] chromosomeBAMs = glob("split_bams/*.bam")
         Array[File] chromosomeFASTAs = glob("split_bams/*.genome.fasta")
-        Array[File] reducedAnnotations = glob("split_bams/*.reduced.annot.gtf")
-        Array[File] fullAnnotations = glob("split_bams/*.full.annot.gtf")
+        Array[File?] reducedAnnotations = glob("split_bams/*.reduced.annot.gtf")
+        Array[File?] fullAnnotations = glob("split_bams/*.full.annot.gtf")
     }
 
     runtime {
@@ -64,7 +64,7 @@ task lraaPerChromosome {
         String OutDir
         String docker
         Int numThreads
-        String IDQuant_or_QuantOnly_or_Both
+        String IDOnly_or_QuantOnly_or_Both
         Boolean? LRAA_no_norm
         Int? LRAA_min_mapping_quality
         File? referenceAnnotation_reduced
@@ -83,14 +83,14 @@ task lraaPerChromosome {
         mkdir -p ~{OutDir}/Quant_noEM_minMapQ
     
         # Use contig_names in the LRAA command
-        if [[ ("~{IDQuant_or_QuantOnly_or_Both}" == "IDQuant" || "~{IDQuant_or_QuantOnly_or_Both}" == "Both") ]]; then #&& -z "~{referenceAnnotation_reduced}" ]]; then
+        if [[ ("~{IDOnly_or_QuantOnly_or_Both}" == "IDOnly" || "~{IDOnly_or_QuantOnly_or_Both}" == "Both") && -z "~{referenceAnnotation_reduced}" ]]; then
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                      --bam ~{inputBAM} \
                                      --output_prefix ~{OutDir}/ID_reffree/LRAA_reffree \
                                      ~{no_norm_flag} --CPU 1
         fi
     
-        if [[ ("~{IDQuant_or_QuantOnly_or_Both}" == "IDQuant" || "~{IDQuant_or_QuantOnly_or_Both}" == "Both") && -f "~{referenceAnnotation_reduced}" ]]; then
+        if [[ ("~{IDOnly_or_QuantOnly_or_Both}" == "IDOnly" || "~{IDOnly_or_QuantOnly_or_Both}" == "Both") && -f "~{referenceAnnotation_reduced}" ]]; then
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                      --bam ~{inputBAM} \
                                      --output_prefix ~{OutDir}/ID_reduced/LRAA_reduced \
@@ -98,7 +98,7 @@ task lraaPerChromosome {
                                      --gtf ~{referenceAnnotation_reduced} --CPU 1
         fi
     
-        if [[ ("~{IDQuant_or_QuantOnly_or_Both}" == "QuantOnly" || "~{IDQuant_or_QuantOnly_or_Both}" == "Both") && -f "~{referenceAnnotation_full}" ]]; then
+        if [[ ("~{IDOnly_or_QuantOnly_or_Both}" == "QuantOnly" || "~{IDOnly_or_QuantOnly_or_Both}" == "Both") && -f "~{referenceAnnotation_full}" ]]; then
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                      --bam ~{inputBAM} \
                                      --output_prefix ~{OutDir}/Quant_noEM_minMapQ/LRAA.quant \
@@ -110,10 +110,10 @@ task lraaPerChromosome {
     >>>
     
     output {
-        File lraaID_reffree_GTF = select_first(glob("~{OutDir}/ID_reffree/*_reffree.gtf"))
-        File lraaID_reduced_GTF = select_first(glob("~{OutDir}/ID_reduced/*_reduced.gtf"))
-        File lraaQuantExpr = select_first(glob("~{OutDir}/Quant_noEM_minMapQ/*.expr"))
-        File lraaQuantTracking = select_first(glob("~{OutDir}/Quant_noEM_minMapQ/*.tracking"))
+        File? lraaID_reffree_GTF = "~{OutDir}/ID_reffree/LRAA_reffree.gtf"
+        File? lraaID_reduced_GTF = "~{OutDir}/ID_reduced/LRAA_reduced.gtf"
+        File? lraaQuantExpr = "~{OutDir}/Quant_noEM_minMapQ/LRAA.quant.quant.expr"))
+        File? lraaQuantTracking = "~{OutDir}/Quant_noEM_minMapQ/LRAA.quant.quant.tracking"))
     }
     runtime {
         docker: docker
@@ -126,11 +126,12 @@ task lraaPerChromosome {
 
 task mergeResults {
     input {
-        Array[File] inputFiles
-        String outputFile
+        Array[File]? gtfFiles
+        Array[File]? reducedGtfFiles
+        Array[File]? quantExprFiles
+        Array[File]? quantTrackingFiles
+        String outputFilePrefix
         String docker
-        Boolean isGTF
-        Boolean isTracking
         Int memoryGB
         Int diskSizeGB
     }
@@ -138,57 +139,57 @@ task mergeResults {
     command <<<
         set -eo pipefail
 
-        # Determine file extension based on file type
-        ext=""
-        if [[ ~{isGTF} == true ]]; then
-            ext=".gtf"
-        elif [[ ~{isTracking} == true ]]; then
-            ext=".tracking"
-        else
-            ext=".expr"
-        fi
-        output_file="~{outputFile}"$ext
-        touch $output_file
+        # Function to merge files with optional header skipping
+        merge_files() {
+            local input_files=("$@")
+            local output_file=$1
+            local skip_header=$2
+            local header_added=false
 
-        # Write input files to a temporary file for better handling
-        for file in ~{sep=" " inputFiles}; do
-            echo $file >> input_files_list.txt
-        done
-
-        # Check if inputFiles array is not empty
-        if [ ! -s input_files_list.txt ]; then
-            echo "No input files provided."
-            exit 1
-        fi
-
-        # Initialize a variable to track if the header has been added (for tracking or quant files)
-        header_added=false
-
-        # Merge files with conditions
-        while IFS= read -r file; do
-            if [[ -f "$file" ]]; then
-                echo "Processing file: $file"
-                if [[ ~{isGTF} == true ]]; then
-                    # For GTF files, concatenate all files
-                    cat $file >> $output_file
+            for file in "${input_files[@]}"; do
+                if [[ "$skip_header" == true && "$header_added" == true ]]; then
+                    tail -n +2 "$file" >> "$output_file"
                 else
-                    # For tracking or quant files, handle header
-                    if [[ $header_added == false ]]; then
-                        cat $file >> $output_file
-                        header_added=true
-                    else
-                        # Skip the header line(s) and append the rest
-                        tail -n +2 $file >> $output_file
-                    fi
+                    cat "$file" >> "$output_file"
+                    header_added=true
                 fi
-            else
-                echo "File $file does not exist."
-            fi
-        done < input_files_list.txt
+            done
+        }
+
+        # GTF Files
+        if [ -n "~{gtfFiles}" ]; then
+            gtf_output="~{outputFilePrefix}_merged.gtf"
+            touch "$gtf_output"
+            merge_files ~{sep=" " gtfFiles} "$gtf_output" false
+        fi
+
+        # Reduced GTF Files
+        if [ -n "~{reducedGtfFiles}" ]; then
+            reduced_gtf_output="~{outputFilePrefix}_merged_reduced.gtf"
+            touch "$reduced_gtf_output"
+            merge_files ~{sep=" " reducedGtfFiles} "$reduced_gtf_output" false
+        fi
+
+        # Quant Expression Files
+        if [ -n "~{quantExprFiles}" ]; then
+            quant_expr_output="~{outputFilePrefix}_merged_quant.expr"
+            touch "$quant_expr_output"
+            merge_files ~{sep=" " quantExprFiles} "$quant_expr_output" true
+        fi
+
+        # Quant Tracking Files
+        if [ -n "~{quantTrackingFiles}" ]; then
+            quant_tracking_output="~{outputFilePrefix}_merged_quant.tracking"
+            touch "$quant_tracking_output"
+            merge_files ~{sep=" " quantTrackingFiles} "$quant_tracking_output" true
+        fi
     >>>
 
     output {
-        File mergedFile = "~{outputFile}" + (if isGTF then ".gtf" else if isTracking then ".tracking" else ".expr")
+        File? mergedGtfFile = if defined(gtfFiles) then "~{outputFilePrefix}_merged.gtf" else None
+        File? mergedReducedGtfFile = if defined(reducedGtfFiles) then "~{outputFilePrefix}_merged_reduced.gtf" else None
+        File? mergedQuantExprFile = if defined(quantExprFiles) then "~{outputFilePrefix}_merged_quant.expr" else None
+        File? mergedQuantTrackingFile = if defined(quantTrackingFiles) then "~{outputFilePrefix}_merged_quant.tracking" else None
     }
 
     runtime {
@@ -198,11 +199,12 @@ task mergeResults {
         disks: "local-disk ~{diskSizeGB} HDD"
     }
 }
+
 workflow lraaWorkflow {
     input {
         File inputBAM
         File referenceGenome
-        String IDQuant_or_QuantOnly_or_Both
+        String IDOnly_or_QuantOnly_or_Both
         Int? LRAA_min_mapping_quality
         Boolean? LRAA_no_norm
         Int cpu = 2
@@ -238,65 +240,33 @@ workflow lraaWorkflow {
                 OutDir = OutDir,
                 docker = docker,
                 numThreads = numThreads,
-                IDQuant_or_QuantOnly_or_Both = IDQuant_or_QuantOnly_or_Both,
+                IDOnly_or_QuantOnly_or_Both = IDOnly_or_QuantOnly_or_Both,
                 LRAA_no_norm = LRAA_no_norm,
                 LRAA_min_mapping_quality = LRAA_min_mapping_quality,
-                referenceAnnotation_reduced = select_first([splitBAMByChromosome.reducedAnnotations[i]]),
-                referenceAnnotation_full = select_first([splitBAMByChromosome.fullAnnotations[i]]),
+                referenceAnnotation_reduced = splitBAMByChromosome.reducedAnnotations[i]],
+                referenceAnnotation_full = splitBAMByChromosome.fullAnnotations[i]],
                 memoryGB = memoryGB,
                 diskSizeGB = diskSizeGB
         }
     }
 
 
-    call mergeResults as mergeReffreeGTF {
-        input:
-            inputFiles = lraaPerChromosome.lraaID_reffree_GTF,
-            outputFile = "merged_reffree_ID",
-            docker = docker,
-            isGTF = true,
-            isTracking = false,
-            memoryGB = memoryGB,
-            diskSizeGB = diskSizeGB
-    }
-    
-    call mergeResults as mergeReducedGTF {
-        input:
-            inputFiles = lraaPerChromosome.lraaID_reduced_GTF,
-            outputFile = "merged_reduced_ID",
-            docker = docker,
-            isGTF = true,
-            isTracking = false,
-            memoryGB = memoryGB,
-            diskSizeGB = diskSizeGB
-    }
-    
-    call mergeResults as mergeQuantExpr {
-        input:
-            inputFiles = lraaPerChromosome.lraaQuantExpr,
-            outputFile = "merged_Quant",
-            docker = docker,
-            isGTF = false,
-            isTracking = true,
-            memoryGB = memoryGB,
-            diskSizeGB = diskSizeGB
-    }
-    
-    call mergeResults as mergeQuantTracking {
-        input:
-            inputFiles = lraaPerChromosome.lraaQuantTracking,
-            outputFile = "merged_Quant.tracking",
-            docker = docker,
-            isGTF = false,
-            isTracking = false,            
-            memoryGB = memoryGB,
-            diskSizeGB = diskSizeGB
-    }
+call mergeResults {
+    input:
+        gtfFiles = lraaPerChromosome.lraaID_reffree_GTF,
+        reducedGtfFiles = lraaPerChromosome.lraaID_reduced_GTF,
+        quantExprFiles = lraaPerChromosome.lraaQuantExpr,
+        quantTrackingFiles = lraaPerChromosome.lraaQuantTracking,
+        outputFilePrefix = "merged",
+        docker = docker,
+        memoryGB = memoryGB,
+        diskSizeGB = diskSizeGB
+}
 
     output {
-        File mergedReffreeGTF = mergeReffreeGTF.mergedFile
-        File mergedReducedGTF = mergeReducedGTF.mergedFile
-        File mergedQuantExpr = mergeQuantExpr.mergedFile
-        File mergedQuantTracking = mergeQuantTracking.mergedFile
+        File? mergedReffreeGTF = mergeReffreeGTF.mergedFile
+        File? mergedReducedGTF = mergeReducedGTF.mergedFile
+        File? mergedQuantExpr = mergeQuantExpr.mergedFile
+        File? mergedQuantTracking = mergeQuantTracking.mergedFile
     }
 }
