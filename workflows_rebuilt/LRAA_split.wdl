@@ -143,7 +143,51 @@ task mergeResults {
 
     command <<<
         set -eo pipefail
-        # Function and command details omitted for brevity
+    
+        # Function to merge files with optional header skipping
+        merge_files() {
+            local input_files=("$@")
+            local output_file=$1
+            local skip_header=$2
+            local header_added=false
+    
+            for file in "${input_files[@]}"; do
+                if [[ "$skip_header" == true && "$header_added" == true ]]; then
+                    tail -n +2 "$file" >> "$output_file"
+                else
+                    cat "$file" >> "$output_file"
+                    header_added=true
+                fi
+            done
+        }
+    
+        # GTF Files
+        if [ -n "~{gtfFiles}" ]; then
+            gtf_output="~{outputFilePrefix}_merged.gtf"
+            touch "$gtf_output"
+            merge_files ~{sep=" " gtfFiles} "$gtf_output" false
+        fi
+    
+        # Reduced GTF Files
+        if [ -n "~{reducedGtfFiles}" ]; then
+            reduced_gtf_output="~{outputFilePrefix}_merged_reduced.gtf"
+            touch "$reduced_gtf_output"
+            merge_files ~{sep=" " reducedGtfFiles} "$reduced_gtf_output" false
+        fi
+    
+        # Quant Expression Files
+        if [ -n "~{quantExprFiles}" ]; then
+            quant_expr_output="~{outputFilePrefix}_merged_quant.expr"
+            touch "$quant_expr_output"
+            merge_files ~{sep=" " quantExprFiles} "$quant_expr_output" true
+        fi
+    
+        # Quant Tracking Files
+        if [ -n "~{quantTrackingFiles}" ]; then
+            quant_tracking_output="~{outputFilePrefix}_merged_quant.tracking"
+            touch "$quant_tracking_output"
+            merge_files ~{sep=" " quantTrackingFiles} "$quant_tracking_output" true
+        fi
     >>>
 
     output {
@@ -159,11 +203,6 @@ task mergeResults {
         memory: "~{memoryGB} GiB"
         disks: "local-disk ~{diskSizeGB} HDD"
     }
-} # Ensure this closing brace is present
-
-# Ensure there's a clear separation before starting a new task or workflow
-task nextTask {
-    # Next task details...
 }
 
 workflow lraaWorkflow {
