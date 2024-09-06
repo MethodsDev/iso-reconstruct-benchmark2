@@ -251,12 +251,17 @@ workflow lraaWorkflow {
     }
 
 
+    Array[File] nonNullGtfFiles = select_all(lraaPerChromosome.lraaID_reffree_GTF)
+    Array[File] nonNullReducedGtfFiles = select_all(lraaPerChromosome.lraaID_reduced_GTF)
+    Array[File] nonNullQuantExprFiles = select_all(lraaPerChromosome.lraaQuantExpr)
+    Array[File] nonNullQuantTrackingFiles = select_all(lraaPerChromosome.lraaQuantTracking)
+    
     call mergeResults {
         input:
-            gtfFiles = lraaPerChromosome.lraaID_reffree_GTF,
-            reducedGtfFiles = lraaPerChromosome.lraaID_reduced_GTF,
-            quantExprFiles = lraaPerChromosome.lraaQuantExpr,
-            quantTrackingFiles = lraaPerChromosome.lraaQuantTracking,
+            gtfFiles = nonNullGtfFiles,
+            reducedGtfFiles = nonNullReducedGtfFiles,
+            quantExprFiles = nonNullQuantExprFiles,
+            quantTrackingFiles = nonNullQuantTrackingFiles,
             outputFilePrefix = "merged",
             docker = docker,
             memoryGB = memoryGB,
