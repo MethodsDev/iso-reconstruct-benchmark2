@@ -141,13 +141,12 @@ task mergeResults {
     
         # Function to merge files with optional header skipping
         merge_files() {
-            local input_files_str="$1"
-            local output_file="$2"
-            local skip_header="$3"
+            local output_file="$1"
+            local skip_header="$2"
+            shift 2 # Remove the first two arguments
+            local input_files=("$@") # The rest of the arguments are input files
             local header_added=false
-            local IFS=' ' # Split input_files_str on spaces
-            read -ra input_files <<< "$input_files_str" # Convert string to array
-
+        
             for file in "${input_files[@]}"; do
                 if [[ "$skip_header" == true && "$header_added" == true ]]; then
                     tail -n +2 "$file" >> "$output_file"
