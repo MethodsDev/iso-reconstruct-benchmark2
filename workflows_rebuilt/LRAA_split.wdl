@@ -141,11 +141,13 @@ task mergeResults {
     
         # Function to merge files with optional header skipping
         merge_files() {
-            IFS=' ' read -r -a input_files <<< "$1"
-            local output_file=$2
-            local skip_header=$3
+            local input_files_str="$1"
+            local output_file="$2"
+            local skip_header="$3"
             local header_added=false
-    
+            local IFS=' ' # Split input_files_str on spaces
+            read -ra input_files <<< "$input_files_str" # Convert string to array
+
             for file in "${input_files[@]}"; do
                 if [[ "$skip_header" == true && "$header_added" == true ]]; then
                     tail -n +2 "$file" >> "$output_file"
@@ -157,31 +159,31 @@ task mergeResults {
         }
     
         # GTF Files
-        if [ -n "~{gtfFiles}" ]; then
+        if [ ${#gtfFiles[@]} -ne 0 ]; then
             gtf_output="~{outputFilePrefix}_merged.gtf"
             touch "$gtf_output"
-            merge_files "$(echo ~{sep=' ' gtfFiles})" "$gtf_output" false
+            merge_files "~{sep=' ' gtfFiles}" "$gtf_output" false
         fi
     
         # Reduced GTF Files
-        if [ -n "~{reducedGtfFiles}" ]; then
+        if [ ${#reducedGtfFiles[@]} -ne 0 ]; then
             reduced_gtf_output="~{outputFilePrefix}_merged_reduced.gtf"
             touch "$reduced_gtf_output"
-            merge_files "$(echo ~{sep=' ' reducedGtfFiles})" "$reduced_gtf_output" false
+            merge_files "~{sep=' ' reducedGtfFiles}" "$reduced_gtf_output" false
         fi
     
         # Quant Expression Files
-        if [ -n "~{quantExprFiles}" ]; then
+        if [ ${#quantExprFiles[@]} -ne 0 ]; then
             quant_expr_output="~{outputFilePrefix}_merged_quant.expr"
             touch "$quant_expr_output"
-            merge_files "$(echo ~{sep=' ' quantExprFiles})" "$quant_expr_output" true
+            merge_files "~{sep=' ' quantExprFiles}" "$quant_expr_output" true
         fi
     
         # Quant Tracking Files
-        if [ -n "~{quantTrackingFiles}" ]; then
+        if [ ${#quantTrackingFiles[@]} -ne 0 ]; then
             quant_tracking_output="~{outputFilePrefix}_merged_quant.tracking"
             touch "$quant_tracking_output"
-            merge_files "$(echo ~{sep=' ' quantTrackingFiles})" "$quant_tracking_output" true
+            merge_files "~{sep=' ' quantTrackingFiles}" "$quant_tracking_output" true
         fi
     >>>
 
