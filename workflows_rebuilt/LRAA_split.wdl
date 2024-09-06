@@ -15,52 +15,47 @@ task splitBAMByChromosome {
 
     command <<<
         set -eo pipefail
-    
-        # Function to merge files with optional header skipping
-        merge_files() {
-            IFS=' ' read -r -a input_files <<< "$1"
-            local output_file=$2
-            local skip_header=$3
-            local header_added=false
-    
-            for file in "${input_files[@]}"; do
-                if [[ "$skip_header" == true && "$header_added" == true ]]; then
-                    tail -n +2 "$file" >> "$output_file"
-                else
-                    cat "$file" >> "$output_file"
-                    header_added=true
-                fi
-            done
-        }
-    
-        # GTF Files
-        if [ -n "~{gtfFiles}" ]; then
-            gtf_output="~{outputFilePrefix}_merged.gtf"
-            touch "$gtf_output"
-            merge_files "$(echo ~{sep=' ' gtfFiles})" "$gtf_output" false
+        mkdir -p split_bams
+        
+        # Check if BAM index exists, if not, index the input BAM
+        if [ ! -f "~{inputBAM}.bai" ]; then
+            samtools index -@ ~{threads} ~{inputBAM}
         fi
-    
-        # Reduced GTF Files
-        if [ -n "~{reducedGtfFiles}" ]; then
-            reduced_gtf_output="~{outputFilePrefix}_merged_reduced.gtf"
-            touch "$reduced_gtf_output"
-            merge_files "$(echo ~{sep=' ' reducedGtfFiles})" "$reduced_gtf_output" false
+        
+        # Loop through each chromosome
+        for chr in ~{main_chromosomes}; do
+            # Generate chromosome-specific BAM
+            samtools view -@ ~{threads} -b ~{inputBAM} $chr > split_bams/$chr.bam
+            
+            # Generate chromosome-specific FASTA from the whole genome
+            samtools faidx ~{referenceGenome} $chr > split_bams/$chr.genome.fasta
+            
+        # Generate chromosome-specific GTF for reduced annotation, if available
+        if [ -f "~{referenceAnnotation_reduced}" ]; then
+            cat ~{referenceAnnotation_reduced} | perl -lane 'if ($F[0] eq "'$chr'") { print; }' > split_bams/$chr.reduced.annot.gtf
         fi
-    
-        # Quant Expression Files
-        if [ -n "~{quantExprFiles}" ]; then
-            quant_expr_output="~{outputFilePrefix}_merged_quant.expr"
-            touch "$quant_expr_output"
-            merge_files "$(echo ~{sep=' ' quantExprFiles})" "$quant_expr_output" true
+        
+        # Generate chromosome-specific GTF for full annotation, if available
+        if [ -f "~{referenceAnnotation_full}" ]; then
+            cat ~{referenceAnnotation_full} | perl -lane 'if ($F[0] eq "'$chr'") { print; }' > split_bams/$chr.full.annot.gtf
         fi
-    
-        # Quant Tracking Files
-        if [ -n "~{quantTrackingFiles}" ]; then
-            quant_tracking_output="~{outputFilePrefix}_merged_quant.tracking"
-            touch "$quant_tracking_output"
-            merge_files "$(echo ~{sep=' ' quantTrackingFiles})" "$quant_tracking_output" true
-        fi
+        done
     >>>
+
+    output {
+        Array[File] chromosomeBAMs = glob("split_bams/*.bam")
+        Array[File] chromosomeFASTAs = glob("split_bams/*.genome.fasta")
+        Array[File?] reducedAnnotations = glob("split_bams/*.reduced.annot.gtf")
+        Array[File?] fullAnnotations = glob("split_bams/*.full.annot.gtf")
+    }
+
+    runtime {
+        docker: docker
+        bootDiskSizeGb: 30
+        memory: "~{memoryGB} GiB"
+        disks: "local-disk ~{diskSizeGB} HDD"
+    }
+}
 
 task lraaPerChromosome {
     input {
