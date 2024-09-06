@@ -264,9 +264,9 @@ workflow lraaWorkflow {
     }
     
     output {
-        File? mergedReffreeGTF = mergeReffreeGTF.mergedFile
-        File? mergedReducedGTF = mergeReducedGTF.mergedFile
-        File? mergedQuantExpr = mergeQuantExpr.mergedFile
-        File? mergedQuantTracking = mergeQuantTracking.mergedFile
+        File? mergedReffreeGTF = mergeResults.mergedGtfFile
+        File? mergedReducedGTF = mergeResults.mergedReducedGtfFile
+        File? mergedQuantExpr = mergeResults.mergedQuantExprFile
+        File? mergedQuantTracking = mergeResults.mergedQuantTrackingFile
     }
 }
