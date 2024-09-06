@@ -243,8 +243,8 @@ workflow lraaWorkflow {
                 IDOnly_or_QuantOnly_or_Both = IDOnly_or_QuantOnly_or_Both,
                 LRAA_no_norm = LRAA_no_norm,
                 LRAA_min_mapping_quality = LRAA_min_mapping_quality,
-                referenceAnnotation_reduced = splitBAMByChromosome.reducedAnnotations[i]],
-                referenceAnnotation_full = splitBAMByChromosome.fullAnnotations[i]],
+                referenceAnnotation_reduced = splitBAMByChromosome.reducedAnnotations[i],
+                referenceAnnotation_full = splitBAMByChromosome.fullAnnotations[i],
                 memoryGB = memoryGB,
                 diskSizeGB = diskSizeGB
         }
