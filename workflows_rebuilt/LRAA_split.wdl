@@ -112,8 +112,8 @@ task lraaPerChromosome {
     output {
         File? lraaID_reffree_GTF = "~{OutDir}/ID_reffree/LRAA_reffree.gtf"
         File? lraaID_reduced_GTF = "~{OutDir}/ID_reduced/LRAA_reduced.gtf"
-        File? lraaQuantExpr = "~{OutDir}/Quant_noEM_minMapQ/LRAA.quant.quant.expr"))
-        File? lraaQuantTracking = "~{OutDir}/Quant_noEM_minMapQ/LRAA.quant.quant.tracking"))
+        File? lraaQuantExpr = "~{OutDir}/Quant_noEM_minMapQ/LRAA.quant.quant.expr"
+        File? lraaQuantTracking = "~{OutDir}/Quant_noEM_minMapQ/LRAA.quant.quant.tracking"
     }
     runtime {
         docker: docker
