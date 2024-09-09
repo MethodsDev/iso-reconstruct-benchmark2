@@ -48,3 +48,12 @@ workflows:
   - name: LRAA_split
     subclass: WDL
     primaryDescriptorPath: /workflows_rebuilt/LRAA_split.wdl
+  - name: LRAA_ID_ref_free
+    subclass: WDL
+    primaryDescriptorPath: /workflows_rebuilt/LRAA_ID_ref_free.wdl
+  - name: LRAA_ID_ref_guided
+    subclass: WDL
+    primaryDescriptorPath: /workflows_rebuilt/LRAA_ID_ref_guided.wdl
+  - name: LRAA_Quant
+    subclass: WDL
+    primaryDescriptorPath: /workflows_rebuilt/LRAA_Quant.wdl
