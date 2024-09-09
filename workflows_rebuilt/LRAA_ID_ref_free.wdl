@@ -60,7 +60,6 @@ task lraaPerChromosome {
     command <<<
         mkdir -p ~{OutDir}/ID_reffree
     
-        # Use contig_names in the LRAA command for IDOnly
         /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                  --bam ~{inputBAM} \
                                  --output_prefix ~{OutDir}/ID_reffree/LRAA_reffree \
