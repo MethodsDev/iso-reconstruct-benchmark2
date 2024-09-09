@@ -25,67 +25,17 @@ workflow CombinedWorkflow {
 
 
     if (mode == "ID_ref_free_Quant_mode") {
-        call IDRefFree.splitBAMByChromosome {
+
+        call IDRefFree.lraaWorkflow {
             input:
-                inputBAM = inputBAM,
-                main_chromosomes = main_chromosomes,
-                docker = docker,
-                threads = threads,
-                referenceGenome = referenceGenome,
-                memoryGB = memoryGB,
-                diskSizeGB = diskSizeGB
-        }
-
-
-    scatter (i in range(length(IDRefFree.splitBAMByChromosome.chromosomeBAMs))) {
-        call lraaPerChromosome {
-            input:
-                inputBAM = IDRefFree.splitBAMByChromosome.chromosomeBAMs[i],
-                referenceGenome = IDRefFree.splitBAMByChromosome.chromosomeFASTAs[i],
-                OutDir = OutDir,
-                docker = docker,
-                numThreads = numThreads,
-                LRAA_no_norm = LRAA_no_norm,
-                memoryGB = memoryGB,
-                diskSizeGB = diskSizeGB
-        }
-    }
-
-    call IDRefFree.mergeResults {
-        input:
-            gtfFiles = IDRefFree.lraaPerChromosome.lraaID_reffree_GTF,
-            outputFilePrefix = "merged",
-            docker = docker,
-            memoryGB = memoryGB,
-            diskSizeGB = diskSizeGB
-    }
-
-
-
-        
-
-
-
-
-
-DRefFree.mergeResults.mergedGtfFile
-
-
-
-
-
-
-
-
-        call IDRefFree.splitBAMByChromosome {
-            input:
-                inputBAM = inputBAM,
-                main_chromosomes = main_chromosomes,
-                docker = docker,
-                threads = threads,
-                referenceGenome = referenceGenome,
-                memoryGB = memoryGB,
-                diskSizeGB = diskSizeGB
+                File inputBAM
+                File referenceGenome
+                Int numThreads = numThreads
+                Int memoryGB = memoryGB
+                Int diskSizeGB = diskSizeGB
+                String docker = docker
+                String main_chromosomes = main_chromosomes
+                Boolean? LRAA_no_norm = LRAA_no_norm
         }
 
 
