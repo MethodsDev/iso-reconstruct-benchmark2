@@ -10,53 +10,49 @@ task FilterTranscripts {
         Int memoryGB
         Int diskSizeGB
         String docker
+        String referenceGenomeGCSPath
+        String gtfGCSPath
+        String exprFileGCSPath
     }
 
     command <<<
 
-set -e
+    set -e
 
-# Function to check file existence in GCS and download
-# Returns 0 if the file was downloaded, 1 otherwise
-check_and_download() {
-    local gcs_path=$1
-    local local_path=$2
+    # Function to check file existence in GCS and download
+    # Returns 0 if the file was downloaded, 1 otherwise
+    check_and_download() {
+        local gcs_path=$1
+        local local_path=$2
 
-    # Check if the file exists in GCS
-    if gsutil -q stat $gcs_path; then
-        echo "File exists: $gcs_path. Downloading..."
-        gsutil cp $gcs_path $local_path
-        return 0
-    else
-        echo "File does not exist: $gcs_path. Skipping download."
-        return 1
+        # Check if the file exists in GCS
+        if gsutil -q stat $gcs_path; then
+            echo "File exists: $gcs_path. Downloading..."
+            gsutil cp $gcs_path $local_path
+            return 0
+        else
+            echo "File does not exist: $gcs_path. Skipping download."
+            return 1
+        fi
+    }
+
+    # Initialize variables to hold the final file paths
+    final_reference_genome_path="~{referenceGenome}"
+    final_gtf_path="~{gtf_path}"
+    final_expr_file_path="~{expr_file_path}"
+
+    # Attempt to download each file and update paths if successful
+    if check_and_download ~{referenceGenomeGCSPath} referenceGenome.fasta; then
+        final_reference_genome_path="referenceGenome.fasta"
     fi
-}
 
-# Initialize variables to hold the final file paths
-final_reference_genome_path="~{referenceGenome}"
-final_gtf_path="~{gtf_path}"
-final_expr_file_path="~{expr_file_path}"
+    if check_and_download ~{gtfGCSPath} gtf_file.gtf; then
+        final_gtf_path="gtf_file.gtf"
+    fi
 
-# Attempt to download each file and update paths if successful
-if check_and_download ~{referenceGenomeGCSPath} referenceGenome.fasta; then
-    final_reference_genome_path="referenceGenome.fasta"
-fi
-
-if check_and_download ~{gtfGCSPath} gtf_file.gtf; then
-    final_gtf_path="gtf_file.gtf"
-fi
-
-if check_and_download ~{exprFileGCSPath} expr_file.txt; then
-    final_expr_file_path="expr_file.txt"
-fi
-
-# Use the final paths in your Python script
-python3 -c "
-# Adjust your Python code to use the variables for file paths
-process_files('$final_reference_genome_path', '$final_gtf_path', '$final_expr_file_path', '~{outputGtfPath}', ~{threshold})
-"
-
+    if check_and_download ~{exprFileGCSPath} expr_file.txt; then
+        final_expr_file_path="expr_file.txt"
+    fi
 
 python3 -c "
 import os
@@ -234,7 +230,6 @@ process_files('$final_reference_genome_path', '$final_gtf_path', '$final_expr_fi
         File filtered_gtf = output_gtf_path
     }
 }
-
 
 workflow TranscriptFiltering {
     input {
