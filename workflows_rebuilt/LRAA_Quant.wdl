@@ -71,15 +71,13 @@ task lraaPerChromosome {
     command <<<
         mkdir -p ~{OutDir}/Quant_noEM_minMapQ
     
-        if [[ ("~{IDOnly_or_QuantOnly_or_Both}" == "QuantOnly" || "~{IDOnly_or_QuantOnly_or_Both}" == "Both") && -f "~{referenceAnnotation_full}" ]]; then
-            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
-                                     --bam ~{inputBAM} \
-                                     --output_prefix ~{OutDir}/Quant_noEM_minMapQ/LRAA.quant \
-                                     --quant_only \
-                                     ~{no_norm_flag} \
-                                     --gtf ~{referenceAnnotation_full} \
-                                     ~{min_mapping_quality_flag} --CPU 1
-        fi
+        /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
+                                 --bam ~{inputBAM} \
+                                 --output_prefix ~{OutDir}/Quant_noEM_minMapQ/LRAA.quant \
+                                 --quant_only \
+                                 ~{no_norm_flag} \
+                                 --gtf ~{referenceAnnotation_full} \
+                                 ~{min_mapping_quality_flag} --CPU 1
     >>>
     
     output {
