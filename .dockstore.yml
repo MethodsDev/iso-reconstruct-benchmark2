@@ -57,3 +57,10 @@ workflows:
   - name: LRAA_Quant
     subclass: WDL
     primaryDescriptorPath: /workflows_rebuilt/LRAA_Quant.wdl
+  - name: LRAA_ID_filtering
+    subclass: WDL
+    primaryDescriptorPath: /workflows_rebuilt/LRAA_ID_filtering.wdl
+  - name: LRAA_master
+    subclass: WDL
+    primaryDescriptorPath: /workflows_rebuilt/LRAA_master.wdl
+
