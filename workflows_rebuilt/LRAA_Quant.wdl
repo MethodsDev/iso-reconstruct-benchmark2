@@ -104,38 +104,30 @@ task mergeResults {
 
     command <<<
         set -eo pipefail
-    
-        # Function to merge files with optional header skipping
-        merge_files() {
-            local output_file="$1"
-            local skip_header="$2"
-            shift 2 # Remove the first two arguments
-            local input_files=("$@") # The rest of the arguments are input files
-            local header_added=false
-        
-            for file in "${input_files[@]}"; do
-                if [[ "$skip_header" == true && "$header_added" == true ]]; then
-                    tail -n +2 "$file" >> "$output_file"
-                else
-                    cat "$file" >> "$output_file"
-                    header_added=true
-                fi
-            done
-        }
-    
-        # Quant Expression Files
-        if [ ${#quantExprFiles[@]} -ne 0 ]; then
-            quant_expr_output="~{outputFilePrefix}_merged_quant.expr"
-            touch "$quant_expr_output"
-            merge_files "~{sep=' ' quantExprFiles}" "$quant_expr_output" true
-        fi
-    
-        # Quant Tracking Files
-        if [ ${#quantTrackingFiles[@]} -ne 0 ]; then
-            quant_tracking_output="~{outputFilePrefix}_merged_quant.tracking"
-            touch "$quant_tracking_output"
-            merge_files "~{sep=' ' quantTrackingFiles}" "$quant_tracking_output" true
-        fi
+
+        # Merge Quant Expression Files with header from the first file only
+        quant_expr_output="~{outputFilePrefix}_merged_quant.expr"
+        for file in ~{sep=' ' quantExprFiles}; do
+            if [[ ! -f "$quant_expr_output" ]]; then
+                # Copy the first file with header
+                cp "$file" "$quant_expr_output"
+            else
+                # Append the rest without the header
+                tail -n +2 "$file" >> "$quant_expr_output"
+            fi
+        done
+
+        # Merge Quant Tracking Files with header from the first file only
+        quant_tracking_output="~{outputFilePrefix}_merged_quant.tracking"
+        for file in ~{sep=' ' quantTrackingFiles}; do
+            if [[ ! -f "$quant_tracking_output" ]]; then
+                # Copy the first file with header
+                cp "$file" "$quant_tracking_output"
+            else
+                # Append the rest without the header
+                tail -n +2 "$file" >> "$quant_tracking_output"
+            fi
+        done
     >>>
 
     output {
