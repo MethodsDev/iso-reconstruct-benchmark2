@@ -200,7 +200,7 @@ workflow TranscriptFiltering {
         Float threshold = 1.0
         Int memoryGB = 32
         Int diskSizeGB = 1024
-        String docker = "pegi3s/biopython"
+        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/isoquant:latest"
     }
 
     call FilterTranscripts {
