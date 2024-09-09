@@ -9,6 +9,7 @@ task FilterTranscripts {
         Float threshold
         Int memoryGB
         Int diskSizeGB
+        String dockerImage
     }
 
     command <<<
@@ -178,7 +179,7 @@ process_files('~{referenceGenome}', '~{gtf_path}', '~{expr_file_path}', '~{outpu
     >>>
 
     runtime {
-        docker: docker
+        docker: dockerImage
         bootDiskSizeGb: 30
         memory: "~{memoryGB} GiB"
         disks: "local-disk ~{diskSizeGB} HDD"
@@ -199,7 +200,7 @@ workflow TranscriptFiltering {
         Float threshold = 1.0
         Int memoryGB = 32
         Int diskSizeGB = 1024
-        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/lraa/lraa:latest"
+        String dockerImage = "us-central1-docker.pkg.dev/methods-dev-lab/lraa/lraa:latest"
     }
 
     call FilterTranscripts {
@@ -209,7 +210,7 @@ workflow TranscriptFiltering {
             expr_file_path = expr_file_path,
             output_gtf_path = output_gtf_path,
             threshold = threshold,
-            docker = docker,
+            dockerImage = dockerImage,
             memoryGB = memoryGB,
             diskSizeGB = diskSizeGB
     }
