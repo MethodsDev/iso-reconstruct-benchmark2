@@ -9,19 +9,90 @@ workflow CombinedWorkflow {
     input {
         File inputBAM
         File referenceGenome
-        File referenceGTF
+        File? referenceGTF
         String mode
-        # Additional inputs as required by the individual tasks
-    }
+        Int numThreads = 4
+        Int memoryGB = 32
+        Int diskSizeGB = 1024
+        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/lraa/lraa:latest"
+        String main_chromosomes = "chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX chrY"
+        Boolean? LRAA_no_norm
+        String docker_filtering
+}
 
     # Conditional execution based on the mode
     if (mode == "ID_ref_free_Quant_mode") {
-        call IDRefFree.IDRefFreeTask {
+        call IDRefFree.splitBAMByChromosome {
             input:
                 inputBAM = inputBAM,
-                referenceGenome = referenceGenome
-                # Add other necessary inputs for IDRefFreeTask
+                main_chromosomes = main_chromosomes,
+                docker = docker,
+                threads = threads,
+                referenceGenome = referenceGenome,
+                memoryGB = memoryGB,
+                diskSizeGB = diskSizeGB
         }
+
+    String OutDir = "LRAA_out"
+
+    scatter (i in range(length(IDRefFree.splitBAMByChromosome.chromosomeBAMs))) {
+        call lraaPerChromosome {
+            input:
+                inputBAM = IDRefFree.splitBAMByChromosome.chromosomeBAMs[i],
+                referenceGenome = IDRefFree.splitBAMByChromosome.chromosomeFASTAs[i],
+                OutDir = OutDir,
+                docker = docker,
+                numThreads = numThreads,
+                LRAA_no_norm = LRAA_no_norm,
+                memoryGB = memoryGB,
+                diskSizeGB = diskSizeGB
+        }
+    }
+
+    call IDRefFree.mergeResults {
+        input:
+            gtfFiles = IDRefFree.lraaPerChromosome.lraaID_reffree_GTF,
+            outputFilePrefix = "merged",
+            docker = docker,
+            memoryGB = memoryGB,
+            diskSizeGB = diskSizeGB
+    }
+
+
+
+        
+
+
+
+
+
+
+
+
+
+DRefFree.mergeResults.mergedGtfFile
+
+
+
+
+
+
+
+
+        call IDRefFree.splitBAMByChromosome {
+            input:
+                inputBAM = inputBAM,
+                main_chromosomes = main_chromosomes,
+                docker = docker,
+                threads = threads,
+                referenceGenome = referenceGenome,
+                memoryGB = memoryGB,
+                diskSizeGB = diskSizeGB
+        }
+
+
+
+
 
         call Quant.QuantTask {
             input:
