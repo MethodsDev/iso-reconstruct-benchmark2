@@ -9,7 +9,7 @@ task FilterTranscripts {
         Float threshold
         Int memoryGB
         Int diskSizeGB
-        String dockerImage
+        String docker
     }
 
     command <<<
@@ -200,7 +200,7 @@ workflow TranscriptFiltering {
         Float threshold = 1.0
         Int memoryGB = 32
         Int diskSizeGB = 1024
-        String dockerImage = "us-central1-docker.pkg.dev/methods-dev-lab/lraa/lraa:latest"
+        String docker = "quay.io/biocontainers/biopython:1.79--py38h497a2fe_0"
     }
 
     call FilterTranscripts {
