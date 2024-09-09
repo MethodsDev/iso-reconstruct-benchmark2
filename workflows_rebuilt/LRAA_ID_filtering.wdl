@@ -10,16 +10,12 @@ task FilterTranscripts {
         Int memoryGB
         Int diskSizeGB
         String docker
-        String referenceGenomeGCSPath
-        String gtfGCSPath
-        String exprFileGCSPath
     }
 
     command <<<
 
     set -e
 
-    # Function to check file existence in GCS and download
     # Returns 0 if the file was downloaded, 1 otherwise
     check_and_download() {
         local gcs_path=$1
@@ -42,15 +38,15 @@ task FilterTranscripts {
     final_expr_file_path="~{expr_file_path}"
 
     # Attempt to download each file and update paths if successful
-    if check_and_download ~{referenceGenomeGCSPath} referenceGenome.fasta; then
+    if check_and_download ~{referenceGenome} referenceGenome.fasta; then
         final_reference_genome_path="referenceGenome.fasta"
     fi
 
-    if check_and_download ~{gtfGCSPath} gtf_file.gtf; then
+    if check_and_download ~{gtf_path} gtf_file.gtf; then
         final_gtf_path="gtf_file.gtf"
     fi
 
-    if check_and_download ~{exprFileGCSPath} expr_file.txt; then
+    if check_and_download ~{expr_file_path} expr_file.txt; then
         final_expr_file_path="expr_file.txt"
     fi
 
