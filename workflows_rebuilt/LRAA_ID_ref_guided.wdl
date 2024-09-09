@@ -73,7 +73,6 @@ task lraaPerChromosome {
                                  --output_prefix ~{OutDir}/ID_reduced/LRAA_reduced \
                                  ~{no_norm_flag} \
                                  --gtf ~{referenceAnnotation_reduced} --CPU 1
-        fi
     >>>
     
     output {
