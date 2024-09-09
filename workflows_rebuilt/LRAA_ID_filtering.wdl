@@ -179,7 +179,7 @@ process_files('~{referenceGenome}', '~{gtf_path}', '~{expr_file_path}', '~{outpu
     >>>
 
     runtime {
-        docker: dockerImage
+        docker: docker
         bootDiskSizeGb: 30
         memory: "~{memoryGB} GiB"
         disks: "local-disk ~{diskSizeGB} HDD"
@@ -210,7 +210,7 @@ workflow TranscriptFiltering {
             expr_file_path = expr_file_path,
             output_gtf_path = output_gtf_path,
             threshold = threshold,
-            dockerImage = dockerImage,
+            docker = docker,
             memoryGB = memoryGB,
             diskSizeGB = diskSizeGB
     }
