@@ -89,24 +89,15 @@ task mergeResults {
 
     command <<<
         set -eo pipefail
-    
-        # Function to merge files
-        merge_files() {
-            local output_file="$1"
-            shift # Remove the first argument
-            local input_files=("$@") # The rest of the arguments are input files
-        
-            for file in "${input_files[@]}"; do
-                cat "$file" >> "$output_file"
-            done
-        }
-    
-        # GTF Files
-        if [ ${#gtfFiles[@]} -ne 0 ]; then
-            gtf_output="~{outputFilePrefix}_merged.gtf"
-            touch "$gtf_output"
-            merge_files "$gtf_output" "${gtfFiles[@]}"
-        fi
+
+        # Initialize output file
+        gtf_output="~{outputFilePrefix}_merged.gtf"
+        touch "$gtf_output"
+
+        # Loop through all files and concatenate them directly
+        for file in "${gtfFiles[@]}"; do
+            cat "$file" >> "$gtf_output"
+        done
     >>>
 
     output {
