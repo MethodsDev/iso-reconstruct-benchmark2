@@ -13,14 +13,17 @@ workflow CombinedWorkflow {
         String mode
         Int numThreads = 4
         Int memoryGB = 32
-        Int diskSizeGB = 1024
-        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/lraa/lraa:latest"
         String main_chromosomes = "chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX chrY"
         Boolean? LRAA_no_norm
-        String docker_filtering
 }
 
-    # Conditional execution based on the mode
+
+    Int diskSizeGB = 1024
+    String docker = "us-central1-docker.pkg.dev/methods-dev-lab/lraa/lraa:latest"
+    String OutDir = "LRAA_out"
+    String docker_filtering
+
+
     if (mode == "ID_ref_free_Quant_mode") {
         call IDRefFree.splitBAMByChromosome {
             input:
@@ -33,7 +36,6 @@ workflow CombinedWorkflow {
                 diskSizeGB = diskSizeGB
         }
 
-    String OutDir = "LRAA_out"
 
     scatter (i in range(length(IDRefFree.splitBAMByChromosome.chromosomeBAMs))) {
         call lraaPerChromosome {
@@ -61,10 +63,6 @@ workflow CombinedWorkflow {
 
 
         
-
-
-
-
 
 
 
