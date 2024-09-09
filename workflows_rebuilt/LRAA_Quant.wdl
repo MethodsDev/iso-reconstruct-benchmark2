@@ -149,7 +149,6 @@ workflow lraaWorkflow {
         File referenceGenome
         Int? LRAA_min_mapping_quality
         Boolean? LRAA_no_norm
-        Int cpu = 2
         Int numThreads = 4
         Int memoryGB = 32
         Int diskSizeGB = 1024
