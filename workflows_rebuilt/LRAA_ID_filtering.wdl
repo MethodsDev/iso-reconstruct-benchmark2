@@ -13,7 +13,7 @@ task FilterTranscripts {
     }
 
     command <<<
-        python -c "
+python -c "
 import os
 from Bio import SeqIO
 from Bio.Seq import Seq
@@ -26,16 +26,16 @@ def load_genomic_sequences(referenceGenome):
         for record in SeqIO.parse(referenceGenome, 'fasta'):
             genomic_sequences[record.id] = record.seq
     except FileNotFoundError:
-        print(f'Error: The file {referenceGenome} was not found.')
+        print('Error: The file {} was not found.'.format(referenceGenome))
     except Exception as e:
-        print(f'An error occurred while loading genomic sequences: {e}')
+        print('An error occurred while loading genomic sequences: {}'.format(e))
     return genomic_sequences
 
 def extract_post_transcript_sequence(chromosome, end_position, strand, genomic_sequences, length=20):
     if strand not in {'+', '-'}:
         raise ValueError('Strand must be \'+\' or \'-\'')
     if chromosome not in genomic_sequences:
-        raise ValueError(f'Chromosome {chromosome} not found in genomic sequences.')
+        raise ValueError('Chromosome {} not found in genomic sequences.'.format(chromosome))
     sequence = genomic_sequences[chromosome]
     sequence_length = len(sequence)
     if strand == '+':
@@ -70,11 +70,11 @@ def calculate_total_transcripts_in_gtf(gtf_path):
                 transcript_id = transcript_id[0].split('\"')[1]
                 transcript_ids.add(transcript_id)
     except FileNotFoundError:
-        print(f'Error: The file {gtf_path} was not found.')
+        print('Error: The file {} was not found.'.format(gtf_path))
     except Exception as e:
-        print(f'An error occurred while calculating total transcripts: {e}')
+        print('An error occurred while calculating total transcripts: {}'.format(e))
     total_transcripts = len(transcript_ids)
-    print(f'Total transcripts in {gtf_path}: {total_transcripts}')
+    print('Total transcripts in {}: {}'.format(gtf_path, total_transcripts))
     return total_transcripts
 
 def analyze_gtf_and_count_transcripts(gtf_path, genomic_sequences, output_gtf_path, tpm, threshold):
@@ -127,9 +127,9 @@ def analyze_gtf_and_count_transcripts(gtf_path, genomic_sequences, output_gtf_pa
                 for line in transcript_lines.get(transcript_id, []):
                     output_file.write(line)
     except FileNotFoundError:
-        print(f'Error: The file {gtf_path} was not found.')
+        print('Error: The file {} was not found.'.format(gtf_path))
     except Exception as e:
-        print(f'An error occurred while analyzing GTF: {e}')
+        print('An error occurred while analyzing GTF: {}'.format(e))
     final_count = len(final_transcripts)
     summary.update({
         'initial_count': len(initial_transcripts),
@@ -140,14 +140,14 @@ def analyze_gtf_and_count_transcripts(gtf_path, genomic_sequences, output_gtf_pa
         'low_tpm_mono_exonic_non_ip_count': len(low_tpm_mono_exonic_non_ip),
         'final_count': final_count,
     })
-    print(f'Filtered GTF file saved to: {output_gtf_path}')
-    print(f'Initial Count: {len(initial_transcripts)}')
-    print(f'Filtered Count (IP): {len(ip_transcripts)}')
-    print(f'Mono-exonic Count: {len(mono_exonic_transcripts)}')
-    print(f'Mono-exonic IP Count: {len(mono_exonic_ip_transcripts)}')
-    print(f'Mono-exonic Non-IP Count: {non_ip_mono_exonic_count}')
-    print(f'Mono-exonic Non-IP with < {threshold} TPM: {len(low_tpm_mono_exonic_non_ip)}')
-    print(f'Total Final Transcripts (after all filters): {final_count}')
+    print('Filtered GTF file saved to: {}'.format(output_gtf_path))
+    print('Initial Count: {}'.format(len(initial_transcripts)))
+    print('Filtered Count (IP): {}'.format(len(ip_transcripts)))
+    print('Mono-exonic Count: {}'.format(len(mono_exonic_transcripts)))
+    print('Mono-exonic IP Count: {}'.format(len(mono_exonic_ip_transcripts)))
+    print('Mono-exonic Non-IP Count: {}'.format(non_ip_mono_exonic_count))
+    print('Mono-exonic Non-IP with < {} TPM: {}'.format(threshold, len(low_tpm_mono_exonic_non_ip)))
+    print('Total Final Transcripts (after all filters): {}'.format(final_count))
 
 def load_expression_values(expr_file_path):
     expr_values = {}
@@ -175,7 +175,7 @@ def process_files(gtf_path, expr_file_path, referenceGenome, output_gtf_path, th
     analyze_gtf_and_count_transcripts(gtf_path, genomic_sequences, output_gtf_path, tpm, threshold)
 
 process_files('~{referenceGenome}', '~{gtf_path}', '~{expr_file_path}', '~{output_gtf_path}', ~{threshold})
-        "
+"
     >>>
 
     runtime {
