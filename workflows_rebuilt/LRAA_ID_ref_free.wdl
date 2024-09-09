@@ -94,8 +94,11 @@ task mergeResults {
         gtf_output="~{outputFilePrefix}_merged.gtf"
         touch "$gtf_output"
 
-        # Loop through all files and concatenate them directly
-        for file in "${gtfFiles[@]}"; do
+        # Convert WDL array to a space-separated string
+        gtf_files_str="~{sep=' ' gtfFiles}"
+
+        # Loop through all files and concatenate them
+        for file in $gtf_files_str; do
             cat "$file" >> "$gtf_output"
         done
     >>>
@@ -111,7 +114,6 @@ task mergeResults {
         disks: "local-disk ~{diskSizeGB} HDD"
     }
 }
-
 workflow lraaWorkflow {
     input {
         File inputBAM
