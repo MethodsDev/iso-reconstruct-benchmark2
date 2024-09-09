@@ -13,7 +13,7 @@ task FilterTranscripts {
     }
 
     command <<<
-        FilterTranscripts ~{gtf_path} ~{expr_file_path} ~{referenceGenome} ~{output_gtf_path} ~{threshold}
+        python /usr/local/bin/FilterTranscripts ~{gtf_path} ~{expr_file_path} ~{referenceGenome} ~{output_gtf_path} ~{threshold}
     >>>
 
     runtime {
