@@ -5,7 +5,6 @@ task FilterTranscripts {
         File referenceGenome
         File gtf_path
         File expr_file_path
-        File output_gtf_path
         Float threshold
         Int memoryGB
         Int diskSizeGB
@@ -13,7 +12,7 @@ task FilterTranscripts {
     }
 
     command <<<
-        python /usr/local/bin/FilterTranscripts ~{gtf_path} ~{expr_file_path} ~{referenceGenome} ~{output_gtf_path} ~{threshold}
+        python /usr/local/bin/FilterTranscripts ~{gtf_path} ~{expr_file_path} ~{referenceGenome} "LRAA_filtered.gtf" ~{threshold}
     >>>
 
     runtime {
@@ -24,7 +23,7 @@ task FilterTranscripts {
     }
 
     output {
-        File filtered_gtf = output_gtf_path
+        File filtered_gtf = "LRAA_filtered.gtf"
     }
 }
 
@@ -33,7 +32,6 @@ workflow TranscriptFiltering {
         File referenceGenome
         File gtf_path
         File expr_file_path
-        File output_gtf_path
         Float threshold = 1.0
         Int memoryGB = 32
         Int diskSizeGB = 1024
@@ -45,7 +43,6 @@ workflow TranscriptFiltering {
             referenceGenome = referenceGenome,
             gtf_path = gtf_path,
             expr_file_path = expr_file_path,
-            output_gtf_path = output_gtf_path,
             threshold = threshold,
             docker = docker,
             memoryGB = memoryGB,
