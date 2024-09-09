@@ -68,12 +68,11 @@ task lraaPerChromosome {
     command <<<
         mkdir -p ~{OutDir}/ID_reduced
     
-        if [ -f "~{referenceAnnotation_reduced}" ]; then
-            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
-                                     --bam ~{inputBAM} \
-                                     --output_prefix ~{OutDir}/ID_reduced/LRAA_reduced \
-                                     ~{no_norm_flag} \
-                                     --gtf ~{referenceAnnotation_reduced} --CPU 1
+        /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
+                                 --bam ~{inputBAM} \
+                                 --output_prefix ~{OutDir}/ID_reduced/LRAA_reduced \
+                                 ~{no_norm_flag} \
+                                 --gtf ~{referenceAnnotation_reduced} --CPU 1
         fi
     >>>
     
