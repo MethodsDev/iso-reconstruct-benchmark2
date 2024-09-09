@@ -2,7 +2,7 @@ version 1.0
 
 task FilterTranscripts {
     input {
-        String fasta_path
+        String referenceGenome
         String gtf_path
         String expr_file_path
         String output_gtf_path
@@ -18,14 +18,14 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 import glob
 
-def load_genomic_sequences(fasta_path):
+def load_genomic_sequences(referenceGenome):
     genomic_sequences = {}
-    fasta_path = os.path.expanduser(fasta_path)
+    referenceGenome = os.path.expanduser(referenceGenome)
     try:
-        for record in SeqIO.parse(fasta_path, 'fasta'):
+        for record in SeqIO.parse(referenceGenome, 'fasta'):
             genomic_sequences[record.id] = record.seq
     except FileNotFoundError:
-        print(f'Error: The file {fasta_path} was not found.')
+        print(f'Error: The file {referenceGenome} was not found.')
     except Exception as e:
         print(f'An error occurred while loading genomic sequences: {e}')
     return genomic_sequences
@@ -167,13 +167,13 @@ def calculate_tpm(expr_values):
     tpm = {transcript_id: (reads / total_reads * 1e6) for transcript_id, reads in expr_values.items()}
     return tpm
 
-def process_files(gtf_path, expr_file_path, fasta_path, output_gtf_path, threshold=1.0):
-    genomic_sequences = load_genomic_sequences(fasta_path)
+def process_files(gtf_path, expr_file_path, referenceGenome, output_gtf_path, threshold=1.0):
+    genomic_sequences = load_genomic_sequences(referenceGenome)
     expr_values = load_expression_values(expr_file_path)
     tpm = calculate_tpm(expr_values)
     analyze_gtf_and_count_transcripts(gtf_path, genomic_sequences, output_gtf_path, tpm, threshold)
 
-process_files('~{fasta_path}', '~{gtf_path}', '~{expr_file_path}', '~{output_gtf_path}', ~{threshold})
+process_files('~{referenceGenome}', '~{gtf_path}', '~{expr_file_path}', '~{output_gtf_path}', ~{threshold})
         "
     >>>
 
@@ -192,7 +192,7 @@ process_files('~{fasta_path}', '~{gtf_path}', '~{expr_file_path}', '~{output_gtf
 
 workflow TranscriptFiltering {
     input {
-        String fasta_path
+        String referenceGenome
         String gtf_path
         String expr_file_path
         String output_gtf_path
@@ -204,7 +204,7 @@ workflow TranscriptFiltering {
 
     call FilterTranscripts {
         input:
-            fasta_path = fasta_path,
+            referenceGenome = referenceGenome,
             gtf_path = gtf_path,
             expr_file_path = expr_file_path,
             output_gtf_path = output_gtf_path,
