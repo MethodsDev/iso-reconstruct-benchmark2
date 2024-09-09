@@ -200,7 +200,7 @@ workflow TranscriptFiltering {
         Float threshold = 1.0
         Int memoryGB = 32
         Int diskSizeGB = 1024
-        String docker = "quay.io/biocontainers/biopython:1.79--py38h497a2fe_0"
+        String docker = "biopython/biopython"
     }
 
     call FilterTranscripts {
