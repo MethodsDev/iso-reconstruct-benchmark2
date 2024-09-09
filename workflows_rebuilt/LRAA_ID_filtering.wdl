@@ -13,6 +13,51 @@ task FilterTranscripts {
     }
 
     command <<<
+
+set -e
+
+# Function to check file existence in GCS and download
+# Returns 0 if the file was downloaded, 1 otherwise
+check_and_download() {
+    local gcs_path=$1
+    local local_path=$2
+
+    # Check if the file exists in GCS
+    if gsutil -q stat $gcs_path; then
+        echo "File exists: $gcs_path. Downloading..."
+        gsutil cp $gcs_path $local_path
+        return 0
+    else
+        echo "File does not exist: $gcs_path. Skipping download."
+        return 1
+    fi
+}
+
+# Initialize variables to hold the final file paths
+final_reference_genome_path="~{referenceGenome}"
+final_gtf_path="~{gtf_path}"
+final_expr_file_path="~{expr_file_path}"
+
+# Attempt to download each file and update paths if successful
+if check_and_download ~{referenceGenomeGCSPath} referenceGenome.fasta; then
+    final_reference_genome_path="referenceGenome.fasta"
+fi
+
+if check_and_download ~{gtfGCSPath} gtf_file.gtf; then
+    final_gtf_path="gtf_file.gtf"
+fi
+
+if check_and_download ~{exprFileGCSPath} expr_file.txt; then
+    final_expr_file_path="expr_file.txt"
+fi
+
+# Use the final paths in your Python script
+python3 -c "
+# Adjust your Python code to use the variables for file paths
+process_files('$final_reference_genome_path', '$final_gtf_path', '$final_expr_file_path', '~{outputGtfPath}', ~{threshold})
+"
+
+
 python3 -c "
 import os
 from Bio import SeqIO
@@ -174,7 +219,7 @@ def process_files(gtf_path, expr_file_path, referenceGenome, output_gtf_path, th
     tpm = calculate_tpm(expr_values)
     analyze_gtf_and_count_transcripts(gtf_path, genomic_sequences, output_gtf_path, tpm, threshold)
 
-process_files('~{referenceGenome}', '~{gtf_path}', '~{expr_file_path}', '~{output_gtf_path}', ~{threshold})
+process_files('$final_reference_genome_path', '$final_gtf_path', '$final_expr_file_path', '~{outputGtfPath}', ~{threshold})
 "
     >>>
 
