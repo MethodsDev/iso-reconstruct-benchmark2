@@ -2,10 +2,10 @@ version 1.0
 
 task FilterTranscripts {
     input {
-        String referenceGenome
-        String gtf_path
-        String expr_file_path
-        String output_gtf_path
+        File referenceGenome
+        File gtf_path
+        File expr_file_path
+        File output_gtf_path
         Float threshold
         Int memoryGB
         Int diskSizeGB
@@ -30,10 +30,10 @@ task FilterTranscripts {
 
 workflow TranscriptFiltering {
     input {
-        String referenceGenome
-        String gtf_path
-        String expr_file_path
-        String output_gtf_path
+        File referenceGenome
+        File gtf_path
+        File expr_file_path
+        File output_gtf_path
         Float threshold = 1.0
         Int memoryGB = 32
         Int diskSizeGB = 1024
