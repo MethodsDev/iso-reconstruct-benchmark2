@@ -200,7 +200,7 @@ workflow TranscriptFiltering {
         Float threshold = 1.0
         Int memoryGB = 32
         Int diskSizeGB = 1024
-        String docker = "biopython/biopython"
+        String docker = "pegi3s/biopython"
     }
 
     call FilterTranscripts {
