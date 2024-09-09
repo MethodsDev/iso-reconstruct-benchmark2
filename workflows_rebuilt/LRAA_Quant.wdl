@@ -57,7 +57,6 @@ task lraaPerChromosome {
         String OutDir
         String docker
         Int numThreads
-        String IDOnly_or_QuantOnly_or_Both
         Boolean? LRAA_no_norm
         Int? LRAA_min_mapping_quality
         File referenceAnnotation_full
@@ -156,7 +155,6 @@ workflow lraaWorkflow {
     input {
         File inputBAM
         File referenceGenome
-        String IDOnly_or_QuantOnly_or_Both
         Int? LRAA_min_mapping_quality
         Boolean? LRAA_no_norm
         Int cpu = 2
@@ -190,7 +188,6 @@ workflow lraaWorkflow {
                 OutDir = OutDir,
                 docker = docker,
                 numThreads = numThreads,
-                IDOnly_or_QuantOnly_or_Both = IDOnly_or_QuantOnly_or_Both,
                 LRAA_no_norm = LRAA_no_norm,
                 LRAA_min_mapping_quality = LRAA_min_mapping_quality,
                 referenceAnnotation_full = splitBAMByChromosome.fullAnnotations[i],
