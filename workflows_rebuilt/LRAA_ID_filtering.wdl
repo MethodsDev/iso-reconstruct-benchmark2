@@ -13,7 +13,7 @@ task FilterTranscripts {
     }
 
     command <<<
-python -c "
+python3 -c "
 import os
 from Bio import SeqIO
 from Bio.Seq import Seq
