@@ -78,7 +78,7 @@ workflow CombinedWorkflow {
 
     output {
         File? refFreeUpdatedGTF = LRAA_ID_filtering.filtered_gtf
-        File? refFreeQuant = Quant2.mergedQuantExprFile
+        File? refFreeQuant = Quant2.mergedQuantExpr
         File? refFreeTracking = Quant2.mergedQuantTracking
     }
 }
