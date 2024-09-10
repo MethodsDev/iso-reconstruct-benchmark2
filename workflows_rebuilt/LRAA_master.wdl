@@ -52,7 +52,6 @@ workflow CombinedWorkflow {
 
         call Filtering.TranscriptFiltering as LRAA_ID_filtering {
             input:
-                inputBAM = inputBAM,
                 gtf_path = IDRefFree.mergedReffreeGTF,
                 expr_file_path = Quant.mergedQuantExpr,
                 threshold = 1.0,
