@@ -15,14 +15,12 @@ workflow CombinedWorkflow {
         Int memoryGB = 32
         String main_chromosomes = "chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX chrY"
         Boolean? LRAA_no_norm
-        LRAA_min_mapping_quality? = 0
-}
-
+        Int? LRAA_min_mapping_quality = 0
+    }
 
     Int diskSizeGB = 1024
     String docker = "us-central1-docker.pkg.dev/methods-dev-lab/lraa/lraa:latest"
     String OutDir = "LRAA_out"
-
 
     if (mode == "ID_ref_free_Quant_mode") {
 
@@ -38,7 +36,6 @@ workflow CombinedWorkflow {
                 LRAA_no_norm = LRAA_no_norm
         }
 
-
         call Quant.lraaWorkflow as Quant {
             input:
                 inputBAM = inputBAM,
@@ -53,18 +50,16 @@ workflow CombinedWorkflow {
                 LRAA_min_mapping_quality = LRAA_min_mapping_quality
         }
 
-
         call LRAA_ID_filtering.TranscriptFiltering as LRAA_ID_filtering {
             input:
                 inputBAM = inputBAM,
                 gtf_path = IDRefFree.mergedReffreeGTF,
                 expr_file_path = Quant.mergedQuantExpr,
-                Float threshold = 1.0
+                Float threshold = 1.0,
                 memoryGB = memoryGB,
                 diskSizeGB = diskSizeGB,
                 String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/filtertranscripts:latest"
         }
-    
 
         call Quant.lraaWorkflow as Quant2 {
             input:
@@ -79,7 +74,6 @@ workflow CombinedWorkflow {
                 LRAA_no_norm = LRAA_no_norm,
                 LRAA_min_mapping_quality = LRAA_min_mapping_quality
         }
-        
     }
 
     output {
