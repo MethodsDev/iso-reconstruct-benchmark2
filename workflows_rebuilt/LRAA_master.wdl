@@ -50,7 +50,7 @@ workflow CombinedWorkflow {
                 LRAA_min_mapping_quality = LRAA_min_mapping_quality
         }
 
-        call LRAA_ID_filtering.TranscriptFiltering as LRAA_ID_filtering {
+        call Filtering.TranscriptFiltering as LRAA_ID_filtering {
             input:
                 inputBAM = inputBAM,
                 gtf_path = IDRefFree.mergedReffreeGTF,
@@ -79,6 +79,6 @@ workflow CombinedWorkflow {
     output {
         File? refFreeUpdatedGTF = LRAA_ID_filtering.filtered_gtf
         File? refFreeQuant = Quant2.mergedQuantExprFile
-        File? refFreeTracking = refFreeTracking.mergedQuantTracking
+        File? refFreeTracking = Quant2.mergedQuantTracking
     }
 }
