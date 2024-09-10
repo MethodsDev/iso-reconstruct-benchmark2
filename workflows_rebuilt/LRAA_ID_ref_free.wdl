@@ -9,9 +9,12 @@ task splitBAMByChromosome {
         File referenceGenome
         Int memoryGB
         Int diskSizeGB
+        File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
     }
 
     command <<<
+        bash ~{monitoringScript} > monitoring.log &
+
         set -eo pipefail
         mkdir -p split_bams
         
@@ -53,11 +56,14 @@ task lraaPerChromosome {
         Boolean? LRAA_no_norm
         Int memoryGB
         Int diskSizeGB
+        File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
     }
 
     String no_norm_flag = if defined(LRAA_no_norm) && LRAA_no_norm then "--no_norm" else ""
     
     command <<<
+        bash ~{monitoringScript} > monitoring.log &
+
         mkdir -p ~{OutDir}/ID_reffree
     
         /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
