@@ -15,6 +15,7 @@ workflow CombinedWorkflow {
         Int memoryGB = 32
         String main_chromosomes = "chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX chrY"
         Boolean? LRAA_no_norm
+        LRAA_min_mapping_quality? = 0
 }
 
 
@@ -28,15 +29,50 @@ workflow CombinedWorkflow {
 
         call IDRefFree.lraaWorkflow {
             input:
-                File inputBAM
-                File referenceGenome
-                Int numThreads = numThreads
-                Int memoryGB = memoryGB
-                Int diskSizeGB = diskSizeGB
-                String docker = docker
-                String main_chromosomes = main_chromosomes
-                Boolean? LRAA_no_norm = LRAA_no_norm
+                inputBAM = inputBAM,
+                referenceGenome = referenceGenome,
+                numThreads = numThreads,
+                memoryGB = memoryGB,
+                diskSizeGB = diskSizeGB,
+                docker = docker,
+                main_chromosomes = main_chromosomes,
+                LRAA_no_norm = LRAA_no_norm
         }
+
+
+        call Quant.lraaWorkflow{
+            input:
+                inputBAM = inputBAM,
+                referenceGenome = referenceGenome,
+                numThreads = numThreads,
+                memoryGB = memoryGB,
+                diskSizeGB = diskSizeGB,
+                docker = docker,
+                referenceAnnotation_full = referenceAnnotation_full,
+                main_chromosomes = main_chromosomes,
+                LRAA_no_norm = LRAA_no_norm,
+                LRAA_min_mapping_quality = LRAA_min_mapping_quality
+        }
+
+
+
+
+
+
+    input {
+        File inputBAM
+        File referenceGenome
+        Int? LRAA_min_mapping_quality
+        Boolean? LRAA_no_norm
+        Int cpu = 2
+        Int numThreads = 4
+        Int memoryGB = 32
+        Int diskSizeGB = 1024
+        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/lraa/lraa:latest"
+        File referenceAnnotation_full
+        String main_chromosomes = "chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX chrY"
+    }
+
 
 
 
