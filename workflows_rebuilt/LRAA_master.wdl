@@ -55,10 +55,10 @@ workflow CombinedWorkflow {
                 inputBAM = inputBAM,
                 gtf_path = IDRefFree.mergedReffreeGTF,
                 expr_file_path = Quant.mergedQuantExpr,
-                Float threshold = 1.0,
+                threshold = 1.0,
                 memoryGB = memoryGB,
                 diskSizeGB = diskSizeGB,
-                String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/filtertranscripts:latest"
+                docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/filtertranscripts:latest"
         }
 
         call Quant.lraaWorkflow as Quant2 {
