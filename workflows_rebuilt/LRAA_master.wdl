@@ -22,12 +22,11 @@ workflow CombinedWorkflow {
     Int diskSizeGB = 1024
     String docker = "us-central1-docker.pkg.dev/methods-dev-lab/lraa/lraa:latest"
     String OutDir = "LRAA_out"
-    String docker_filtering
 
 
     if (mode == "ID_ref_free_Quant_mode") {
 
-        call IDRefFree.lraaWorkflow {
+        call IDRefFree.lraaWorkflow as IDRefFree {
             input:
                 inputBAM = inputBAM,
                 referenceGenome = referenceGenome,
@@ -40,7 +39,7 @@ workflow CombinedWorkflow {
         }
 
 
-        call Quant.lraaWorkflow{
+        call Quant.lraaWorkflow as Quant {
             input:
                 inputBAM = inputBAM,
                 referenceGenome = referenceGenome,
@@ -48,103 +47,44 @@ workflow CombinedWorkflow {
                 memoryGB = memoryGB,
                 diskSizeGB = diskSizeGB,
                 docker = docker,
-                referenceAnnotation_full = referenceAnnotation_full,
+                referenceAnnotation_full = IDRefFree.mergedReffreeGTF,
                 main_chromosomes = main_chromosomes,
                 LRAA_no_norm = LRAA_no_norm,
                 LRAA_min_mapping_quality = LRAA_min_mapping_quality
         }
 
 
+        call LRAA_ID_filtering.TranscriptFiltering as LRAA_ID_filtering {
+            input:
+                inputBAM = inputBAM,
+                gtf_path = IDRefFree.mergedReffreeGTF,
+                expr_file_path = Quant.mergedQuantExpr,
+                Float threshold = 1.0
+                memoryGB = memoryGB,
+                diskSizeGB = diskSizeGB,
+                String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/filtertranscripts:latest"
+        }
+    
 
-
-
-
-    input {
-        File inputBAM
-        File referenceGenome
-        Int? LRAA_min_mapping_quality
-        Boolean? LRAA_no_norm
-        Int cpu = 2
-        Int numThreads = 4
-        Int memoryGB = 32
-        Int diskSizeGB = 1024
-        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/lraa/lraa:latest"
-        File referenceAnnotation_full
-        String main_chromosomes = "chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX chrY"
+        call Quant.lraaWorkflow as Quant2 {
+            input:
+                inputBAM = inputBAM,
+                referenceGenome = referenceGenome,
+                numThreads = numThreads,
+                memoryGB = memoryGB,
+                diskSizeGB = diskSizeGB,
+                docker = docker,
+                referenceAnnotation_full = LRAA_ID_filtering.filtered_gtf,
+                main_chromosomes = main_chromosomes,
+                LRAA_no_norm = LRAA_no_norm,
+                LRAA_min_mapping_quality = LRAA_min_mapping_quality
+        }
+        
     }
 
-
-
-
-
-
-        call Quant.QuantTask {
-            input:
-                inputBAM = inputBAM,
-                referenceGTF = IDRefFree.IDRefFreeTask.updatedGTF
-                # Add other necessary inputs for QuantTask
-        }
-
-        call Filtering.FilteringTask {
-            input:
-                inputGTF = IDRefFree.IDRefFreeTask.updatedGTF,
-                quantResults = Quant.QuantTask.quantResults
-                # Add other necessary inputs for FilteringTask
-        }
-
-        call Quant.QuantTask as QuantAfterFiltering {
-            input:
-                inputBAM = inputBAM,
-                referenceGTF = Filtering.FilteringTask.filteredGTF
-                # Add other necessary inputs for QuantTask
-        }
-    }
-
-    if (mode == "ID_ref_guided_Quant_mode") {
-        call IDRefGuided.IDRefGuidedTask {
-            input:
-                inputBAM = inputBAM,
-                referenceGenome = referenceGenome
-                # Add other necessary inputs for IDRefGuidedTask
-        }
-
-        call Quant.QuantTask as QuantForRefGuided {
-            input:
-                inputBAM = inputBAM,
-                referenceGTF = IDRefGuided.IDRefGuidedTask.updatedGTF
-                # Add other necessary inputs for QuantTask
-        }
-
-        call Filtering.FilteringTask as FilteringForRefGuided {
-            input:
-                inputGTF = IDRefGuided.IDRefGuidedTask.updatedGTF,
-                quantResults = QuantForRefGuided.quantResults
-                # Add other necessary inputs for FilteringTask
-        }
-
-        call Quant.QuantTask as QuantAfterFilteringForRefGuided {
-            input:
-                inputBAM = inputBAM,
-                referenceGTF = FilteringForRefGuided.filteredGTF
-                # Add other necessary inputs for QuantTask
-        }
-    }
-
-    if (mode == "Quant_only") {
-        call Quant.QuantTask as QuantOnly {
-            input:
-                inputBAM = inputBAM,
-                referenceGTF = referenceGTF
-                # Add other necessary inputs for QuantTask
-        }
-    }
-
-    # Define workflow outputs
     output {
-        File? refFreeUpdatedGTF = IDRefFree.IDRefFreeTask.updatedGTF
-        File? refGuidedUpdatedGTF = IDRefGuided.IDRefGuidedTask.updatedGTF
-        File? quantResultsFirstPass = select_first([Quant.QuantTask.quantResults, QuantForRefGuided.quantResults])
-        File? filteredGTF = select_first([Filtering.FilteringTask.filteredGTF, FilteringForRefGuided.filteredGTF])
-        File? finalQuantResults = select_first([QuantAfterFiltering.quantResults, QuantAfterFilteringForRefGuided.quantResults, QuantOnly.quantResults])
+        File? refFreeUpdatedGTF = LRAA_ID_filtering.filtered_gtf
+        File? refFreeQuant = Quant2.mergedQuantExprFile
+        File? refFreeTracking = refFreeTracking.mergedQuantTracking
     }
 }
