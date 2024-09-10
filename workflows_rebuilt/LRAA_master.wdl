@@ -1,9 +1,9 @@
 version 1.0
 
-import "ID_ref_free.wdl" as IDRefFree
-import "ID_ref_guided.wdl" as IDRefGuided
-import "Quant.wdl" as Quant
-import "Filtering.wdl" as Filtering
+import "LRAA_ID_ref_free.wdl" as IDRefFree
+import "LRAA_ID_ref_guided.wdl" as IDRefGuided
+import "LRAA_Quant.wdl" as Quant
+import "LRAA_ID_filtering.wdl" as Filtering
 
 workflow CombinedWorkflow {
     input {
