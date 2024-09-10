@@ -10,9 +10,12 @@ task splitBAMByChromosome {
         File referenceAnnotation_full
         Int memoryGB
         Int diskSizeGB
+        File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
     }
 
     command <<<
+        bash ~{monitoringScript} > monitoring.log &
+
         set -eo pipefail
         mkdir -p split_bams
         
@@ -62,12 +65,15 @@ task lraaPerChromosome {
         File referenceAnnotation_full
         Int memoryGB
         Int diskSizeGB
+        File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
     }
 
     String no_norm_flag = if defined(LRAA_no_norm) && LRAA_no_norm then "--no_norm" else ""
     String min_mapping_quality_flag = "--min_mapping_quality=" + select_first([LRAA_min_mapping_quality, 0])
     
     command <<<
+        bash ~{monitoringScript} > monitoring.log &
+
         mkdir -p ~{OutDir}/Quant_noEM_minMapQ
     
         /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
@@ -100,9 +106,12 @@ task mergeResults {
         String docker
         Int memoryGB
         Int diskSizeGB
+        File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
     }
 
     command <<<
+        bash ~{monitoringScript} > monitoring.log &
+
         set -eo pipefail
 
         # Merge Quant Expression Files with header from the first file only
