@@ -9,9 +9,11 @@ task FilterTranscripts {
         Int memoryGB
         Int diskSizeGB
         String docker
+        File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
     }
 
     command <<<
+        bash ~{monitoringScript} > monitoring.log &
         python /usr/local/bin/FilterTranscripts ~{gtf_path} ~{expr_file_path} ~{referenceGenome} "LRAA_filtered.gtf" ~{threshold}
     >>>
 
