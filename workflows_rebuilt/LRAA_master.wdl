@@ -54,6 +54,7 @@ workflow CombinedWorkflow {
             input:
                 gtf_path = IDRefFree.mergedReffreeGTF,
                 expr_file_path = Quant.mergedQuantExpr,
+                referenceGenome = referenceGenome,
                 threshold = 1.0,
                 memoryGB = memoryGB,
                 diskSizeGB = diskSizeGB,
