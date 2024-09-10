@@ -91,9 +91,12 @@ task mergeResults {
         String docker
         Int memoryGB
         Int diskSizeGB
+        File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
     }
 
     command <<<
+        bash ~{monitoringScript} > monitoring.log &
+
         set -eo pipefail
 
         # Initialize output file
