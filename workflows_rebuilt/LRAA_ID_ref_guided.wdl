@@ -10,9 +10,12 @@ task splitBAMByChromosome {
         File referenceAnnotation_reduced
         Int memoryGB
         Int diskSizeGB
+        File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
     }
 
     command <<<
+        bash ~{monitoringScript} > monitoring.log &
+
         set -eo pipefail
         mkdir -p split_bams
         
@@ -61,11 +64,14 @@ task lraaPerChromosome {
         File referenceAnnotation_reduced
         Int memoryGB
         Int diskSizeGB
+        File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
     }
 
     String no_norm_flag = if defined(LRAA_no_norm) && LRAA_no_norm then "--no_norm" else ""
     
     command <<<
+        bash ~{monitoringScript} > monitoring.log &
+
         mkdir -p ~{OutDir}/ID_reduced
     
         /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
@@ -94,9 +100,12 @@ task mergeResults {
         String docker
         Int memoryGB
         Int diskSizeGB
+        File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
     }
 
     command <<<
+        bash ~{monitoringScript} > monitoring.log &
+
         set -eo pipefail
     
         # Initialize output file
