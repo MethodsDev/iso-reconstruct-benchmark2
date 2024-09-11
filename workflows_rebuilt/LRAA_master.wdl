@@ -141,13 +141,10 @@ workflow CombinedWorkflow {
                 memoryGB = memoryGB,
                 diskSizeGB = diskSizeGB,
                 docker = docker,
-                referenceAnnotation_full = referenceGTF,
+                referenceAnnotation_full = select_first([referenceGTF]),
                 main_chromosomes = main_chromosomes,
                 LRAA_no_norm = LRAA_no_norm,
                 LRAA_min_mapping_quality = LRAA_min_mapping_quality
         }
-    }
-
-    output {
     }
 }
