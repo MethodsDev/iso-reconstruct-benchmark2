@@ -61,7 +61,7 @@ task lraaPerChromosome {
         String docker
         Int numThreads
         Boolean? LRAA_no_norm
-        File referenceAnnotation_reduced
+        File? referenceAnnotation_reduced
         Int memoryGB
         Int diskSizeGB
         File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
