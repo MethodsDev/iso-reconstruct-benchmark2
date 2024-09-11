@@ -78,6 +78,10 @@ workflow CombinedWorkflow {
 
     if (mode == "ID_ref_guided_Quant_mode") {
 
+        if (!defined(referenceGTF)) {
+            throw "referenceGTF must be provided for ID_ref_guided_Quant_mode"
+        }
+
         call IDRefGuided.lraaWorkflow as IDRefGuided {
             input:
                 inputBAM = inputBAM,
@@ -132,6 +136,10 @@ workflow CombinedWorkflow {
     }
 
     if (mode == "Quant_only") {
+
+        if (!defined(referenceGTF)) {
+            throw "referenceGTF must be provided for Quant_only mode"
+        }
 
         call Quant.lraaWorkflow as QuantOnly {
             input:
