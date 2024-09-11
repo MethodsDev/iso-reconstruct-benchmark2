@@ -9,7 +9,7 @@ workflow CombinedWorkflow {
     input {
         File inputBAM
         File referenceGenome
-        File referenceGTF
+        File? referenceGTF
         String mode
         Int numThreads = 4
         Int memoryGB = 32
@@ -78,75 +78,78 @@ workflow CombinedWorkflow {
 
     if (mode == "ID_ref_guided_Quant_mode") {
 
-            call IDRefGuided.lraaWorkflow as IDRefGuided {
-                input:
-                    inputBAM = inputBAM,
-                    referenceGenome = referenceGenome,
-                    referenceAnnotation_reduced = referenceGTF,
-                    numThreads = numThreads,
-                    memoryGB = memoryGB,
-                    diskSizeGB = diskSizeGB,
-                    docker = docker,
-                    main_chromosomes = main_chromosomes,
-                    LRAA_no_norm = LRAA_no_norm
-            }
+        File guaranteedRef = select_first([referenceGTF])
 
-            call Quant.lraaWorkflow as QuantGuided {
-                input:
-                    inputBAM = inputBAM,
-                    referenceGenome = referenceGenome,
-                    numThreads = numThreads,
-                    memoryGB = memoryGB,
-                    diskSizeGB = diskSizeGB,
-                    docker = docker,
-                    referenceAnnotation_full = IDRefGuided.mergedReducedGTF,
-                    main_chromosomes = main_chromosomes,
-                    LRAA_no_norm = LRAA_no_norm,
-                    LRAA_min_mapping_quality = LRAA_min_mapping_quality
-            }
+        call IDRefGuided.lraaWorkflow as IDRefGuided {
+            input:
+                inputBAM = inputBAM,
+                referenceGenome = referenceGenome,
+                referenceAnnotation_reduced = guaranteedRef,
+                numThreads = numThreads,
+                memoryGB = memoryGB,
+                diskSizeGB = diskSizeGB,
+                docker = docker,
+                main_chromosomes = main_chromosomes,
+                LRAA_no_norm = LRAA_no_norm
+        }
 
-            call Filtering.TranscriptFiltering as LRAA_ID_filtering_Guided {
-                input:
-                    gtf_path = IDRefGuided.mergedReducedGTF,
-                    expr_file_path = QuantGuided.mergedQuantExpr,
-                    referenceGenome = referenceGenome,
-                    threshold = 1.0,
-                    memoryGB = memoryGB,
-                    diskSizeGB = diskSizeGB,
-                    docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/filtertranscripts:latest"
-            }
+        call Quant.lraaWorkflow as QuantGuided {
+            input:
+                inputBAM = inputBAM,
+                referenceGenome = referenceGenome,
+                numThreads = numThreads,
+                memoryGB = memoryGB,
+                diskSizeGB = diskSizeGB,
+                docker = docker,
+                referenceAnnotation_full = IDRefGuided.mergedReducedGTF,
+                main_chromosomes = main_chromosomes,
+                LRAA_no_norm = LRAA_no_norm,
+                LRAA_min_mapping_quality = LRAA_min_mapping_quality
+        }
 
-            call Quant.lraaWorkflow as QuantGuided2 {
-                input:
-                    inputBAM = inputBAM,
-                    referenceGenome = referenceGenome,
-                    numThreads = numThreads,
-                    memoryGB = memoryGB,
-                    diskSizeGB = diskSizeGB,
-                    docker = docker,
-                    referenceAnnotation_full = LRAA_ID_filtering_Guided.filtered_gtf,
-                    main_chromosomes = main_chromosomes,
-                    LRAA_no_norm = LRAA_no_norm,
-                    LRAA_min_mapping_quality = LRAA_min_mapping_quality
-            }
+        call Filtering.TranscriptFiltering as LRAA_ID_filtering_Guided {
+            input:
+                gtf_path = IDRefGuided.mergedReducedGTF,
+                expr_file_path = QuantGuided.mergedQuantExpr,
+                referenceGenome = referenceGenome,
+                threshold = 1.0,
+                memoryGB = memoryGB,
+                diskSizeGB = diskSizeGB,
+                docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/filtertranscripts:latest"
+        }
 
+        call Quant.lraaWorkflow as QuantGuided2 {
+            input:
+                inputBAM = inputBAM,
+                referenceGenome = referenceGenome,
+                numThreads = numThreads,
+                memoryGB = memoryGB,
+                diskSizeGB = diskSizeGB,
+                docker = docker,
+                referenceAnnotation_full = LRAA_ID_filtering_Guided.filtered_gtf,
+                main_chromosomes = main_chromosomes,
+                LRAA_no_norm = LRAA_no_norm,
+                LRAA_min_mapping_quality = LRAA_min_mapping_quality
+        }
     }
 
     if (mode == "Quant_only") {
 
+        File guaranteedRef = select_first([referenceGTF])
+
         call Quant.lraaWorkflow as QuantOnly {
-                input:
-                    inputBAM = inputBAM,
-                    referenceGenome = referenceGenome,
-                    numThreads = numThreads,
-                    memoryGB = memoryGB,
-                    diskSizeGB = diskSizeGB,
-                    docker = docker,
-                    referenceAnnotation_full = referenceGTF,
-                    main_chromosomes = main_chromosomes,
-                    LRAA_no_norm = LRAA_no_norm,
-                    LRAA_min_mapping_quality = LRAA_min_mapping_quality
-            }
+            input:
+                inputBAM = inputBAM,
+                referenceGenome = referenceGenome,
+                numThreads = numThreads,
+                memoryGB = memoryGB,
+                diskSizeGB = diskSizeGB,
+                docker = docker,
+                referenceAnnotation_full = guaranteedRef,
+                main_chromosomes = main_chromosomes,
+                LRAA_no_norm = LRAA_no_norm,
+                LRAA_min_mapping_quality = LRAA_min_mapping_quality
+        }
     }
 
     output {
