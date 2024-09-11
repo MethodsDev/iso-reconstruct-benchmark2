@@ -82,7 +82,7 @@ workflow CombinedWorkflow {
             input:
                 inputBAM = inputBAM,
                 referenceGenome = referenceGenome,
-                referenceGTF = referenceGTF,
+                referenceAnnotation = referenceGTF,
                 numThreads = numThreads,
                 memoryGB = memoryGB,
                 diskSizeGB = diskSizeGB,
@@ -146,5 +146,11 @@ workflow CombinedWorkflow {
                 LRAA_no_norm = LRAA_no_norm,
                 LRAA_min_mapping_quality = LRAA_min_mapping_quality
         }
+    }
+
+    output {
+        File? UpdatedGTF = if (mode == "ID_ref_free_Quant_mode") then LRAA_ID_filtering_Free.filtered_gtf else if (mode == "ID_ref_guided_Quant_mode") then LRAA_ID_filtering_Guided.filtered_gtf else undefined
+        File? Quant = if (mode == "ID_ref_free_Quant_mode") then QuantFree2.mergedQuantExpr else if (mode == "ID_ref_guided_Quant_mode") then QuantGuided2.mergedQuantExpr else QuantOnly.mergedQuantExpr
+        File? Tracking = if (mode == "ID_ref_free_Quant_mode") then QuantFree2.mergedQuantTracking else if (mode == "ID_ref_guided_Quant_mode") then QuantGuided2.mergedQuantTracking else QuantOnly.mergedQuantTracking
     }
 }
