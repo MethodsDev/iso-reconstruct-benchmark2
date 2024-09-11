@@ -99,7 +99,7 @@ workflow CombinedWorkflow {
                 memoryGB = memoryGB,
                 diskSizeGB = diskSizeGB,
                 docker = docker,
-                referenceAnnotation_full = IDRefGuided.mergedRefguidedGTF,
+                referenceAnnotation_full = IDRefGuided.mergedReducedGTF,
                 main_chromosomes = main_chromosomes,
                 LRAA_no_norm = LRAA_no_norm,
                 LRAA_min_mapping_quality = LRAA_min_mapping_quality
@@ -107,7 +107,7 @@ workflow CombinedWorkflow {
 
         call Filtering.TranscriptFiltering as LRAA_ID_filtering_Guided {
             input:
-                gtf_path = IDRefGuided.mergedRefguidedGTF,
+                gtf_path = IDRefGuided.mergedReducedGTF,
                 expr_file_path = QuantGuided.mergedQuantExpr,
                 referenceGenome = referenceGenome,
                 threshold = 1.0,
@@ -131,9 +131,26 @@ workflow CombinedWorkflow {
         }
     }
 
+    if (mode == "Quant_only") {
+
+        call Quant.lraaWorkflow as QuantOnly {
+            input:
+                inputBAM = inputBAM,
+                referenceGenome = referenceGenome,
+                numThreads = numThreads,
+                memoryGB = memoryGB,
+                diskSizeGB = diskSizeGB,
+                docker = docker,
+                referenceAnnotation_full = referenceGTF,
+                main_chromosomes = main_chromosomes,
+                LRAA_no_norm = LRAA_no_norm,
+                LRAA_min_mapping_quality = LRAA_min_mapping_quality
+        }
+    }
+
     output {
-        File? UpdatedGTF = if (mode == "ID_ref_free_Quant_mode") then LRAA_ID_filtering_Free.filtered_gtf else LRAA_ID_filtering_Guided.filtered_gtf
-        File? Quant = if (mode == "ID_ref_free_Quant_mode") then QuantFree2.mergedQuantExpr else QuantGuided2.mergedQuantExpr
-        File? Tracking = if (mode == "ID_ref_free_Quant_mode") then QuantFree2.mergedQuantTracking else QuantGuided2.mergedQuantTracking
+        File? UpdatedGTF = if (mode == "ID_ref_free_Quant_mode") then LRAA_ID_filtering_Free.filtered_gtf else if (mode == "ID_ref_guided_Quant_mode") then LRAA_ID_filtering_Guided.filtered_gtf else null
+        File? Quant = if (mode == "ID_ref_free_Quant_mode") then QuantFree2.mergedQuantExpr else if (mode == "ID_ref_guided_Quant_mode") then QuantGuided2.mergedQuantExpr else QuantOnly.mergedQuantExpr
+        File? Tracking = if (mode == "ID_ref_free_Quant_mode") then QuantFree2.mergedQuantTracking else if (mode == "ID_ref_guided_Quant_mode") then QuantGuided2.mergedQuantTracking else QuantOnly.mergedQuantTracking
     }
 }
