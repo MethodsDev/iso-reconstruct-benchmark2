@@ -133,7 +133,7 @@ workflow CombinedWorkflow {
         }
     }
 
-    if (mode == "Quant_only") {
+    if (mode == "Quant_only_mode") {
 
         File guaranteedRefQuantOnly = select_first([referenceGTF])
 
