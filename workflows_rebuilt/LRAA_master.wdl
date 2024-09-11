@@ -78,81 +78,81 @@ workflow CombinedWorkflow {
 
     if (mode == "ID_ref_guided_Quant_mode") {
 
-        if (!defined(referenceGTF)) {
-            throw "referenceGTF must be provided for ID_ref_guided_Quant_mode"
-        }
+        if (defined(referenceGTF)) {
+            call IDRefGuided.lraaWorkflow as IDRefGuided {
+                input:
+                    inputBAM = inputBAM,
+                    referenceGenome = referenceGenome,
+                    referenceAnnotation_reduced = referenceGTF,
+                    numThreads = numThreads,
+                    memoryGB = memoryGB,
+                    diskSizeGB = diskSizeGB,
+                    docker = docker,
+                    main_chromosomes = main_chromosomes,
+                    LRAA_no_norm = LRAA_no_norm
+            }
 
-        call IDRefGuided.lraaWorkflow as IDRefGuided {
-            input:
-                inputBAM = inputBAM,
-                referenceGenome = referenceGenome,
-                referenceAnnotation_reduced = referenceGTF,
-                numThreads = numThreads,
-                memoryGB = memoryGB,
-                diskSizeGB = diskSizeGB,
-                docker = docker,
-                main_chromosomes = main_chromosomes,
-                LRAA_no_norm = LRAA_no_norm
-        }
+            call Quant.lraaWorkflow as QuantGuided {
+                input:
+                    inputBAM = inputBAM,
+                    referenceGenome = referenceGenome,
+                    numThreads = numThreads,
+                    memoryGB = memoryGB,
+                    diskSizeGB = diskSizeGB,
+                    docker = docker,
+                    referenceAnnotation_full = IDRefGuided.mergedReducedGTF,
+                    main_chromosomes = main_chromosomes,
+                    LRAA_no_norm = LRAA_no_norm,
+                    LRAA_min_mapping_quality = LRAA_min_mapping_quality
+            }
 
-        call Quant.lraaWorkflow as QuantGuided {
-            input:
-                inputBAM = inputBAM,
-                referenceGenome = referenceGenome,
-                numThreads = numThreads,
-                memoryGB = memoryGB,
-                diskSizeGB = diskSizeGB,
-                docker = docker,
-                referenceAnnotation_full = IDRefGuided.mergedReducedGTF,
-                main_chromosomes = main_chromosomes,
-                LRAA_no_norm = LRAA_no_norm,
-                LRAA_min_mapping_quality = LRAA_min_mapping_quality
-        }
+            call Filtering.TranscriptFiltering as LRAA_ID_filtering_Guided {
+                input:
+                    gtf_path = IDRefGuided.mergedReducedGTF,
+                    expr_file_path = QuantGuided.mergedQuantExpr,
+                    referenceGenome = referenceGenome,
+                    threshold = 1.0,
+                    memoryGB = memoryGB,
+                    diskSizeGB = diskSizeGB,
+                    docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/filtertranscripts:latest"
+            }
 
-        call Filtering.TranscriptFiltering as LRAA_ID_filtering_Guided {
-            input:
-                gtf_path = IDRefGuided.mergedReducedGTF,
-                expr_file_path = QuantGuided.mergedQuantExpr,
-                referenceGenome = referenceGenome,
-                threshold = 1.0,
-                memoryGB = memoryGB,
-                diskSizeGB = diskSizeGB,
-                docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/filtertranscripts:latest"
-        }
-
-        call Quant.lraaWorkflow as QuantGuided2 {
-            input:
-                inputBAM = inputBAM,
-                referenceGenome = referenceGenome,
-                numThreads = numThreads,
-                memoryGB = memoryGB,
-                diskSizeGB = diskSizeGB,
-                docker = docker,
-                referenceAnnotation_full = LRAA_ID_filtering_Guided.filtered_gtf,
-                main_chromosomes = main_chromosomes,
-                LRAA_no_norm = LRAA_no_norm,
-                LRAA_min_mapping_quality = LRAA_min_mapping_quality
+            call Quant.lraaWorkflow as QuantGuided2 {
+                input:
+                    inputBAM = inputBAM,
+                    referenceGenome = referenceGenome,
+                    numThreads = numThreads,
+                    memoryGB = memoryGB,
+                    diskSizeGB = diskSizeGB,
+                    docker = docker,
+                    referenceAnnotation_full = LRAA_ID_filtering_Guided.filtered_gtf,
+                    main_chromosomes = main_chromosomes,
+                    LRAA_no_norm = LRAA_no_norm,
+                    LRAA_min_mapping_quality = LRAA_min_mapping_quality
+            }
+        } else {
+            fail("referenceGTF must be provided for ID_ref_guided_Quant_mode")
         }
     }
 
     if (mode == "Quant_only") {
 
-        if (!defined(referenceGTF)) {
-            throw "referenceGTF must be provided for Quant_only mode"
-        }
-
-        call Quant.lraaWorkflow as QuantOnly {
-            input:
-                inputBAM = inputBAM,
-                referenceGenome = referenceGenome,
-                numThreads = numThreads,
-                memoryGB = memoryGB,
-                diskSizeGB = diskSizeGB,
-                docker = docker,
-                referenceAnnotation_full = referenceGTF,
-                main_chromosomes = main_chromosomes,
-                LRAA_no_norm = LRAA_no_norm,
-                LRAA_min_mapping_quality = LRAA_min_mapping_quality
+        if (defined(referenceGTF)) {
+            call Quant.lraaWorkflow as QuantOnly {
+                input:
+                    inputBAM = inputBAM,
+                    referenceGenome = referenceGenome,
+                    numThreads = numThreads,
+                    memoryGB = memoryGB,
+                    diskSizeGB = diskSizeGB,
+                    docker = docker,
+                    referenceAnnotation_full = referenceGTF,
+                    main_chromosomes = main_chromosomes,
+                    LRAA_no_norm = LRAA_no_norm,
+                    LRAA_min_mapping_quality = LRAA_min_mapping_quality
+            }
+        } else {
+            fail("referenceGTF must be provided for Quant_only mode")
         }
     }
 
