@@ -1,160 +1,183 @@
 version 1.0
 
-import "LRAA_ID_ref_free.wdl" as IDRefFree
-import "LRAA_ID_ref_guided.wdl" as IDRefGuided
-import "LRAA_Quant.wdl" as Quant
-import "LRAA_ID_filtering.wdl" as Filtering
+task splitBAMByChromosome {
+    input {
+        File inputBAM
+        String main_chromosomes
+        String docker
+        Int threads
+        File referenceGenome
+        File referenceAnnotation_reduced
+        Int memoryGB
+        Int diskSizeGB
+        File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
+    }
 
-workflow CombinedWorkflow {
+    command <<<
+        bash ~{monitoringScript} > monitoring.log &
+
+        set -eo pipefail
+        mkdir -p split_bams
+        
+        # Check if BAM index exists, if not, index the input BAM
+        if [ ! -f "~{inputBAM}.bai" ]; then
+            samtools index -@ ~{threads} ~{inputBAM}
+        fi
+        
+        # Loop through each chromosome
+        for chr in ~{main_chromosomes}; do
+            # Generate chromosome-specific BAM
+            samtools view -@ ~{threads} -b ~{inputBAM} $chr > split_bams/$chr.bam
+            
+            # Generate chromosome-specific FASTA from the whole genome
+            samtools faidx ~{referenceGenome} $chr > split_bams/$chr.genome.fasta
+            
+            # Generate chromosome-specific GTF for reduced annotation, if available
+            if [ -f "~{referenceAnnotation_reduced}" ]; then
+                cat ~{referenceAnnotation_reduced} | perl -lane 'if ($F[0] eq "'$chr'") { print; }' > split_bams/$chr.reduced.annot.gtf
+            fi
+        done
+    >>>
+
+    output {
+        Array[File] chromosomeBAMs = glob("split_bams/*.bam")
+        Array[File] chromosomeFASTAs = glob("split_bams/*.genome.fasta")
+        Array[File] reducedAnnotations = glob("split_bams/*.reduced.annot.gtf")
+    }
+
+    runtime {
+        docker: docker
+        bootDiskSizeGb: 30
+        memory: "~{memoryGB} GiB"
+        disks: "local-disk ~{diskSizeGB} HDD"
+    }
+}
+
+task lraaPerChromosome {
     input {
         File inputBAM
         File referenceGenome
-        File? referenceGTF
-        String mode
-        Int numThreads = 4
-        Int memoryGB = 32
-        String main_chromosomes = "chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX chrY"
+        String OutDir
+        String docker
+        Int numThreads
         Boolean? LRAA_no_norm
-        Int? LRAA_min_mapping_quality = 0
+        File referenceAnnotation_reduced
+        Int memoryGB
+        Int diskSizeGB
+        File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
     }
 
-    Int diskSizeGB = 1024
-    String docker = "us-central1-docker.pkg.dev/methods-dev-lab/lraa/lraa:latest"
-    String OutDir = "LRAA_out"
+    String no_norm_flag = if defined(LRAA_no_norm) && LRAA_no_norm then "--no_norm" else ""
+    
+    command <<<
+        bash ~{monitoringScript} > monitoring.log &
 
-    if (mode == "ID_ref_free_Quant_mode") {
+        mkdir -p ~{OutDir}/ID_reduced
+    
+        /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
+                                 --bam ~{inputBAM} \
+                                 --output_prefix ~{OutDir}/ID_reduced/LRAA_reduced \
+                                 ~{no_norm_flag} \
+                                 --gtf ~{referenceAnnotation_reduced} --CPU 1
+    >>>
+    
+    output {
+        File lraaID_reduced_GTF = "~{OutDir}/ID_reduced/LRAA_reduced.gtf"
+    }
+    runtime {
+        docker: docker
+        bootDiskSizeGb: 30
+        cpu: "~{numThreads}"
+        memory: "~{memoryGB} GiB"
+        disks: "local-disk ~{diskSizeGB} HDD"
+    }
+}
 
-        call IDRefFree.lraaWorkflow as IDRefFree {
-            input:
-                inputBAM = inputBAM,
-                referenceGenome = referenceGenome,
-                numThreads = numThreads,
-                memoryGB = memoryGB,
-                diskSizeGB = diskSizeGB,
-                docker = docker,
-                main_chromosomes = main_chromosomes,
-                LRAA_no_norm = LRAA_no_norm
-        }
-
-        call Quant.lraaWorkflow as QuantFree {
-            input:
-                inputBAM = inputBAM,
-                referenceGenome = referenceGenome,
-                numThreads = numThreads,
-                memoryGB = memoryGB,
-                diskSizeGB = diskSizeGB,
-                docker = docker,
-                referenceAnnotation_full = IDRefFree.mergedReffreeGTF,
-                main_chromosomes = main_chromosomes,
-                LRAA_no_norm = LRAA_no_norm,
-                LRAA_min_mapping_quality = LRAA_min_mapping_quality
-        }
-
-        call Filtering.TranscriptFiltering as LRAA_ID_filtering_Free {
-            input:
-                gtf_path = IDRefFree.mergedReffreeGTF,
-                expr_file_path = QuantFree.mergedQuantExpr,
-                referenceGenome = referenceGenome,
-                threshold = 1.0,
-                memoryGB = memoryGB,
-                diskSizeGB = diskSizeGB,
-                docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/filtertranscripts:latest"
-        }
-
-        call Quant.lraaWorkflow as QuantFree2 {
-            input:
-                inputBAM = inputBAM,
-                referenceGenome = referenceGenome,
-                numThreads = numThreads,
-                memoryGB = memoryGB,
-                diskSizeGB = diskSizeGB,
-                docker = docker,
-                referenceAnnotation_full = LRAA_ID_filtering_Free.filtered_gtf,
-                main_chromosomes = main_chromosomes,
-                LRAA_no_norm = LRAA_no_norm,
-                LRAA_min_mapping_quality = LRAA_min_mapping_quality
-        }
+task mergeResults {
+    input {
+        Array[File] reducedGtfFiles
+        String outputFilePrefix
+        String docker
+        Int memoryGB
+        Int diskSizeGB
+        File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
     }
 
-    if (mode == "ID_ref_guided_Quant_mode") {
+    command <<<
+        bash ~{monitoringScript} > monitoring.log &
 
-        if (!defined(referenceGTF)) {
-            throw "referenceGTF must be provided for ID_ref_guided_Quant_mode"
-        }
-
-        call IDRefGuided.lraaWorkflow as IDRefGuided {
-            input:
-                inputBAM = inputBAM,
-                referenceGenome = referenceGenome,
-                referenceAnnotation_reduced = referenceGTF,
-                numThreads = numThreads,
-                memoryGB = memoryGB,
-                diskSizeGB = diskSizeGB,
-                docker = docker,
-                main_chromosomes = main_chromosomes,
-                LRAA_no_norm = LRAA_no_norm
-        }
-
-        call Quant.lraaWorkflow as QuantGuided {
-            input:
-                inputBAM = inputBAM,
-                referenceGenome = referenceGenome,
-                numThreads = numThreads,
-                memoryGB = memoryGB,
-                diskSizeGB = diskSizeGB,
-                docker = docker,
-                referenceAnnotation_full = IDRefGuided.mergedReducedGTF,
-                main_chromosomes = main_chromosomes,
-                LRAA_no_norm = LRAA_no_norm,
-                LRAA_min_mapping_quality = LRAA_min_mapping_quality
-        }
-
-        call Filtering.TranscriptFiltering as LRAA_ID_filtering_Guided {
-            input:
-                gtf_path = IDRefGuided.mergedReducedGTF,
-                expr_file_path = QuantGuided.mergedQuantExpr,
-                referenceGenome = referenceGenome,
-                threshold = 1.0,
-                memoryGB = memoryGB,
-                diskSizeGB = diskSizeGB,
-                docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/filtertranscripts:latest"
-        }
-
-        call Quant.lraaWorkflow as QuantGuided2 {
-            input:
-                inputBAM = inputBAM,
-                referenceGenome = referenceGenome,
-                numThreads = numThreads,
-                memoryGB = memoryGB,
-                diskSizeGB = diskSizeGB,
-                docker = docker,
-                referenceAnnotation_full = LRAA_ID_filtering_Guided.filtered_gtf,
-                main_chromosomes = main_chromosomes,
-                LRAA_no_norm = LRAA_no_norm,
-                LRAA_min_mapping_quality = LRAA_min_mapping_quality
-        }
-    }
-
-    if (mode == "Quant_only") {
-
-        call Quant.lraaWorkflow as QuantOnly {
-            input:
-                inputBAM = inputBAM,
-                referenceGenome = referenceGenome,
-                numThreads = numThreads,
-                memoryGB = memoryGB,
-                diskSizeGB = diskSizeGB,
-                docker = docker,
-                referenceAnnotation_full = select_first([referenceGTF]),
-                main_chromosomes = main_chromosomes,
-                LRAA_no_norm = LRAA_no_norm,
-                LRAA_min_mapping_quality = LRAA_min_mapping_quality
-        }
-    }
+        set -eo pipefail
+    
+        # Initialize output file
+        reduced_gtf_output="~{outputFilePrefix}_merged_reduced.gtf"
+        
+        # Directly concatenate all input files into the output file
+        cat ~{sep=' ' reducedGtfFiles} > "$reduced_gtf_output"
+    >>>
 
     output {
-        File? UpdatedGTF = if (mode == "ID_ref_free_Quant_mode") then LRAA_ID_filtering_Free.filtered_gtf else if (mode == "ID_ref_guided_Quant_mode") then LRAA_ID_filtering_Guided.filtered_gtf else "null"
-        File? Quant = if (mode == "ID_ref_free_Quant_mode") then QuantFree2.mergedQuantExpr else if (mode == "ID_ref_guided_Quant_mode") then QuantGuided2.mergedQuantExpr else QuantOnly.mergedQuantExpr
-        File? Tracking = if (mode == "ID_ref_free_Quant_mode") then QuantFree2.mergedQuantTracking else if (mode == "ID_ref_guided_Quant_mode") then QuantGuided2.mergedQuantTracking else QuantOnly.mergedQuantTracking
+        File mergedReducedGtfFile = "~{outputFilePrefix}_merged_reduced.gtf"
+    }
+
+    runtime {
+        docker: docker
+        cpu: 1
+        memory: "~{memoryGB} GiB"
+        disks: "local-disk ~{diskSizeGB} HDD"
+    }
+}
+
+workflow lraaWorkflow {
+    input {
+        File inputBAM
+        File referenceGenome
+        Int numThreads = 4
+        Int memoryGB = 32
+        Int diskSizeGB = 1024
+        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/lraa/lraa:latest"
+        File referenceAnnotation_reduced
+        String main_chromosomes = "chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX chrY"
+        Boolean? LRAA_no_norm
+    }
+
+    String OutDir = "LRAA_out"
+
+    call splitBAMByChromosome {
+        input:
+            inputBAM = inputBAM,
+            main_chromosomes = main_chromosomes,
+            docker = docker,
+            threads = numThreads,
+            referenceGenome = referenceGenome,
+            referenceAnnotation_reduced = referenceAnnotation_reduced,
+            memoryGB = memoryGB,
+            diskSizeGB = diskSizeGB
+    }
+
+    scatter (i in range(length(splitBAMByChromosome.chromosomeBAMs))) {
+        call lraaPerChromosome {
+            input:
+                inputBAM = splitBAMByChromosome.chromosomeBAMs[i],
+                referenceGenome = splitBAMByChromosome.chromosomeFASTAs[i],
+                OutDir = OutDir,
+                docker = docker,
+                numThreads = numThreads,
+                LRAA_no_norm = LRAA_no_norm,
+                referenceAnnotation_reduced = splitBAMByChromosome.reducedAnnotations[i],
+                memoryGB = memoryGB,
+                diskSizeGB = diskSizeGB
+        }
+    }
+    call mergeResults {
+        input:
+            reducedGtfFiles = lraaPerChromosome.lraaID_reduced_GTF,
+            outputFilePrefix = "merged",
+            docker = docker,
+            memoryGB = memoryGB,
+            diskSizeGB = diskSizeGB
+    }
+    
+    output {
+        File mergedReducedGTF = mergeResults.mergedReducedGtfFile
     }
 }
