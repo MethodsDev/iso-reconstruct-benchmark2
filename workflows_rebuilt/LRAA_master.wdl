@@ -36,7 +36,7 @@ workflow CombinedWorkflow {
                 LRAA_no_norm = LRAA_no_norm
         }
 
-        call Quant.lraaWorkflow as Quant {
+        call Quant.lraaWorkflow as QuantFree {
             input:
                 inputBAM = inputBAM,
                 referenceGenome = referenceGenome,
@@ -50,10 +50,10 @@ workflow CombinedWorkflow {
                 LRAA_min_mapping_quality = LRAA_min_mapping_quality
         }
 
-        call Filtering.TranscriptFiltering as LRAA_ID_filtering {
+        call Filtering.TranscriptFiltering as LRAA_ID_filtering_Free {
             input:
                 gtf_path = IDRefFree.mergedReffreeGTF,
-                expr_file_path = Quant.mergedQuantExpr,
+                expr_file_path = QuantFree.mergedQuantExpr,
                 referenceGenome = referenceGenome,
                 threshold = 1.0,
                 memoryGB = memoryGB,
@@ -61,7 +61,7 @@ workflow CombinedWorkflow {
                 docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/filtertranscripts:latest"
         }
 
-        call Quant.lraaWorkflow as Quant2 {
+        call Quant.lraaWorkflow as QuantFree2 {
             input:
                 inputBAM = inputBAM,
                 referenceGenome = referenceGenome,
@@ -69,7 +69,7 @@ workflow CombinedWorkflow {
                 memoryGB = memoryGB,
                 diskSizeGB = diskSizeGB,
                 docker = docker,
-                referenceAnnotation_full = LRAA_ID_filtering.filtered_gtf,
+                referenceAnnotation_full = LRAA_ID_filtering_Free.filtered_gtf,
                 main_chromosomes = main_chromosomes,
                 LRAA_no_norm = LRAA_no_norm,
                 LRAA_min_mapping_quality = LRAA_min_mapping_quality
@@ -91,7 +91,7 @@ workflow CombinedWorkflow {
                 LRAA_no_norm = LRAA_no_norm
         }
 
-        call Quant.lraaWorkflow as Quant {
+        call Quant.lraaWorkflow as QuantGuided {
             input:
                 inputBAM = inputBAM,
                 referenceGenome = referenceGenome,
@@ -105,10 +105,10 @@ workflow CombinedWorkflow {
                 LRAA_min_mapping_quality = LRAA_min_mapping_quality
         }
 
-        call Filtering.TranscriptFiltering as LRAA_ID_filtering {
+        call Filtering.TranscriptFiltering as LRAA_ID_filtering_Guided {
             input:
                 gtf_path = IDRefGuided.mergedRefguidedGTF,
-                expr_file_path = Quant.mergedQuantExpr,
+                expr_file_path = QuantGuided.mergedQuantExpr,
                 referenceGenome = referenceGenome,
                 threshold = 1.0,
                 memoryGB = memoryGB,
@@ -116,7 +116,7 @@ workflow CombinedWorkflow {
                 docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/filtertranscripts:latest"
         }
 
-        call Quant.lraaWorkflow as Quant2 {
+        call Quant.lraaWorkflow as QuantGuided2 {
             input:
                 inputBAM = inputBAM,
                 referenceGenome = referenceGenome,
@@ -124,7 +124,7 @@ workflow CombinedWorkflow {
                 memoryGB = memoryGB,
                 diskSizeGB = diskSizeGB,
                 docker = docker,
-                referenceAnnotation_full = LRAA_ID_filtering.filtered_gtf,
+                referenceAnnotation_full = LRAA_ID_filtering_Guided.filtered_gtf,
                 main_chromosomes = main_chromosomes,
                 LRAA_no_norm = LRAA_no_norm,
                 LRAA_min_mapping_quality = LRAA_min_mapping_quality
@@ -132,8 +132,8 @@ workflow CombinedWorkflow {
     }
 
     output {
-        File? UpdatedGTF = LRAA_ID_filtering.filtered_gtf
-        File? Quant = Quant2.mergedQuantExpr
-        File? Tracking = Quant2.mergedQuantTracking
+        File? UpdatedGTF = if (mode == "ID_ref_free_Quant_mode") then LRAA_ID_filtering_Free.filtered_gtf else LRAA_ID_filtering_Guided.filtered_gtf
+        File? Quant = if (mode == "ID_ref_free_Quant_mode") then QuantFree2.mergedQuantExpr else QuantGuided2.mergedQuantExpr
+        File? Tracking = if (mode == "ID_ref_free_Quant_mode") then QuantFree2.mergedQuantTracking else QuantGuided2.mergedQuantTracking
     }
 }
