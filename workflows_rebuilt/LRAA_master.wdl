@@ -78,13 +78,13 @@ workflow CombinedWorkflow {
 
     if (mode == "ID_ref_guided_Quant_mode") {
 
-        File guaranteedRef = select_first([referenceGTF])
+        File guaranteedRefGuided = select_first([referenceGTF])
 
         call IDRefGuided.lraaWorkflow as IDRefGuidedWorkflow {
             input:
                 inputBAM = inputBAM,
                 referenceGenome = referenceGenome,
-                referenceAnnotation_reduced = guaranteedRef,
+                referenceAnnotation_reduced = guaranteedRefGuided,
                 numThreads = numThreads,
                 memoryGB = memoryGB,
                 diskSizeGB = diskSizeGB,
@@ -135,7 +135,7 @@ workflow CombinedWorkflow {
 
     if (mode == "Quant_only") {
 
-        File guaranteedRef = select_first([referenceGTF])
+        File guaranteedRefQuantOnly = select_first([referenceGTF])
 
         call Quant.lraaWorkflow as QuantOnlyWorkflow {
             input:
@@ -145,7 +145,7 @@ workflow CombinedWorkflow {
                 memoryGB = memoryGB,
                 diskSizeGB = diskSizeGB,
                 docker = dockerImage,
-                referenceAnnotation_full = guaranteedRef,
+                referenceAnnotation_full = guaranteedRefQuantOnly,
                 main_chromosomes = main_chromosomes,
                 LRAA_no_norm = LRAA_no_norm,
                 LRAA_min_mapping_quality = LRAA_min_mapping_quality
