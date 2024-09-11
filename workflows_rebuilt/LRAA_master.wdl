@@ -19,41 +19,41 @@ workflow CombinedWorkflow {
     }
 
     Int diskSizeGB = 1024
-    String docker = "us-central1-docker.pkg.dev/methods-dev-lab/lraa/lraa:latest"
-    String OutDir = "LRAA_out"
+    String dockerImage = "us-central1-docker.pkg.dev/methods-dev-lab/lraa/lraa:latest"
+    String outputDir = "LRAA_out"
 
     if (mode == "ID_ref_free_Quant_mode") {
 
-        call IDRefFree.lraaWorkflow as IDRefFree {
+        call IDRefFree.lraaWorkflow as IDRefFreeWorkflow {
             input:
                 inputBAM = inputBAM,
                 referenceGenome = referenceGenome,
                 numThreads = numThreads,
                 memoryGB = memoryGB,
                 diskSizeGB = diskSizeGB,
-                docker = docker,
+                docker = dockerImage,
                 main_chromosomes = main_chromosomes,
                 LRAA_no_norm = LRAA_no_norm
         }
 
-        call Quant.lraaWorkflow as QuantFree {
+        call Quant.lraaWorkflow as QuantFreeWorkflow {
             input:
                 inputBAM = inputBAM,
                 referenceGenome = referenceGenome,
                 numThreads = numThreads,
                 memoryGB = memoryGB,
                 diskSizeGB = diskSizeGB,
-                docker = docker,
-                referenceAnnotation_full = IDRefFree.mergedReffreeGTF,
+                docker = dockerImage,
+                referenceAnnotation_full = IDRefFreeWorkflow.mergedReffreeGTF,
                 main_chromosomes = main_chromosomes,
                 LRAA_no_norm = LRAA_no_norm,
                 LRAA_min_mapping_quality = LRAA_min_mapping_quality
         }
 
-        call Filtering.TranscriptFiltering as LRAA_ID_filtering_Free {
+        call Filtering.TranscriptFiltering as LRAA_ID_filtering_FreeWorkflow {
             input:
-                gtf_path = IDRefFree.mergedReffreeGTF,
-                expr_file_path = QuantFree.mergedQuantExpr,
+                gtf_path = IDRefFreeWorkflow.mergedReffreeGTF,
+                expr_file_path = QuantFreeWorkflow.mergedQuantExpr,
                 referenceGenome = referenceGenome,
                 threshold = 1.0,
                 memoryGB = memoryGB,
@@ -61,15 +61,15 @@ workflow CombinedWorkflow {
                 docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/filtertranscripts:latest"
         }
 
-        call Quant.lraaWorkflow as QuantFree2 {
+        call Quant.lraaWorkflow as QuantFree2Workflow {
             input:
                 inputBAM = inputBAM,
                 referenceGenome = referenceGenome,
                 numThreads = numThreads,
                 memoryGB = memoryGB,
                 diskSizeGB = diskSizeGB,
-                docker = docker,
-                referenceAnnotation_full = LRAA_ID_filtering_Free.filtered_gtf,
+                docker = dockerImage,
+                referenceAnnotation_full = LRAA_ID_filtering_FreeWorkflow.filtered_gtf,
                 main_chromosomes = main_chromosomes,
                 LRAA_no_norm = LRAA_no_norm,
                 LRAA_min_mapping_quality = LRAA_min_mapping_quality
@@ -80,7 +80,7 @@ workflow CombinedWorkflow {
 
         File guaranteedRef = select_first([referenceGTF])
 
-        call IDRefGuided.lraaWorkflow as IDRefGuided {
+        call IDRefGuided.lraaWorkflow as IDRefGuidedWorkflow {
             input:
                 inputBAM = inputBAM,
                 referenceGenome = referenceGenome,
@@ -88,29 +88,29 @@ workflow CombinedWorkflow {
                 numThreads = numThreads,
                 memoryGB = memoryGB,
                 diskSizeGB = diskSizeGB,
-                docker = docker,
+                docker = dockerImage,
                 main_chromosomes = main_chromosomes,
                 LRAA_no_norm = LRAA_no_norm
         }
 
-        call Quant.lraaWorkflow as QuantGuided {
+        call Quant.lraaWorkflow as QuantGuidedWorkflow {
             input:
                 inputBAM = inputBAM,
                 referenceGenome = referenceGenome,
                 numThreads = numThreads,
                 memoryGB = memoryGB,
                 diskSizeGB = diskSizeGB,
-                docker = docker,
-                referenceAnnotation_full = IDRefGuided.mergedReducedGTF,
+                docker = dockerImage,
+                referenceAnnotation_full = IDRefGuidedWorkflow.mergedReducedGTF,
                 main_chromosomes = main_chromosomes,
                 LRAA_no_norm = LRAA_no_norm,
                 LRAA_min_mapping_quality = LRAA_min_mapping_quality
         }
 
-        call Filtering.TranscriptFiltering as LRAA_ID_filtering_Guided {
+        call Filtering.TranscriptFiltering as LRAA_ID_filtering_GuidedWorkflow {
             input:
-                gtf_path = IDRefGuided.mergedReducedGTF,
-                expr_file_path = QuantGuided.mergedQuantExpr,
+                gtf_path = IDRefGuidedWorkflow.mergedReducedGTF,
+                expr_file_path = QuantGuidedWorkflow.mergedQuantExpr,
                 referenceGenome = referenceGenome,
                 threshold = 1.0,
                 memoryGB = memoryGB,
@@ -118,15 +118,15 @@ workflow CombinedWorkflow {
                 docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/filtertranscripts:latest"
         }
 
-        call Quant.lraaWorkflow as QuantGuided2 {
+        call Quant.lraaWorkflow as QuantGuided2Workflow {
             input:
                 inputBAM = inputBAM,
                 referenceGenome = referenceGenome,
                 numThreads = numThreads,
                 memoryGB = memoryGB,
                 diskSizeGB = diskSizeGB,
-                docker = docker,
-                referenceAnnotation_full = LRAA_ID_filtering_Guided.filtered_gtf,
+                docker = dockerImage,
+                referenceAnnotation_full = LRAA_ID_filtering_GuidedWorkflow.filtered_gtf,
                 main_chromosomes = main_chromosomes,
                 LRAA_no_norm = LRAA_no_norm,
                 LRAA_min_mapping_quality = LRAA_min_mapping_quality
@@ -137,14 +137,14 @@ workflow CombinedWorkflow {
 
         File guaranteedRef = select_first([referenceGTF])
 
-        call Quant.lraaWorkflow as QuantOnly {
+        call Quant.lraaWorkflow as QuantOnlyWorkflow {
             input:
                 inputBAM = inputBAM,
                 referenceGenome = referenceGenome,
                 numThreads = numThreads,
                 memoryGB = memoryGB,
                 diskSizeGB = diskSizeGB,
-                docker = docker,
+                docker = dockerImage,
                 referenceAnnotation_full = guaranteedRef,
                 main_chromosomes = main_chromosomes,
                 LRAA_no_norm = LRAA_no_norm,
@@ -153,8 +153,8 @@ workflow CombinedWorkflow {
     }
 
     output {
-        File? UpdatedGTF = if (mode == "ID_ref_free_Quant_mode") then LRAA_ID_filtering_Free.filtered_gtf else if (mode == "ID_ref_guided_Quant_mode") then LRAA_ID_filtering_Guided.filtered_gtf else "null"
-        File? Quant = if (mode == "ID_ref_free_Quant_mode") then QuantFree2.mergedQuantExpr else if (mode == "ID_ref_guided_Quant_mode") then QuantGuided2.mergedQuantExpr else QuantOnly.mergedQuantExpr
-        File? Tracking = if (mode == "ID_ref_free_Quant_mode") then QuantFree2.mergedQuantTracking else if (mode == "ID_ref_guided_Quant_mode") then QuantGuided2.mergedQuantTracking else QuantOnly.mergedQuantTracking
+        File? UpdatedGTF = if (mode == "ID_ref_free_Quant_mode") then LRAA_ID_filtering_FreeWorkflow.filtered_gtf else if (mode == "ID_ref_guided_Quant_mode") then LRAA_ID_filtering_GuidedWorkflow.filtered_gtf else "null"
+        File? Quant = if (mode == "ID_ref_free_Quant_mode") then QuantFree2Workflow.mergedQuantExpr else if (mode == "ID_ref_guided_Quant_mode") then QuantGuided2Workflow.mergedQuantExpr else QuantOnlyWorkflow.mergedQuantExpr
+        File? Tracking = if (mode == "ID_ref_free_Quant_mode") then QuantFree2Workflow.mergedQuantTracking else if (mode == "ID_ref_guided_Quant_mode") then QuantGuided2Workflow.mergedQuantTracking else QuantOnlyWorkflow.mergedQuantTracking
     }
 }
