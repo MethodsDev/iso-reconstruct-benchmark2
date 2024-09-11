@@ -149,7 +149,7 @@ workflow CombinedWorkflow {
     }
 
     output {
-        File? UpdatedGTF = if (mode == "ID_ref_free_Quant_mode") then LRAA_ID_filtering_Free.filtered_gtf else if (mode == "ID_ref_guided_Quant_mode") then LRAA_ID_filtering_Guided.filtered_gtf else null
+        File? UpdatedGTF = if (mode == "ID_ref_free_Quant_mode") then LRAA_ID_filtering_Free.filtered_gtf else if (mode == "ID_ref_guided_Quant_mode") then LRAA_ID_filtering_Guided.filtered_gtf else "null"
         File? Quant = if (mode == "ID_ref_free_Quant_mode") then QuantFree2.mergedQuantExpr else if (mode == "ID_ref_guided_Quant_mode") then QuantGuided2.mergedQuantExpr else QuantOnly.mergedQuantExpr
         File? Tracking = if (mode == "ID_ref_free_Quant_mode") then QuantFree2.mergedQuantTracking else if (mode == "ID_ref_guided_Quant_mode") then QuantGuided2.mergedQuantTracking else QuantOnly.mergedQuantTracking
     }
