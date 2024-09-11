@@ -82,7 +82,7 @@ workflow CombinedWorkflow {
             input:
                 inputBAM = inputBAM,
                 referenceGenome = referenceGenome,
-                referenceAnnotation = referenceGTF,
+                referenceGTF = referenceGTF,
                 numThreads = numThreads,
                 memoryGB = memoryGB,
                 diskSizeGB = diskSizeGB,
