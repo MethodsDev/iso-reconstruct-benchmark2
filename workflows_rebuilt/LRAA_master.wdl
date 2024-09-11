@@ -9,7 +9,7 @@ workflow CombinedWorkflow {
     input {
         File inputBAM
         File referenceGenome
-        File? referenceGTF
+        File referenceGTF
         String mode
         Int numThreads = 4
         Int memoryGB = 32
@@ -78,7 +78,6 @@ workflow CombinedWorkflow {
 
     if (mode == "ID_ref_guided_Quant_mode") {
 
-        if (defined(referenceGTF)) {
             call IDRefGuided.lraaWorkflow as IDRefGuided {
                 input:
                     inputBAM = inputBAM,
@@ -130,15 +129,12 @@ workflow CombinedWorkflow {
                     LRAA_no_norm = LRAA_no_norm,
                     LRAA_min_mapping_quality = LRAA_min_mapping_quality
             }
-        } else {
-            fail("referenceGTF must be provided for ID_ref_guided_Quant_mode")
-        }
+
     }
 
     if (mode == "Quant_only") {
 
-        if (defined(referenceGTF)) {
-            call Quant.lraaWorkflow as QuantOnly {
+        call Quant.lraaWorkflow as QuantOnly {
                 input:
                     inputBAM = inputBAM,
                     referenceGenome = referenceGenome,
@@ -151,9 +147,6 @@ workflow CombinedWorkflow {
                     LRAA_no_norm = LRAA_no_norm,
                     LRAA_min_mapping_quality = LRAA_min_mapping_quality
             }
-        } else {
-            fail("referenceGTF must be provided for Quant_only mode")
-        }
     }
 
     output {
