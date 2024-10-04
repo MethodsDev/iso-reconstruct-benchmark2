@@ -20,7 +20,7 @@ task isoscelesTask {
     }
     
     
-    String OutDir = "StringTie_out"
+    String OutDir = "Isosceles_out"
 
     command <<<
         bash ~{monitoringScript} > monitoring.log &
