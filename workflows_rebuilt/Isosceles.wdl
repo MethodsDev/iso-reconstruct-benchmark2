@@ -30,7 +30,7 @@ task isoscelesTask {
             if [[ -n "~{referenceAnnotation_reduced}" ]]; then
                 isosceles -b ~{inputBAM} \
                 -g ~{referenceAnnotation_reducedf} \
-                -f minigenome.fa -n 4 -m 'pacbio'
+                -f ~{referenceGenome} -n {numThreads} -m ~{mode}
             fi
         fi
 
