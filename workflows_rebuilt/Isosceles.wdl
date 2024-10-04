@@ -27,20 +27,10 @@ task isoscelesTask {
         mkdir -p $OutDir
 
         if [[ "~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both" ]]; then
-#            stringtie \
-#            -o "~{OutDir}/StringTie.gtf" \
-#            -p ~{numThreads} \
-#            -L ~{inputBAM} \
-#            --ref ~{referenceGenome}
-            
             if [[ -n "~{referenceAnnotation_reduced}" ]]; then
-                stringtie \
-                -o "~{OutDir}/StringTie_reduced.gtf" \
-                -G ~{referenceAnnotation_reduced} \
-                -p ~{numThreads} \
-                -L ~{inputBAM} \
-                --ref ~{referenceGenome}
-
+                isosceles -b ~{inputBAM} \
+                -g ~{referenceAnnotation_reducedf} \
+                -f minigenome.fa -n 4 -m 'pacbio'
             fi
         fi
 
