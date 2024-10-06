@@ -55,19 +55,11 @@ task flairTask {
 
         if [ "~{ID_or_Quant_or_Both}" = "Quant" -o "~{ID_or_Quant_or_Both}" = "Both" ]; then
         
-            # Step 1: Convert BAM to FASTQ
             samtools bam2fq ~{inputBAM} > tmp.fastq
-
-            # Step 2: Create transcriptome from reference_full and reference genome using gffread
             gffread ~{referenceAnnotation_full} -g ~{referenceGenome} -w transcriptome.fa
-            
-            # Define the sample
             sample=("flair" "condition1" "batch1" "tmp.fastq")
-
-            # Define the manifest filename
             manifest_filename="flair_manifest.tsv"
 
-            # Write the manifest file
             for i in "${sample[@]}"; do
                 echo -e "$i\t\c" >> $manifest_filename
             done
