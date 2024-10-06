@@ -1,6 +1,6 @@
 version 1.0
 
-# This task uses LRAA version 0.0.8
+# This task uses LRAA latest version
 task lraaTask {
     input {
         File inputBAM
@@ -32,20 +32,20 @@ task lraaTask {
         
         mkdir -p ~{OutDir}/ID ~{OutDir}/ID_reduced ~{OutDir}/Quant ~{OutDir}/Quant_noEM ~{OutDir}/Quant_minMapQ ~{OutDir}/Quant_noEM_minMapQ
 
-   #     if [[ "~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both" ]]; then
-   #         /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
-   #                              --bam ~{inputBAM} \
-   #                              --output_prefix ~{OutDir}/ID/LRAA \
-   #                              ~{no_norm_flag} --CPU ~{numThreads}
+        if [[ "~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both" ]]; then
+            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
+                                 --bam ~{inputBAM} \
+                                 --output_prefix ~{OutDir}/ID/LRAA \
+                                 ~{no_norm_flag} --CPU 1
 
-   #     fi
+        fi
 
         if [[ ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{referenceAnnotation_reduced}" ]]; then
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                  --bam ~{inputBAM} \
                                  --output_prefix ~{OutDir}/ID_reduced/LRAA_reduced \
                                  ~{no_norm_flag} \
-                                 --gtf ~{referenceAnnotation_reduced} --CPU ~{numThreads} 
+                                 --gtf ~{referenceAnnotation_reduced} --CPU 1 
 
 
         fi
@@ -57,7 +57,7 @@ task lraaTask {
                                  --quant_only \
                                  ~{no_norm_flag} \
                                  --gtf ~{referenceAnnotation_full} \
-                                 --EM --CPU ~{numThreads}
+                                 --EM --CPU 1
 
 
             /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
@@ -65,7 +65,7 @@ task lraaTask {
                                  --output_prefix ~{OutDir}/Quant_noEM/LRAA.noEM \
                                  --quant_only \
                                  ~{no_norm_flag} \
-                                 --gtf ~{referenceAnnotation_full} --CPU ~{numThreads}
+                                 --gtf ~{referenceAnnotation_full} --CPU 1
         fi
 
         if [[ ("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both") && -n "~{referenceAnnotation_full}" && -n "~{LRAA_min_mapping_quality}" ]]; then
@@ -75,16 +75,16 @@ task lraaTask {
                                  --quant_only \
                                  ~{no_norm_flag} \
                                  --gtf ~{referenceAnnotation_full} \
-                                 ~{LRAA_min_mapping_quality_flag} --CPU ~{numThreads}
+                                 ~{LRAA_min_mapping_quality_flag} --CPU 1
 
-#            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
-#                                 --bam ~{inputBAM} \
-#                                 --output_prefix ~{OutDir}/Quant_minMapQ/LRAA.minMapQ \
-#                                 --quant_only \
-#                                 ~{no_norm_flag} \
-#                                 --gtf ~{referenceAnnotation_full} \
-#                                 ~{LRAA_min_mapping_quality_flag} \
-#                                 --EM --CPU ~{numThreads} --CPU ~{numThreads}
+            /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
+                                 --bam ~{inputBAM} \
+                                 --output_prefix ~{OutDir}/Quant_minMapQ/LRAA.minMapQ \
+                                 --quant_only \
+                                 ~{no_norm_flag} \
+                                 --gtf ~{referenceAnnotation_full} \
+                                 ~{LRAA_min_mapping_quality_flag} \
+                                 --EM --CPU ~{numThreads} --CPU 1
         fi
     >>>
 
