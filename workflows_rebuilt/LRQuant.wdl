@@ -18,7 +18,7 @@ task lrquantTask {
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/lrquant:latest"
         File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
     }
-    String OutDir = "LRQuant_out"
+    String OutDir = "Gffcompare_out"
 
     command <<<
         bash ~{monitoringScript} > monitoring.log &
@@ -43,9 +43,7 @@ task lrquantTask {
     >>>
 
     output {
-        File? gffcompareCounts = "Gffcompare_quant.tsv"
-        File? lrquantCounts = "LRQuant_OUT_expression_matrix.tsv"
-        File? lrquantOUT = "LRQuant_OUT.tar.gz"
+        File? gffcompareCounts = "Gffcompare_out_expression_matrix.tsv"
         File monitoringLog = "monitoring.log"
     }
 
@@ -84,9 +82,7 @@ workflow lrquantWorkflow {
     }
 
     output {
-        File? lrquantCounts =lrquantTask.lrquantCounts
         File? gffcompareCounts = lrquantTask.gffcompareCounts
-        File? lrquantOUT = lrquantTask.lrquantOUT       
         File monitoringLog = lrquantTask.monitoringLog
     }
 }
