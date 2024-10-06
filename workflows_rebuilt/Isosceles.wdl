@@ -20,6 +20,7 @@ task isoscelesTask {
     }
     
     String OutDir = "Isosceles_out"
+    String mode = if (dataType == "pacbio_ccs") then "pacbio" else "ont"
 
     command <<<
         bash ~{monitoringScript} > monitoring.log &
@@ -28,7 +29,7 @@ task isoscelesTask {
             if [[ -n "~{referenceAnnotation_reduced}" ]]; then
                 isosceles -b ~{inputBAM} \
                 -i ~{referenceAnnotation_reduced} \
-                -f ~{referenceGenome} -n ~{numThreads} -m ~{dataType} -t ID
+                -f ~{referenceGenome} -n ~{numThreads} -m ~{mode} -t ID
             fi
         fi
 
@@ -36,7 +37,7 @@ task isoscelesTask {
             if [[ -n "~{referenceAnnotation_full}" ]]; then
                 isosceles -b ~{inputBAM} \
                 -q ~{referenceAnnotation_full} \
-                -f ~{referenceGenome} -n ~{numThreads} -m ~{dataType} -t Quant
+                -f ~{referenceGenome} -n ~{numThreads} -m ~{mode} -t Quant
             fi
         fi
 
@@ -45,7 +46,7 @@ task isoscelesTask {
                 isosceles -b ~{inputBAM} \
                 -i ~{referenceAnnotation_reduced} \
                 -q ~{referenceAnnotation_full} \
-                -f ~{referenceGenome} -n ~{numThreads} -m ~{dataType} -t Both
+                -f ~{referenceGenome} -n ~{numThreads} -m ~{mode} -t Both
             fi
         fi
     >>>
