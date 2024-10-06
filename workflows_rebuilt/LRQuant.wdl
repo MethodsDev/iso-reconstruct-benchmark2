@@ -33,8 +33,6 @@ task lrquantTask {
 
             samtools bam2fq --threads ~{numThreads} ~{inputBAM} > LRQuant_tmp.fq
 
-
-
             LRQuant -r LRQuant_tmp.fq \
             -g ~{referenceGenome} \
             -a ~{referenceAnnotation_full} \
@@ -45,8 +43,8 @@ task lrquantTask {
     >>>
 
     output {
-        File? gffcompareCounts = "LRQuant_OUT_expression_matrix.tsv"
-        File? lrquantCounts = "Gffcompare_quant.tsv"
+        File? gffcompareCounts = "Gffcompare_quant.tsv"
+        File? lrquantCounts = "LRQuant_OUT_expression_matrix.tsv"
         File? lrquantOUT = "LRQuant_OUT.tar.gz"
         File monitoringLog = "monitoring.log"
     }
@@ -86,9 +84,9 @@ workflow lrquantWorkflow {
     }
 
     output {
-        File? lrquantCounts = "LRQuant_quant.tsv"
-        File? gffcompareCounts = "Gffcompare_quant.tsv"
-        File? lrquantOUT = "LRQuant_OUT.tar.gz"        
+        File? lrquantCounts =lrquantTask.lrquantCounts
+        File? gffcompareCounts = lrquantTask.gffcompareCounts
+        File? lrquantOUT = lrquantTask.lrquantOUT       
         File monitoringLog = lrquantTask.monitoringLog
     }
 }
