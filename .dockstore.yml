@@ -63,4 +63,7 @@ workflows:
   - name: LRAA_master
     subclass: WDL
     primaryDescriptorPath: /workflows_rebuilt/LRAA_master.wdl
+  - name: Isosceles
+    subclass: WDL
+    primaryDescriptorPath: /workflows_rebuilt/Isosceles.wdl
 
