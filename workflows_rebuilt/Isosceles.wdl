@@ -23,12 +23,11 @@ task isoscelesTask {
 
     command <<<
         bash ~{monitoringScript} > monitoring.log &
-        mkdir -p ~{OutDir}
 
         if [[ "~{ID_or_Quant_or_Both}" == "ID" ]]; then
             if [[ -n "~{referenceAnnotation_reduced}" ]]; then
                 isosceles -b ~{inputBAM} \
-                -g ~{referenceAnnotation_reduced} \
+                -i ~{referenceAnnotation_reduced} \
                 -f ~{referenceGenome} -n ~{numThreads} -m ~{dataType} -t ID
             fi
         fi
@@ -36,29 +35,27 @@ task isoscelesTask {
         if [[ "~{ID_or_Quant_or_Both}" == "Quant" ]]; then
             if [[ -n "~{referenceAnnotation_full}" ]]; then
                 isosceles -b ~{inputBAM} \
-                -g ~{referenceAnnotation_full} \
+                -q ~{referenceAnnotation_full} \
                 -f ~{referenceGenome} -n ~{numThreads} -m ~{dataType} -t Quant
             fi
         fi
 
         if [[ "~{ID_or_Quant_or_Both}" == "Both" ]]; then
             if [[ -n "~{referenceAnnotation_reduced}" ]]; then
-                isosceles -b ~{inputBAM} \
-                -g ~{referenceAnnotation_reduced} \
-                -f ~{referenceGenome} -n ~{numThreads} -m ~{dataType} -t ID
-            fi
-            if [[ -n "~{referenceAnnotation_full}" ]]; then
-                isosceles -b ~{inputBAM} \
-                -g ~{referenceAnnotation_full} \
-                -f ~{referenceGenome} -n ~{numThreads} -m ~{dataType} -t Quant
+                if [[ -n "~{referenceAnnotation_full}" ]]; then
+                    isosceles -b ~{inputBAM} \
+                    -i ~{referenceAnnotation_reduced} \
+                    -q ~{referenceAnnotation_full} \
+                    -f ~{referenceGenome} -n ~{numThreads} -m ~{dataType} -t Both
+                fi
             fi
         fi
     >>>
     
     output {
-        File? isoscelesGTF = "~{OutDir}/Isosceles.gtf"
-        File? isoscelesQuantGTF = "~{OutDir}/Isosceles_quant.gtf"
-        File? isoscelesCounts = "~{OutDir}/Isosceles_quant.csv"
+        File? isoscelesGTF = "Isosceles_de_novo_loose.gtf"
+        File? isoscelesGTF = "Isosceles_de_novo_strict.gtf"
+        File? isoscelesCounts = "Isosceles_quant.txt"
         File monitoringLog = "monitoring.log"
     }
 
