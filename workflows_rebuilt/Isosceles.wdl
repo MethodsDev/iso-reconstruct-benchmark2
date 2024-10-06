@@ -19,34 +19,46 @@ task isoscelesTask {
         File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
     }
     
-    
     String OutDir = "Isosceles_out"
 
     command <<<
         bash ~{monitoringScript} > monitoring.log &
-        mkdir -p $OutDir
+        mkdir -p ~{OutDir}
 
-        if [[ "~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both" ]]; then
+        if [[ "~{ID_or_Quant_or_Both}" == "ID" ]]; then
             if [[ -n "~{referenceAnnotation_reduced}" ]]; then
                 isosceles -b ~{inputBAM} \
-                -g ~{referenceAnnotation_reducedf} \
-                -f ~{referenceGenome} -n {numThreads} -m ~{mode}
+                -g ~{referenceAnnotation_reduced} \
+                -f ~{referenceGenome} -n ~{numThreads} -m ~{dataType} -t ID
             fi
         fi
 
-        if [[ "~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both" ]]; then
+        if [[ "~{ID_or_Quant_or_Both}" == "Quant" ]]; then
             if [[ -n "~{referenceAnnotation_full}" ]]; then
-                stringtie -e -o "~{OutDir}/StringTie_quant.gtf" -G ~{referenceAnnotation_full} -p ~{numThreads} -L ~{inputBAM} --ref ~{referenceGenome}
-                echo -e "stringtie\t~{OutDir}/StringTie_quant.gtf" > ~{OutDir}/stringtie_sample_list.txt
-                prepDE.py -i ~{OutDir}/stringtie_sample_list.txt -g ~{OutDir}/gene_count_matrix.csv -t ~{OutDir}/StringTie_quant.csv
+                isosceles -b ~{inputBAM} \
+                -g ~{referenceAnnotation_full} \
+                -f ~{referenceGenome} -n ~{numThreads} -m ~{dataType} -t Quant
+            fi
+        fi
+
+        if [[ "~{ID_or_Quant_or_Both}" == "Both" ]]; then
+            if [[ -n "~{referenceAnnotation_reduced}" ]]; then
+                isosceles -b ~{inputBAM} \
+                -g ~{referenceAnnotation_reduced} \
+                -f ~{referenceGenome} -n ~{numThreads} -m ~{dataType} -t ID
+            fi
+            if [[ -n "~{referenceAnnotation_full}" ]]; then
+                isosceles -b ~{inputBAM} \
+                -g ~{referenceAnnotation_full} \
+                -f ~{referenceGenome} -n ~{numThreads} -m ~{dataType} -t Quant
             fi
         fi
     >>>
     
     output {
-        File? stringtieGTF = "~{OutDir}/StringTie.gtf"
-        File? stringtieReducedGTF = "~{OutDir}/StringTie_reduced.gtf"
-        File? stringtieCounts = "~{OutDir}/StringTie_quant.csv"
+        File? isoscelesGTF = "~{OutDir}/Isosceles.gtf"
+        File? isoscelesQuantGTF = "~{OutDir}/Isosceles_quant.gtf"
+        File? isoscelesCounts = "~{OutDir}/Isosceles_quant.csv"
         File monitoringLog = "monitoring.log"
     }
 
@@ -59,7 +71,7 @@ task isoscelesTask {
     }
 }
 
-workflow stringtieWorkflow {
+workflow isoscelesWorkflow {
     input {
         File inputBAM
         File inputBAMIndex
@@ -71,7 +83,7 @@ workflow stringtieWorkflow {
         String ID_or_Quant_or_Both
     }
 
-    call stringtieTask {
+    call isoscelesTask {
         input:
             inputBAM = inputBAM,
             inputBAMIndex = inputBAMIndex,
@@ -84,9 +96,9 @@ workflow stringtieWorkflow {
     }
 
     output {
-        File? stringtieGTF = stringtieTask.stringtieGTF
-        File? stringtieReducedGTF = stringtieTask.stringtieReducedGTF
-        File? stringtieCounts = stringtieTask.stringtieCounts
-        File monitoringLog = stringtieTask.monitoringLog
+        File? isoscelesGTF = isoscelesTask.isoscelesGTF
+        File? isoscelesQuantGTF = isoscelesTask.isoscelesQuantGTF
+        File? isoscelesCounts = isoscelesTask.isoscelesCounts
+        File monitoringLog = isoscelesTask.monitoringLog
     }
 }
