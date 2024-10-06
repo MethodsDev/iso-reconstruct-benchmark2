@@ -353,52 +353,53 @@ if (runLrquant) {
     }
 }
 
-call relocateOutputs {
-    input:
-        bambuReducedGTF = bambu.bambuReducedGTF,
-        bambuNDR1ReducedGTF = bambu.bambuNDR1ReducedGTF,
-        bambuGTF = bambu.bambuGTF,
-        bambuCounts = bambu.bambuCounts,
-        espressoReducedGTF = espresso.espressoReducedGTF,
-        espressoCounts = espresso.espressoCounts,
-        flairReducedGTF = flair.flairReducedGTF,
-        flairCounts = flair.flairCounts,
-        flamesReducedGTF = flames.flamesReducedGTF,
-        isoquantReducedGTF = isoquant.isoquantReducedGTF,
-        isoquantGTF = isoquant.isoquantGTF,
-        isoquantCounts = isoquant.isoquantCounts,
-        isoquantGTF_with_polyA = isoquant.isoquantGTF_with_polyA,
-        isoquantReducedGTF_with_polyA = isoquant.isoquantReducedGTF_with_polyA,
-        isoquantCounts_with_polyA = isoquant.isoquantCounts_with_polyA,
-#       isoquantCounts_OUT = isoquant.isoquantCounts_OUT,
-#       isoquantCounts_with_polyA_OUT = isoquant.isoquantCounts_with_polyA_OUT,
-#        gffcompareCounts = lrquant.gffcompareCounts,
-#        lrquantCounts = lrquant.lrquantCounts,
-#        lrquantOUT = lrquant.lrquantOUT
-        isoseqReducedGTF = isoseq.isoseqReducedGTF,
-        isoseqGTF = isoseq.isoseqGTF,
-        mandalorionReducedGTF = mandalorion.mandalorionReducedGTF,
-        mandalorionGTF = mandalorion.mandalorionGTF,
-        mandalorionforkReducedGTF = mandalorionfork.mandalorionforkReducedGTF,
-        mandalorionforkGTF = mandalorionfork.mandalorionforkGTF,
-        oarfishCounts = oarfish.oarfishCounts,
-        salmonCounts = salmon.salmonCounts,
-        stringtieReducedGTF = stringtie.stringtieReducedGTF,
-        stringtieGTF = stringtie.stringtieGTF,
-        stringtieCounts = stringtie.stringtieCounts,
-        talonReducedGTF = talon.talonReducedGTF,
-        lraaGTF = lraa.lraaGTF,
-        lraaReducedGTF = lraa.lraaReducedGTF,
-        lraaCounts = lraa.lraaCounts,
-        lraaCounts_noEM = lraa.lraaCounts_noEM,
-        lraa_quant_tracking = lraa.lraa_quant_tracking,
-        lraa_quant_tracking_noEM = lraa.lraa_quant_tracking_noEM,
-        lraaCounts_noEM_minMapQ = lraa.lraaCounts_noEM_minMapQ,
-        lraa_quant_tracking_noEM_minMapQ = lraa.lraa_quant_tracking_noEM_minMapQ,
-        lraaCounts_minMapQ = lraa.lraaCounts_minMapQ,
-        lraa_quant_tracking_minMapQ = lraa.lraa_quant_tracking_minMapQ
-
-}
+if (runrelocateOutputs) {
+    call relocateOutputs {
+        input:
+            bambuReducedGTF = bambu.bambuReducedGTF,
+            bambuNDR1ReducedGTF = bambu.bambuNDR1ReducedGTF,
+            bambuGTF = bambu.bambuGTF,
+            bambuCounts = bambu.bambuCounts,
+            espressoReducedGTF = espresso.espressoReducedGTF,
+            espressoCounts = espresso.espressoCounts,
+            flairReducedGTF = flair.flairReducedGTF,
+            flairCounts = flair.flairCounts,
+            flamesReducedGTF = flames.flamesReducedGTF,
+            isoquantReducedGTF = isoquant.isoquantReducedGTF,
+            isoquantGTF = isoquant.isoquantGTF,
+            isoquantCounts = isoquant.isoquantCounts,
+            isoquantGTF_with_polyA = isoquant.isoquantGTF_with_polyA,
+            isoquantReducedGTF_with_polyA = isoquant.isoquantReducedGTF_with_polyA,
+            isoquantCounts_with_polyA = isoquant.isoquantCounts_with_polyA,
+    #       isoquantCounts_OUT = isoquant.isoquantCounts_OUT,
+    #       isoquantCounts_with_polyA_OUT = isoquant.isoquantCounts_with_polyA_OUT,
+    #        gffcompareCounts = lrquant.gffcompareCounts,
+    #        lrquantCounts = lrquant.lrquantCounts,
+    #        lrquantOUT = lrquant.lrquantOUT
+            isoseqReducedGTF = isoseq.isoseqReducedGTF,
+            isoseqGTF = isoseq.isoseqGTF,
+            mandalorionReducedGTF = mandalorion.mandalorionReducedGTF,
+            mandalorionGTF = mandalorion.mandalorionGTF,
+            mandalorionforkReducedGTF = mandalorionfork.mandalorionforkReducedGTF,
+            mandalorionforkGTF = mandalorionfork.mandalorionforkGTF,
+            oarfishCounts = oarfish.oarfishCounts,
+            salmonCounts = salmon.salmonCounts,
+            stringtieReducedGTF = stringtie.stringtieReducedGTF,
+            stringtieGTF = stringtie.stringtieGTF,
+            stringtieCounts = stringtie.stringtieCounts,
+            talonReducedGTF = talon.talonReducedGTF,
+            lraaGTF = lraa.lraaGTF,
+            lraaReducedGTF = lraa.lraaReducedGTF,
+            lraaCounts = lraa.lraaCounts,
+            lraaCounts_noEM = lraa.lraaCounts_noEM,
+            lraa_quant_tracking = lraa.lraa_quant_tracking,
+            lraa_quant_tracking_noEM = lraa.lraa_quant_tracking_noEM,
+            lraaCounts_noEM_minMapQ = lraa.lraaCounts_noEM_minMapQ,
+            lraa_quant_tracking_noEM_minMapQ = lraa.lraa_quant_tracking_noEM_minMapQ,
+            lraaCounts_minMapQ = lraa.lraaCounts_minMapQ,
+            lraa_quant_tracking_minMapQ = lraa.lraa_quant_tracking_minMapQ
+    
+    }
 }
 
 
