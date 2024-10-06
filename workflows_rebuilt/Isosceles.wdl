@@ -41,13 +41,11 @@ task isoscelesTask {
         fi
 
         if [[ "~{ID_or_Quant_or_Both}" == "Both" ]]; then
-            if [[ -n "~{referenceAnnotation_reduced}" ]]; then
-                if [[ -n "~{referenceAnnotation_full}" ]]; then
-                    isosceles -b ~{inputBAM} \
-                    -i ~{referenceAnnotation_reduced} \
-                    -q ~{referenceAnnotation_full} \
-                    -f ~{referenceGenome} -n ~{numThreads} -m ~{dataType} -t Both
-                fi
+            if [[ -n "~{referenceAnnotation_reduced}" && -n "~{referenceAnnotation_full}" ]]; then
+                isosceles -b ~{inputBAM} \
+                -i ~{referenceAnnotation_reduced} \
+                -q ~{referenceAnnotation_full} \
+                -f ~{referenceGenome} -n ~{numThreads} -m ~{dataType} -t Both
             fi
         fi
     >>>
