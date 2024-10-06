@@ -53,8 +53,8 @@ task isoscelesTask {
     >>>
     
     output {
-        File? isoscelesGTF = "Isosceles_de_novo_loose.gtf"
-        File? isoscelesGTF = "Isosceles_de_novo_strict.gtf"
+        File? isoscelesReducedGTF = "Isosceles_de_novo_loose.gtf"
+        File? isoscelesStrictReducedGTF = "Isosceles_de_novo_strict.gtf"
         File? isoscelesCounts = "Isosceles_quant.txt"
         File monitoringLog = "monitoring.log"
     }
@@ -93,8 +93,8 @@ workflow isoscelesWorkflow {
     }
 
     output {
-        File? isoscelesGTF = isoscelesTask.isoscelesGTF
-        File? isoscelesQuantGTF = isoscelesTask.isoscelesQuantGTF
+        File? isoscelesReducedGTF = isoscelesTask.isoscelesReducedGTF
+        File? isoscelesStrictReducedGTF = isoscelesTask.isoscelesStrictReducedGTF
         File? isoscelesCounts = isoscelesTask.isoscelesCounts
         File monitoringLog = isoscelesTask.monitoringLog
     }
