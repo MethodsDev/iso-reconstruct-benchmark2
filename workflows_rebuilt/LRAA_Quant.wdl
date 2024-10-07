@@ -27,7 +27,7 @@ task splitBAMByChromosome {
             samtools view -@ ~{threads} -b ~{inputBAM} $chr > split_bams/$chr.bam
             samtools faidx ~{referenceGenome} $chr > split_bams/$chr.genome.fasta
             
-            if [ -f "~{referenceAnnotation_full}") {
+            if [ -f "~{referenceAnnotation_full}" ]; then
                 cat ~{referenceAnnotation_full} | perl -lane 'if ($F[0] eq "'$chr'") { print; }' > split_bams/$chr.full.annot.gtf
             fi
         done
@@ -158,8 +158,12 @@ workflow lraaWorkflow {
 
     String OutDir = "LRAA_out"
 
+    Array[File] quantExprFiles = []
+    Array[File] quantTrackingFiles = []
+
     if (defined(inputBAM)) {
         File nonOptionalInputBAM = select_first([inputBAM, ""])
+        File nonOptionalReferenceGenome = select_first([referenceGenome, ""])
 
         call splitBAMByChromosome {
             input:
@@ -167,7 +171,7 @@ workflow lraaWorkflow {
                 main_chromosomes = main_chromosomes,
                 docker = docker,
                 threads = numThreads,
-                referenceGenome = referenceGenome,
+                referenceGenome = nonOptionalReferenceGenome,
                 referenceAnnotation_full = referenceAnnotation_full,
                 memoryGB = memoryGB,
                 diskSizeGB = diskSizeGB
@@ -188,6 +192,9 @@ workflow lraaWorkflow {
                     diskSizeGB = diskSizeGB
             }
         }
+
+        quantExprFiles = quantExprFiles + lraaPerChromosome.lraaQuantExpr
+        quantTrackingFiles = quantTrackingFiles + lraaPerChromosome.lraaQuantTracking
     }
 
     if (defined(inputBAMArray) && defined(referenceGenomeArray)) {
@@ -209,10 +216,10 @@ workflow lraaWorkflow {
                     diskSizeGB = diskSizeGB
             }
         }
-    }
 
-    Array[File] quantExprFiles = if defined(inputBAM) then select_first([lraaPerChromosome.lraaQuantExpr, []]) else select_first([lraaPerChromosomeArray.lraaQuantExpr, []])
-    Array[File] quantTrackingFiles = if defined(inputBAM) then select_first([lraaPerChromosome.lraaQuantTracking, []]) else select_first([lraaPerChromosomeArray.lraaQuantTracking, []])
+        quantExprFiles = quantExprFiles + lraaPerChromosomeArray.lraaQuantExpr
+        quantTrackingFiles = quantTrackingFiles + lraaPerChromosomeArray.lraaQuantTracking
+    }
 
     call mergeResults {
         input:
