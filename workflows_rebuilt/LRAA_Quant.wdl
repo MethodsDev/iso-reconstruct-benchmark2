@@ -211,10 +211,13 @@ workflow lraaWorkflow {
         }
     }
 
+    Array[File] quantExprFiles = if defined(inputBAM) then lraaPerChromosome.lraaQuantExpr else lraaPerChromosomeArray.lraaQuantExpr
+    Array[File] quantTrackingFiles = if defined(inputBAM) then lraaPerChromosome.lraaQuantTracking else lraaPerChromosomeArray.lraaQuantTracking
+
     call mergeResults {
         input:
-            quantExprFiles = select_first(lraaPerChromosome.lraaQuantExpr),
-            quantTrackingFiles = select_first(lraaPerChromosome.lraaQuantTracking),
+            quantExprFiles = select_first([quantExprFiles, []]),
+            quantTrackingFiles = select_first([quantTrackingFiles, []]),
             outputFilePrefix = "merged",
             docker = docker,
             memoryGB = memoryGB,
