@@ -156,6 +156,7 @@ workflow lraaWorkflow {
     input {
         File? inputBAM
         Array[File]? inputBAMArray
+        Array[File]? referenceGenomeArray
         File referenceGenome
         Int numThreads = 4
         Int memoryGB = 32
@@ -188,7 +189,7 @@ workflow lraaWorkflow {
         chromosomeFASTAs = splitBAMByChromosome.chromosomeFASTAs
     } else {
         chromosomeBAMs = inputBAMArray
-        chromosomeFASTAs = [referenceGenome] # Assuming the reference genome is the same for all chromosomes
+        chromosomeFASTAs = referenceGenomeArray
     }
 
     call splitGTFByChromosome {
@@ -206,7 +207,7 @@ workflow lraaWorkflow {
         call lraaPerChromosome {
             input:
                 inputBAM = chromosomeBAMs[i],
-                referenceGenome = chromosomeFASTAs[0], # Using the same reference genome for all chromosomes
+                referenceGenome = chromosomeFASTAs[i], # Using the specific reference genome for each chromosome
                 OutDir = OutDir,
                 docker = docker,
                 numThreads = numThreads,
@@ -229,5 +230,6 @@ workflow lraaWorkflow {
     output {
         File mergedReducedGTF = mergeResults.mergedReducedGtfFile
         Array[File]? splitBAMs = if defined(inputBAM) then splitBAMByChromosome.chromosomeBAMs else []
+        Array[File]? splitFASTAs = if defined(inputBAM) then splitBAMByChromosome.chromosomeFASTAs else []
     }
 }
