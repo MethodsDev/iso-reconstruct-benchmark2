@@ -158,8 +158,6 @@ workflow lraaWorkflow {
 
     String OutDir = "LRAA_out"
 
-    Array[File] quantExprFiles = []
-    Array[File] quantTrackingFiles = []
 
     if (defined(inputBAM)) {
         File nonOptionalInputBAM = select_first([inputBAM, ""])
@@ -192,9 +190,6 @@ workflow lraaWorkflow {
                     diskSizeGB = diskSizeGB
             }
         }
-
-        quantExprFiles = quantExprFiles + lraaPerChromosome.lraaQuantExpr
-        quantTrackingFiles = quantTrackingFiles + lraaPerChromosome.lraaQuantTracking
     }
 
     if (defined(inputBAMArray) && defined(referenceGenomeArray)) {
@@ -216,10 +211,11 @@ workflow lraaWorkflow {
                     diskSizeGB = diskSizeGB
             }
         }
-
-        quantExprFiles = quantExprFiles + lraaPerChromosomeArray.lraaQuantExpr
-        quantTrackingFiles = quantTrackingFiles + lraaPerChromosomeArray.lraaQuantTracking
     }
+
+    Array[File] quantExprFiles = if defined(inputBAM) then select_first([lraaPerChromosome.lraaQuantExpr, []]) else select_first([lraaPerChromosomeArray.lraaQuantExpr, []])
+    Array[File] quantTrackingFiles = if defined(inputBAM) then select_first([lraaPerChromosome.lraaQuantTracking, []]) else select_first([lraaPerChromosomeArray.lraaQuantTracking, []])
+    
 
     call mergeResults {
         input:
