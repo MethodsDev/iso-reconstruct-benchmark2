@@ -180,9 +180,11 @@ workflow lraaWorkflow {
         }
     }
 
+    Array[File] nonOptionalGtfFiles = if defined(inputBAM) then select_first([lraaPerChromosome.lraaID_reffree_GTF, []]) else select_first([lraaPerChromosomeArray.lraaID_reffree_GTF, []])
+
     call mergeResults {
         input:
-            gtfFiles = if defined(inputBAM) then lraaPerChromosome.lraaID_reffree_GTF else lraaPerChromosomeArray.lraaID_reffree_GTF,
+            gtfFiles = nonOptionalGtfFiles,
             outputFilePrefix = "merged",
             docker = docker,
             memoryGB = memoryGB,
