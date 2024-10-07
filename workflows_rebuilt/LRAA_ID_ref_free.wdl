@@ -157,7 +157,9 @@ workflow lraaWorkflow {
                     diskSizeGB = diskSizeGB
             }
         }
-    } else {
+    }
+
+    if (defined(inputBAMArray) && defined(referenceGenomeArray)) {
         scatter (i in range(length(inputBAMArray))) {
             call lraaPerChromosome {
                 input:
