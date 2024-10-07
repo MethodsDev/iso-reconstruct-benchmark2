@@ -213,8 +213,8 @@ workflow lraaWorkflow {
 
     call mergeResults {
         input:
-            quantExprFiles = lraaPerChromosome.lraaQuantExpr,
-            quantTrackingFiles = lraaPerChromosome.lraaQuantTracking,
+            quantExprFiles = select_first(lraaPerChromosome.lraaQuantExpr),
+            quantTrackingFiles = select_first(lraaPerChromosome.lraaQuantTracking),
             outputFilePrefix = "merged",
             docker = docker,
             memoryGB = memoryGB,
