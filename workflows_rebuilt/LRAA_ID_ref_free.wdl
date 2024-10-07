@@ -132,9 +132,6 @@ workflow lraaWorkflow {
 
     String OutDir = "LRAA_out"
 
-    Array[File] chromosomeBAMs
-    Array[File] chromosomeFASTAs
-
     if (defined(inputBAM)) {
         call splitBAMByChromosome {
             input:
@@ -146,7 +143,6 @@ workflow lraaWorkflow {
                 memoryGB = memoryGB,
                 diskSizeGB = diskSizeGB
         }
-
         chromosomeBAMs = splitBAMByChromosome.chromosomeBAMs
         chromosomeFASTAs = splitBAMByChromosome.chromosomeFASTAs
     } else {
