@@ -45,9 +45,9 @@ workflows:
   - name: LRQuant
     subclass: WDL
     primaryDescriptorPath: /workflows_rebuilt/LRQuant.wdl
-  - name: LRAA_split
+  - name: Isosceles
     subclass: WDL
-    primaryDescriptorPath: /workflows_rebuilt/LRAA_split.wdl
+    primaryDescriptorPath: /workflows_rebuilt/Isosceles.wdl
   - name: LRAA_ID_ref_free
     subclass: WDL
     primaryDescriptorPath: /workflows_rebuilt/LRAA_ID_ref_free.wdl
@@ -63,7 +63,4 @@ workflows:
   - name: LRAA_master
     subclass: WDL
     primaryDescriptorPath: /workflows_rebuilt/LRAA_master.wdl
-  - name: Isosceles
-    subclass: WDL
-    primaryDescriptorPath: /workflows_rebuilt/Isosceles.wdl
 
