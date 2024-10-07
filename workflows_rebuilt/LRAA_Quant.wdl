@@ -211,16 +211,17 @@ workflow lraaWorkflow {
         }
     }
 
-    Array[File] nonOptionalQuantExprFiles = if (defined(inputBAM)) {
-        select_first([lraaPerChromosome.lraaQuantExpr, []])
-    } else {
-        select_first([lraaPerChromosomeArray.lraaQuantExpr, []])
+    Array[File] nonOptionalQuantExprFiles
+    Array[File] nonOptionalQuantTrackingFiles
+
+    if (defined(inputBAM)) {
+        nonOptionalQuantExprFiles = select_first([lraaPerChromosome.lraaQuantExpr, []])
+        nonOptionalQuantTrackingFiles = select_first([lraaPerChromosome.lraaQuantTracking, []])
     }
 
-    Array[File] nonOptionalQuantTrackingFiles = if (defined(inputBAM)) {
-        select_first([lraaPerChromosome.lraaQuantTracking, []])
-    } else {
-        select_first([lraaPerChromosomeArray.lraaQuantTracking, []])
+    if (defined(inputBAMArray) && defined(referenceGenomeArray)) {
+        nonOptionalQuantExprFiles = select_first([lraaPerChromosomeArray.lraaQuantExpr, []])
+        nonOptionalQuantTrackingFiles = select_first([lraaPerChromosomeArray.lraaQuantTracking, []])
     }
 
     call mergeResults {
