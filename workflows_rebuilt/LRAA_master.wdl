@@ -44,7 +44,7 @@ workflow CombinedWorkflow {
                 memoryGB = memoryGB,
                 diskSizeGB = diskSizeGB,
                 docker = dockerImage,
-                referenceAnnotation_full = IDRefFreeWorkflow.mergedReducedGTF,
+                referenceAnnotation_full = IDRefFree.mergedGTF,
                 main_chromosomes = main_chromosomes,
                 LRAA_no_norm = LRAA_no_norm,
                 LRAA_min_mapping_quality = LRAA_min_mapping_quality
@@ -52,7 +52,7 @@ workflow CombinedWorkflow {
 
         call Filtering.TranscriptFiltering as LRAA_ID_filtering_FreeWorkflow {
             input:
-                gtf_path = IDRefFreeWorkflow.mergedReducedGTF,
+                gtf_path = IDRefFreeWorkflow.mergedGTF,
                 expr_file_path = QuantFreeWorkflow.mergedQuantExpr,
                 referenceGenome = referenceGenome,
                 threshold = 1.0,
