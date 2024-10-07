@@ -39,6 +39,8 @@ task lrquantTask {
             -p LRQuant_OUT \
             -t ~{numThreads}
 
+            mv LRQuant_OUT_expression_matrix.tsv Gffcompare_out_expression_matrix.tsv
+
         fi
     >>>
 
