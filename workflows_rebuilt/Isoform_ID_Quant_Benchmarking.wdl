@@ -58,7 +58,6 @@ task relocateOutputs {
         File? lraaCounts_minMapQ
         File? lraa_quant_tracking_minMapQ
         File? gffcompareCounts
-        File? lrquantOUT
         File? isoscelesReducedGTF
         File? isoscelesStrictReducedGTF
         File? isoscelesCounts
