@@ -26,10 +26,8 @@ task espressoTask {
         bash ~{monitoringScript} > monitoring.log &
         mkdir -p ESPRESSO_out
         
-        # Convert BAM to SAM
         samtools view -h -o input.sam ~{inputBAM}
         
-        # Create espresso_samples.tsv
         mkdir -p ESPRESSO_out/ID
         echo -e "input.sam\tespresso" > ESPRESSO_out/ID/~{samples_filename}
         
