@@ -18,7 +18,6 @@ task lrquantTask {
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/lrquant:latest"
         File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
     }
-    String OutDir = "Gffcompare_out"
 
     command <<<
         bash ~{monitoringScript} > monitoring.log &
@@ -28,7 +27,6 @@ task lrquantTask {
                 echo "Full annotation is not provided. Please provide the full annotation."
                 exit 1
             fi  
-            mkdir -p ~{OutDir}
 
 
             samtools bam2fq --threads ~{numThreads} ~{inputBAM} > LRQuant_tmp.fq
@@ -36,16 +34,14 @@ task lrquantTask {
             LRQuant -r LRQuant_tmp.fq \
             -g ~{referenceGenome} \
             -a ~{referenceAnnotation_full} \
-            -p LRQuant_OUT \
+            -p Gffcompare_OUT \
             -t ~{numThreads}
-
-            mv LRQuant_OUT_expression_matrix.tsv Gffcompare_out_expression_matrix.tsv
 
         fi
     >>>
 
     output {
-        File? gffcompareCounts = "Gffcompare_out_expression_matrix.tsv"
+        File? gffcompareCounts = "Gffcompare_OUT_expression_matrix.tsv"
         File monitoringLog = "monitoring.log"
     }
 
