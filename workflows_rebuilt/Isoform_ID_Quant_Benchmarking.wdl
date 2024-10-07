@@ -397,7 +397,10 @@ workflow LongReadRNABenchmark {
                 lraaCounts_noEM_minMapQ = lraa.lraaCounts_noEM_minMapQ,
                 lraa_quant_tracking_noEM_minMapQ = lraa.lraa_quant_tracking_noEM_minMapQ,
                 lraaCounts_minMapQ = lraa.lraaCounts_minMapQ,
-                lraa_quant_tracking_minMapQ = lraa.lraa_quant_tracking_minMapQ
+                lraa_quant_tracking_minMapQ = lraa.lraa_quant_tracking_minMapQ,
+                isoscelesReducedGTF = isosceles.isoscelesReducedGTF,
+                isoscelesStrictReducedGTF = isosceles.isoscelesStrictReducedGTF,
+                isoscelesCounts = isosceles.isoscelesCounts
         }
     }
 }
