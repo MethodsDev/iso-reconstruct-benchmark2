@@ -132,9 +132,6 @@ workflow lraaWorkflow {
 
     String OutDir = "LRAA_out"
 
-    Array[File] chromosomeBAMs
-    Array[File] chromosomeFASTAs
-
     if (defined(inputBAM)) {
         File nonOptionalInputBAM = select_first([inputBAM, ""])
 
@@ -149,31 +146,41 @@ workflow lraaWorkflow {
                 diskSizeGB = diskSizeGB
         }
 
-        chromosomeBAMs = splitBAMByChromosome.chromosomeBAMs
-        chromosomeFASTAs = splitBAMByChromosome.chromosomeFASTAs
-    } else {
-        Array[File] nonOptionalInputBAMArray = select_first([inputBAMArray, []])
-        Array[File] nonOptionalReferenceGenomeArray = select_first([referenceGenomeArray, []])
-
-        chromosomeBAMs = nonOptionalInputBAMArray
-        chromosomeFASTAs = nonOptionalReferenceGenomeArray
-    }
-
-    scatter (i in range(length(chromosomeBAMs))) {
-        call lraaPerChromosome {
-            input:
-                inputBAM = chromosomeBAMs[i],
-                referenceGenome = chromosomeFASTAs[i],
-                OutDir = OutDir,
-                docker = docker,
-                numThreads = numThreads,
-                LRAA_no_norm = LRAA_no_norm,
-                memoryGB = memoryGB,
-                diskSizeGB = diskSizeGB
+        scatter (i in range(length(splitBAMByChromosome.chromosomeBAMs))) {
+            call lraaPerChromosome {
+                input:
+                    inputBAM = splitBAMByChromosome.chromosomeBAMs[i],
+                    referenceGenome = splitBAMByChromosome.chromosomeFASTAs[i],
+                    OutDir = OutDir,
+                    docker = docker,
+                    numThreads = numThreads,
+                    LRAA_no_norm = LRAA_no_norm,
+                    memoryGB = memoryGB,
+                    diskSizeGB = diskSizeGB
+            }
         }
     }
 
-    Array[File] nonOptionalGtfFiles = select_first([lraaPerChromosome.lraaID_refguided_GTF, []])
+    if (defined(inputBAMArray) && defined(referenceGenomeArray)) {
+        Array[File] nonOptionalInputBAMArray = select_first([inputBAMArray, []])
+        Array[File] nonOptionalReferenceGenomeArray = select_first([referenceGenomeArray, []])
+
+        scatter (j in range(length(nonOptionalInputBAMArray))) {
+            call lraaPerChromosome as lraaPerChromosomeArray {
+                input:
+                    inputBAM = nonOptionalInputBAMArray[j],
+                    referenceGenome = nonOptionalReferenceGenomeArray[j],
+                    OutDir = OutDir,
+                    docker = docker,
+                    numThreads = numThreads,
+                    LRAA_no_norm = LRAA_no_norm,
+                    memoryGB = memoryGB,
+                    diskSizeGB = diskSizeGB
+            }
+        }
+    }
+
+    Array[File] nonOptionalGtfFiles = if defined(inputBAM) then select_first([lraaPerChromosome.lraaID_refguided_GTF, []]) else select_first([lraaPerChromosomeArray.lraaID_refguided_GTF, []])
 
     call mergeResults {
         input:
