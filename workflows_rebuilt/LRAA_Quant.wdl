@@ -215,13 +215,13 @@ workflow lraaWorkflow {
     Array[File] nonOptionalQuantTrackingFiles = []
 
     if (defined(inputBAM)) {
-        nonOptionalQuantExprFiles = select_first([lraaPerChromosome.lraaQuantExpr, []])
-        nonOptionalQuantTrackingFiles = select_first([lraaPerChromosome.lraaQuantTracking, []])
+        nonOptionalQuantExprFiles = select_all([lraaPerChromosome.lraaQuantExpr])
+        nonOptionalQuantTrackingFiles = select_all([lraaPerChromosome.lraaQuantTracking])
     }
 
     if (defined(inputBAMArray) && defined(referenceGenomeArray)) {
-        nonOptionalQuantExprFiles = select_first([lraaPerChromosomeArray.lraaQuantExpr, []])
-        nonOptionalQuantTrackingFiles = select_first([lraaPerChromosomeArray.lraaQuantTracking, []])
+        nonOptionalQuantExprFiles = select_all([lraaPerChromosomeArray.lraaQuantExpr])
+        nonOptionalQuantTrackingFiles = select_all([lraaPerChromosomeArray.lraaQuantTracking])
     }
 
     call mergeResults {
