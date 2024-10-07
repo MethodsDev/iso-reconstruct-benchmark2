@@ -158,8 +158,8 @@ workflow lraaWorkflow {
 
     String OutDir = "LRAA_out"
 
-    Array[File] quantExprFiles
-    Array[File] quantTrackingFiles
+    Array[File] quantExprFiles = []
+    Array[File] quantTrackingFiles = []
 
     if (defined(inputBAM)) {
         File nonOptionalInputBAM = select_first([inputBAM, ""])
@@ -192,8 +192,8 @@ workflow lraaWorkflow {
             }
         }
 
-        quantExprFiles = lraaPerChromosome.lraaQuantExpr
-        quantTrackingFiles = lraaPerChromosome.lraaQuantTracking
+        quantExprFiles = quantExprFiles + lraaPerChromosome.lraaQuantExpr
+        quantTrackingFiles = quantTrackingFiles + lraaPerChromosome.lraaQuantTracking
     }
 
     if (defined(inputBAMArray) && defined(referenceGenomeArray)) {
@@ -216,14 +216,14 @@ workflow lraaWorkflow {
             }
         }
 
-        quantExprFiles = lraaPerChromosomeArray.lraaQuantExpr
-        quantTrackingFiles = lraaPerChromosomeArray.lraaQuantTracking
+        quantExprFiles = quantExprFiles + lraaPerChromosomeArray.lraaQuantExpr
+        quantTrackingFiles = quantTrackingFiles + lraaPerChromosomeArray.lraaQuantTracking
     }
 
     call mergeResults {
         input:
-            quantExprFiles = select_first([quantExprFiles, []]),
-            quantTrackingFiles = select_first([quantTrackingFiles, []]),
+            quantExprFiles = quantExprFiles,
+            quantTrackingFiles = quantTrackingFiles,
             outputFilePrefix = "merged",
             docker = docker,
             memoryGB = memoryGB,
