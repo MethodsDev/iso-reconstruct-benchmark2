@@ -33,6 +33,8 @@ task relocateOutputs {
         File? isoquantGTF_with_polyA
         File? isoquantReducedGTF_with_polyA
         File? isoquantCounts_with_polyA
+        File? isoquantCounts_OUT
+        File? isoquantCounts_with_polyA_OUT
         File? isoseqReducedGTF
         File? isoseqGTF
         File? mandalorionReducedGTF
@@ -56,6 +58,7 @@ task relocateOutputs {
         File? lraaCounts_minMapQ
         File? lraa_quant_tracking_minMapQ
         File? gffcompareCounts
+        File? lrquantOUT
         File? isoscelesReducedGTF
         File? isoscelesStrictReducedGTF
         File? isoscelesCounts
@@ -75,7 +78,7 @@ task relocateOutputs {
         # Define arrays of files for each directory
         reduced_files=("~{bambuReducedGTF}" "~{bambuNDR1ReducedGTF}" "~{espressoReducedGTF}" "~{flairReducedGTF}" "~{flamesReducedGTF}" "~{isoquantReducedGTF}" "~{isoquantReducedGTF_with_polyA}" "~{isoseqReducedGTF}" "~{mandalorionReducedGTF}" "~{mandalorionforkReducedGTF}" "~{stringtieReducedGTF}" "~{talonReducedGTF}" "~{lraaReducedGTF}" "~{isoscelesReducedGTF}" "~{isoscelesStrictReducedGTF}")
         id_files=("~{bambuGTF}" "~{isoquantGTF}" "~{isoquantGTF_with_polyA}" "~{isoseqGTF}" "~{mandalorionGTF}" "~{mandalorionforkGTF}" "~{stringtieGTF}" "~{lraaGTF}")
-        quant_files=("~{bambuCounts}" "~{espressoCounts}" "~{flairCounts}" "~{isoquantCounts}" "~{isoquantCounts_with_polyA}" "~{oarfishCounts}" "~{salmonCounts}" "~{stringtieCounts}" "~{lraaCounts}" "~{lraaCounts_noEM}" "~{lraa_quant_tracking}" "~{lraa_quant_tracking_noEM}" "~{lraaCounts_noEM_minMapQ}" "~{lraa_quant_tracking_noEM_minMapQ}" "~{lraaCounts_minMapQ}" "~{lraa_quant_tracking_minMapQ}" "~{gffcompareCounts}" "~{lrquantCounts}" "~{isoscelesCounts}")
+        quant_files=("~{bambuCounts}" "~{espressoCounts}" "~{flairCounts}" "~{isoquantCounts}" "~{isoquantCounts_with_polyA}" "~{oarfishCounts}" "~{salmonCounts}" "~{stringtieCounts}" "~{lraaCounts}" "~{lraaCounts_noEM}" "~{lraa_quant_tracking}" "~{lraa_quant_tracking_noEM}" "~{lraaCounts_noEM_minMapQ}" "~{lraa_quant_tracking_noEM_minMapQ}" "~{lraaCounts_minMapQ}" "~{lraa_quant_tracking_minMapQ}" "~{gffcompareCounts}" "~{isoscelesCounts}")
 
         # Loop over the files for each directory
         for file in "${reduced_files[@]}"; do
