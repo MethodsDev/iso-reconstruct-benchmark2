@@ -15,7 +15,6 @@ import "TALON.wdl" as talonWorkflow
 import "LRAA.wdl" as lraaWorkflow
 import "LRQuant.wdl" as lrquantWorkflow
 
-
 task relocateOutputs {
     input {
         File? bambuReducedGTF
@@ -151,255 +150,252 @@ workflow LongReadRNABenchmark {
         Boolean runLraa = true
         Boolean runLrquant = true
     }
-if (runBambu) {
-    call bambuWorkflow.bambuWorkflow as bambu {
-        input:
-            inputBAM = inputBAM,
-            inputBAMIndex = inputBAMIndex,
-            referenceGenome = referenceGenome,
-            referenceGenomeIndex = referenceGenomeIndex,
-            referenceAnnotation_reduced = referenceAnnotation_reduced,
-            referenceAnnotation_full = referenceAnnotation_full,
-            dataType = dataType,
-            ID_or_Quant_or_Both = ID_or_Quant_or_Both
+
+    if (runBambu) {
+        call bambuWorkflow.bambuWorkflow as bambu {
+            input:
+                inputBAM = inputBAM,
+                inputBAMIndex = inputBAMIndex,
+                referenceGenome = referenceGenome,
+                referenceGenomeIndex = referenceGenomeIndex,
+                referenceAnnotation_reduced = referenceAnnotation_reduced,
+                referenceAnnotation_full = referenceAnnotation_full,
+                dataType = dataType,
+                ID_or_Quant_or_Both = ID_or_Quant_or_Both
+        }
+    }
+
+    if (runEspresso) {
+        call espressoWorkflow.espressoWorkflow as espresso {
+            input:
+                inputBAM = inputBAM,
+                inputBAMIndex = inputBAMIndex,
+                referenceGenome = referenceGenome,
+                referenceGenomeIndex = referenceGenomeIndex,
+                referenceAnnotation_reduced = referenceAnnotation_reduced,
+                referenceAnnotation_full = referenceAnnotation_full,
+                dataType = dataType,
+                ID_or_Quant_or_Both = ID_or_Quant_or_Both
+        }
+    }
+
+    if (runFlair) {
+        call flairWorkflow.flairWorkflow as flair {
+            input:
+                inputBAM = inputBAM,
+                inputBAMIndex = inputBAMIndex,
+                referenceGenome = referenceGenome,
+                referenceGenomeIndex = referenceGenomeIndex,
+                referenceAnnotation_reduced = referenceAnnotation_reduced,
+                referenceAnnotation_full = referenceAnnotation_full,
+                dataType = dataType,
+                ID_or_Quant_or_Both = ID_or_Quant_or_Both
+        }
+    }
+
+    if (runFlames) {
+        call flamesWorkflow.flamesWorkflow as flames {
+            input:
+                inputBAM = inputBAM,
+                inputBAMIndex = inputBAMIndex,
+                referenceGenome = referenceGenome,
+                referenceGenomeIndex = referenceGenomeIndex,
+                referenceAnnotation_reduced = referenceAnnotation_reduced,
+                referenceAnnotation_full = referenceAnnotation_full,
+                dataType = dataType,
+                ID_or_Quant_or_Both = ID_or_Quant_or_Both
+        }
+    }
+
+    if (runIsoquant) {
+        call isoquantWorkflow.isoquantWorkflow as isoquant {
+            input:   
+                inputBAM = inputBAM,
+                inputBAMIndex = inputBAMIndex,
+                inputBAM_with_polyA_for_IsoQuant = inputBAM_with_polyA_for_IsoQuant,
+                inputBAMIndex_with_polyA_for_IsoQuant = inputBAMIndex_with_polyA_for_IsoQuant,
+                referenceGenome = referenceGenome,
+                referenceGenomeIndex = referenceGenomeIndex,
+                referenceAnnotation_reduced = referenceAnnotation_reduced,
+                referenceAnnotation_full = referenceAnnotation_full,
+                dataType = dataType,
+                ID_or_Quant_or_Both = ID_or_Quant_or_Both
+        }
+    }
+
+    if (runIsoseq) {
+        call isoseqWorkflow.isoseqWorkflow as isoseq {
+            input:
+                inputBAM = inputBAM,
+                inputBAMIndex = inputBAMIndex,
+                referenceGenome = referenceGenome,
+                referenceGenomeIndex = referenceGenomeIndex,
+                referenceAnnotation_reduced = referenceAnnotation_reduced,
+                referenceAnnotation_full = referenceAnnotation_full,
+                dataType = dataType,
+                ID_or_Quant_or_Both = ID_or_Quant_or_Both
+        }
+    }
+
+    if (runMandalorion) {
+        call mandalorionWorkflow.mandalorionWorkflow as mandalorion {
+            input:
+                inputBAM = inputBAM,
+                inputBAMIndex = inputBAMIndex,
+                referenceGenome = referenceGenome,
+                referenceGenomeIndex = referenceGenomeIndex,
+                referenceAnnotation_reduced = referenceAnnotation_reduced,
+                referenceAnnotation_full = referenceAnnotation_full,
+                dataType = dataType,
+                ID_or_Quant_or_Both = ID_or_Quant_or_Both
+        }
+    }
+
+    if (runMandalorionfork) {
+        call mandalorionforkWorkflow.mandalorionforkWorkflow as mandalorionfork {
+            input:
+                inputBAM = inputBAM,
+                inputBAMIndex = inputBAMIndex,
+                referenceGenome = referenceGenome,
+                referenceGenomeIndex = referenceGenomeIndex,
+                referenceAnnotation_reduced = referenceAnnotation_reduced,
+                referenceAnnotation_full = referenceAnnotation_full,
+                dataType = dataType,
+                ID_or_Quant_or_Both = ID_or_Quant_or_Both
+        }
+    }
+
+    if (runOarfish) {
+        call oarfishWorkflow.oarfishWorkflow as oarfish {
+            input:
+                inputBAM = inputBAM,
+                inputBAMIndex = inputBAMIndex,
+                referenceGenome = referenceGenome,
+                referenceGenomeIndex = referenceGenomeIndex,
+                referenceAnnotation_reduced = referenceAnnotation_reduced,
+                referenceAnnotation_full = referenceAnnotation_full,
+                dataType = dataType,
+                ID_or_Quant_or_Both = ID_or_Quant_or_Both
+        }
+    }
+
+    if (runSalmon) {
+        call salmonWorkflow.salmonWorkflow as salmon {
+            input:
+                inputBAM = inputBAM,
+                inputBAMIndex = inputBAMIndex,
+                referenceGenome = referenceGenome,
+                referenceGenomeIndex = referenceGenomeIndex,
+                referenceAnnotation_reduced = referenceAnnotation_reduced,
+                referenceAnnotation_full = referenceAnnotation_full,
+                dataType = dataType,
+                ID_or_Quant_or_Both = ID_or_Quant_or_Both
+        }
+    }
+
+    if (runStringtie) {
+        call stringtieWorkflow.stringtieWorkflow as stringtie {
+            input:
+                inputBAM = inputBAM,
+                inputBAMIndex = inputBAMIndex,
+                referenceGenome = referenceGenome,
+                referenceGenomeIndex = referenceGenomeIndex,
+                referenceAnnotation_reduced = referenceAnnotation_reduced,
+                referenceAnnotation_full = referenceAnnotation_full,
+                dataType = dataType,
+                ID_or_Quant_or_Both = ID_or_Quant_or_Both
+        }
+    }
+
+    if (runTalon) {
+        call talonWorkflow.talonWorkflow as talon {
+            input:
+                inputBAM = inputBAM,
+                inputBAMIndex = inputBAMIndex,
+                referenceGenome = referenceGenome,
+                referenceGenomeIndex = referenceGenomeIndex,
+                referenceAnnotation_reduced = referenceAnnotation_reduced,
+                referenceAnnotation_full = referenceAnnotation_full,
+                dataType = dataType,
+                ID_or_Quant_or_Both = ID_or_Quant_or_Both
+        }
+    }
+
+    if (runLraa) {
+        call lraaWorkflow.lraaWorkflow as lraa {
+            input:
+                inputBAM = inputBAM,
+                inputBAMIndex = inputBAMIndex,
+                referenceGenome = referenceGenome,
+                referenceGenomeIndex = referenceGenomeIndex,
+                referenceAnnotation_reduced = referenceAnnotation_reduced,
+                referenceAnnotation_full = referenceAnnotation_full,
+                dataType = dataType,
+                ID_or_Quant_or_Both = ID_or_Quant_or_Both,
+                LRAA_no_norm = LRAA_no_norm,
+                LRAA_min_mapping_quality  = LRAA_min_mapping_quality
+        }
+    }
+
+    if (runLrquant) {
+        call lrquantWorkflow.lrquantWorkflow as lrquant {
+            input:
+                inputBAM = inputBAM,
+                inputBAMIndex = inputBAMIndex,
+                referenceGenome = referenceGenome,
+                referenceGenomeIndex = referenceGenomeIndex,
+                referenceAnnotation_reduced = referenceAnnotation_reduced,
+                referenceAnnotation_full = referenceAnnotation_full,
+                dataType = dataType,
+                ID_or_Quant_or_Both = ID_or_Quant_or_Both
+        }
+    }
+
+    if (runrelocateOutputs) {
+        call relocateOutputs {
+            input:
+                bambuReducedGTF = bambu.bambuReducedGTF,
+                bambuNDR1ReducedGTF = bambu.bambuNDR1ReducedGTF,
+                bambuGTF = bambu.bambuGTF,
+                bambuCounts = bambu.bambuCounts,
+                espressoReducedGTF = espresso.espressoReducedGTF,
+                espressoCounts = espresso.espressoCounts,
+                flairReducedGTF = flair.flairReducedGTF,
+                flairCounts = flair.flairCounts,
+                flamesReducedGTF = flames.flamesReducedGTF,
+                isoquantReducedGTF = isoquant.isoquantReducedGTF,
+                isoquantGTF = isoquant.isoquantGTF,
+                isoquantCounts = isoquant.isoquantCounts,
+                isoquantGTF_with_polyA = isoquant.isoquantGTF_with_polyA,
+                isoquantReducedGTF_with_polyA = isoquant.isoquantReducedGTF_with_polyA,
+                isoquantCounts_with_polyA = isoquant.isoquantCounts_with_polyA,
+    #           isoquantCounts_OUT = isoquant.isoquantCounts_OUT,
+    #           isoquantCounts_with_polyA_OUT = isoquant.isoquantCounts_with_polyA_OUT,
+    #           gffcompareCounts = lrquant.gffcompareCounts,
+    #           lrquantCounts = lrquant.lrquantCounts,
+    #           lrquantOUT = lrquant.lrquantOUT,
+                isoseqReducedGTF = isoseq.isoseqReducedGTF,
+                isoseqGTF = isoseq.isoseqGTF,
+                mandalorionReducedGTF = mandalorion.mandalorionReducedGTF,
+                mandalorionGTF = mandalorion.mandalorionGTF,
+                mandalorionforkReducedGTF = mandalorionfork.mandalorionforkReducedGTF,
+                mandalorionforkGTF = mandalorionfork.mandalorionforkGTF,
+                oarfishCounts = oarfish.oarfishCounts,
+                salmonCounts = salmon.salmonCounts,
+                stringtieReducedGTF = stringtie.stringtieReducedGTF,
+                stringtieGTF = stringtie.stringtieGTF,
+                stringtieCounts = stringtie.stringtieCounts,
+                talonReducedGTF = talon.talonReducedGTF,
+                lraaGTF = lraa.lraaGTF,
+                lraaReducedGTF = lraa.lraaReducedGTF,
+                lraaCounts = lraa.lraaCounts,
+                lraaCounts_noEM = lraa.lraaCounts_noEM,
+                lraa_quant_tracking = lraa.lraa_quant_tracking,
+                lraa_quant_tracking_noEM = lraa.lraa_quant_tracking_noEM,
+                lraaCounts_noEM_minMapQ = lraa.lraaCounts_noEM_minMapQ,
+                lraa_quant_tracking_noEM_minMapQ = lraa.lraa_quant_tracking_noEM_minMapQ,
+                lraaCounts_minMapQ = lraa.lraaCounts_minMapQ,
+                lraa_quant_tracking_minMapQ = lraa.lraa_quant_tracking_minMapQ
+        }
     }
 }
-
-if (runEspresso) {
-    call espressoWorkflow.espressoWorkflow as espresso {
-        input:
-            inputBAM = inputBAM,
-            inputBAMIndex = inputBAMIndex,
-            referenceGenome = referenceGenome,
-            referenceGenomeIndex = referenceGenomeIndex,
-            referenceAnnotation_reduced = referenceAnnotation_reduced,
-            referenceAnnotation_full = referenceAnnotation_full,
-            dataType = dataType,
-            ID_or_Quant_or_Both = ID_or_Quant_or_Both
-    }
-}
-
-if (runFlair) {
-    call flairWorkflow.flairWorkflow as flair {
-        input:
-            inputBAM = inputBAM,
-            inputBAMIndex = inputBAMIndex,
-            referenceGenome = referenceGenome,
-            referenceGenomeIndex = referenceGenomeIndex,
-            referenceAnnotation_reduced = referenceAnnotation_reduced,
-            referenceAnnotation_full = referenceAnnotation_full,
-            dataType = dataType,
-            ID_or_Quant_or_Both = ID_or_Quant_or_Both
-    }
-}
-
-if (runFlames) {
-    call flamesWorkflow.flamesWorkflow as flames {
-        input:
-            inputBAM = inputBAM,
-            inputBAMIndex = inputBAMIndex,
-            referenceGenome = referenceGenome,
-            referenceGenomeIndex = referenceGenomeIndex,
-            referenceAnnotation_reduced = referenceAnnotation_reduced,
-            referenceAnnotation_full = referenceAnnotation_full,
-            dataType = dataType,
-            ID_or_Quant_or_Both = ID_or_Quant_or_Both
-    }
-}
-
-if (runIsoquant) {
-    call isoquantWorkflow.isoquantWorkflow as isoquant {
-        input:   
-            inputBAM = inputBAM,
-            inputBAMIndex = inputBAMIndex,
-            inputBAM_with_polyA_for_IsoQuant = inputBAM_with_polyA_for_IsoQuant,
-            inputBAMIndex_with_polyA_for_IsoQuant = inputBAMIndex_with_polyA_for_IsoQuant,
-            referenceGenome = referenceGenome,
-            referenceGenomeIndex = referenceGenomeIndex,
-            referenceAnnotation_reduced = referenceAnnotation_reduced,
-            referenceAnnotation_full = referenceAnnotation_full,
-            dataType = dataType,
-            ID_or_Quant_or_Both = ID_or_Quant_or_Both
-    }
-}
-
-if (runIsoseq) {
-    call isoseqWorkflow.isoseqWorkflow as isoseq {
-        input:
-            inputBAM = inputBAM,
-            inputBAMIndex = inputBAMIndex,
-            referenceGenome = referenceGenome,
-            referenceGenomeIndex = referenceGenomeIndex,
-            referenceAnnotation_reduced = referenceAnnotation_reduced,
-            referenceAnnotation_full = referenceAnnotation_full,
-            dataType = dataType,
-            ID_or_Quant_or_Both = ID_or_Quant_or_Both
-    }
-}
-
-if (runMandalorion) {
-    call mandalorionWorkflow.mandalorionWorkflow as mandalorion {
-        input:
-            inputBAM = inputBAM,
-            inputBAMIndex = inputBAMIndex,
-            referenceGenome = referenceGenome,
-            referenceGenomeIndex = referenceGenomeIndex,
-            referenceAnnotation_reduced = referenceAnnotation_reduced,
-            referenceAnnotation_full = referenceAnnotation_full,
-            dataType = dataType,
-            ID_or_Quant_or_Both = ID_or_Quant_or_Both
-    }
-}
-
-if (runMandalorionfork) {
-    call mandalorionforkWorkflow.mandalorionforkWorkflow as mandalorionfork {
-        input:
-            inputBAM = inputBAM,
-            inputBAMIndex = inputBAMIndex,
-            referenceGenome = referenceGenome,
-            referenceGenomeIndex = referenceGenomeIndex,
-            referenceAnnotation_reduced = referenceAnnotation_reduced,
-            referenceAnnotation_full = referenceAnnotation_full,
-            dataType = dataType,
-            ID_or_Quant_or_Both = ID_or_Quant_or_Both
-    }
-}
-
-if (runOarfish) {
-    call oarfishWorkflow.oarfishWorkflow as oarfish {
-        input:
-            inputBAM = inputBAM,
-            inputBAMIndex = inputBAMIndex,
-            referenceGenome = referenceGenome,
-            referenceGenomeIndex = referenceGenomeIndex,
-            referenceAnnotation_reduced = referenceAnnotation_reduced,
-            referenceAnnotation_full = referenceAnnotation_full,
-            dataType = dataType,
-            ID_or_Quant_or_Both = ID_or_Quant_or_Both
-    }
-}
-
-if (runSalmon) {
-    call salmonWorkflow.salmonWorkflow as salmon {
-        input:
-            inputBAM = inputBAM,
-            inputBAMIndex = inputBAMIndex,
-            referenceGenome = referenceGenome,
-            referenceGenomeIndex = referenceGenomeIndex,
-            referenceAnnotation_reduced = referenceAnnotation_reduced,
-            referenceAnnotation_full = referenceAnnotation_full,
-            dataType = dataType,
-            ID_or_Quant_or_Both = ID_or_Quant_or_Both
-    }
-}
-
-if (runStringtie) {
-    call stringtieWorkflow.stringtieWorkflow as stringtie {
-        input:
-            inputBAM = inputBAM,
-            inputBAMIndex = inputBAMIndex,
-            referenceGenome = referenceGenome,
-            referenceGenomeIndex = referenceGenomeIndex,
-            referenceAnnotation_reduced = referenceAnnotation_reduced,
-            referenceAnnotation_full = referenceAnnotation_full,
-            dataType = dataType,
-            ID_or_Quant_or_Both = ID_or_Quant_or_Both
-    }
-}
-
-if (runTalon) {
-    call talonWorkflow.talonWorkflow as talon {
-        input:
-            inputBAM = inputBAM,
-            inputBAMIndex = inputBAMIndex,
-            referenceGenome = referenceGenome,
-            referenceGenomeIndex = referenceGenomeIndex,
-            referenceAnnotation_reduced = referenceAnnotation_reduced,
-            referenceAnnotation_full = referenceAnnotation_full,
-            dataType = dataType,
-            ID_or_Quant_or_Both = ID_or_Quant_or_Both
-    }
-}
-    
-
-if (runLraa) {
-    call lraaWorkflow.lraaWorkflow as lraa {
-        input:
-            inputBAM = inputBAM,
-            inputBAMIndex = inputBAMIndex,
-            referenceGenome = referenceGenome,
-            referenceGenomeIndex = referenceGenomeIndex,
-            referenceAnnotation_reduced = referenceAnnotation_reduced,
-            referenceAnnotation_full = referenceAnnotation_full,
-            dataType = dataType,
-            ID_or_Quant_or_Both = ID_or_Quant_or_Both,
-            LRAA_no_norm = LRAA_no_norm,
-            LRAA_min_mapping_quality  = LRAA_min_mapping_quality
-
-    }
-}
-
-if (runLrquant) {
-    call lrquantWorkflow.lrquantWorkflow as lrquant {
-        input:
-            inputBAM = inputBAM,
-            inputBAMIndex = inputBAMIndex,
-            referenceGenome = referenceGenome,
-            referenceGenomeIndex = referenceGenomeIndex,
-            referenceAnnotation_reduced = referenceAnnotation_reduced,
-            referenceAnnotation_full = referenceAnnotation_full,
-            dataType = dataType,
-            ID_or_Quant_or_Both = ID_or_Quant_or_Both
-    }
-}
-
-if (runrelocateOutputs) {
-    call relocateOutputs {
-        input:
-            bambuReducedGTF = bambu.bambuReducedGTF,
-            bambuNDR1ReducedGTF = bambu.bambuNDR1ReducedGTF,
-            bambuGTF = bambu.bambuGTF,
-            bambuCounts = bambu.bambuCounts,
-            espressoReducedGTF = espresso.espressoReducedGTF,
-            espressoCounts = espresso.espressoCounts,
-            flairReducedGTF = flair.flairReducedGTF,
-            flairCounts = flair.flairCounts,
-            flamesReducedGTF = flames.flamesReducedGTF,
-            isoquantReducedGTF = isoquant.isoquantReducedGTF,
-            isoquantGTF = isoquant.isoquantGTF,
-            isoquantCounts = isoquant.isoquantCounts,
-            isoquantGTF_with_polyA = isoquant.isoquantGTF_with_polyA,
-            isoquantReducedGTF_with_polyA = isoquant.isoquantReducedGTF_with_polyA,
-            isoquantCounts_with_polyA = isoquant.isoquantCounts_with_polyA,
-    #       isoquantCounts_OUT = isoquant.isoquantCounts_OUT,
-    #       isoquantCounts_with_polyA_OUT = isoquant.isoquantCounts_with_polyA_OUT,
-    #        gffcompareCounts = lrquant.gffcompareCounts,
-    #        lrquantCounts = lrquant.lrquantCounts,
-    #        lrquantOUT = lrquant.lrquantOUT
-            isoseqReducedGTF = isoseq.isoseqReducedGTF,
-            isoseqGTF = isoseq.isoseqGTF,
-            mandalorionReducedGTF = mandalorion.mandalorionReducedGTF,
-            mandalorionGTF = mandalorion.mandalorionGTF,
-            mandalorionforkReducedGTF = mandalorionfork.mandalorionforkReducedGTF,
-            mandalorionforkGTF = mandalorionfork.mandalorionforkGTF,
-            oarfishCounts = oarfish.oarfishCounts,
-            salmonCounts = salmon.salmonCounts,
-            stringtieReducedGTF = stringtie.stringtieReducedGTF,
-            stringtieGTF = stringtie.stringtieGTF,
-            stringtieCounts = stringtie.stringtieCounts,
-            talonReducedGTF = talon.talonReducedGTF,
-            lraaGTF = lraa.lraaGTF,
-            lraaReducedGTF = lraa.lraaReducedGTF,
-            lraaCounts = lraa.lraaCounts,
-            lraaCounts_noEM = lraa.lraaCounts_noEM,
-            lraa_quant_tracking = lraa.lraa_quant_tracking,
-            lraa_quant_tracking_noEM = lraa.lraa_quant_tracking_noEM,
-            lraaCounts_noEM_minMapQ = lraa.lraaCounts_noEM_minMapQ,
-            lraa_quant_tracking_noEM_minMapQ = lraa.lraa_quant_tracking_noEM_minMapQ,
-            lraaCounts_minMapQ = lraa.lraaCounts_minMapQ,
-            lraa_quant_tracking_minMapQ = lraa.lraa_quant_tracking_minMapQ
-    
-    }
-}
-
-
