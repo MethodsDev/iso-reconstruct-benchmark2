@@ -211,23 +211,10 @@ workflow lraaWorkflow {
         }
     }
 
-    Array[File] nonOptionalQuantExprFiles = []
-    Array[File] nonOptionalQuantTrackingFiles = []
-
-    if (defined(inputBAM)) {
-        nonOptionalQuantExprFiles = select_all([lraaPerChromosome.lraaQuantExpr])
-        nonOptionalQuantTrackingFiles = select_all([lraaPerChromosome.lraaQuantTracking])
-    }
-
-    if (defined(inputBAMArray) && defined(referenceGenomeArray)) {
-        nonOptionalQuantExprFiles = select_all([lraaPerChromosomeArray.lraaQuantExpr])
-        nonOptionalQuantTrackingFiles = select_all([lraaPerChromosomeArray.lraaQuantTracking])
-    }
-
     call mergeResults {
         input:
-            quantExprFiles = nonOptionalQuantExprFiles,
-            quantTrackingFiles = nonOptionalQuantTrackingFiles,
+            quantExprFiles = select_all([lraaPerChromosome.lraaQuantExpr]),
+            quantTrackingFiles = select_all([lraaPerChromosome.lraaQuantTracking]),
             outputFilePrefix = "merged",
             docker = docker,
             memoryGB = memoryGB,
