@@ -60,6 +60,9 @@ task relocateOutputs {
         File? gffcompareCounts
         File? lrquantCounts
         File? lrquantOUT
+        File? isoscelesReducedGTF
+        File? isoscelesStrictReducedGTF
+        File? isoscelesCounts
 
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/espresso@sha256:f538303f6457c55e7b3c2a45081e6d8e3053e6f76e56bc65631b7f4aa290b026"
         File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
@@ -74,10 +77,10 @@ task relocateOutputs {
         mkdir ID_reduced ID Quant All_Outputs_Relocated
     
         # Define arrays of files for each directory
-        reduced_files=("~{bambuReducedGTF}" "~{bambuNDR1ReducedGTF}" "~{espressoReducedGTF}" "~{flairReducedGTF}" "~{flamesReducedGTF}" "~{isoquantReducedGTF}" "~{isoquantReducedGTF_with_polyA}" "~{isoseqReducedGTF}" "~{mandalorionReducedGTF}" "~{mandalorionforkReducedGTF}" "~{stringtieReducedGTF}" "~{talonReducedGTF}" "~{lraaReducedGTF}")
+        reduced_files=("~{bambuReducedGTF}" "~{bambuNDR1ReducedGTF}" "~{espressoReducedGTF}" "~{flairReducedGTF}" "~{flamesReducedGTF}" "~{isoquantReducedGTF}" "~{isoquantReducedGTF_with_polyA}" "~{isoseqReducedGTF}" "~{mandalorionReducedGTF}" "~{mandalorionforkReducedGTF}" "~{stringtieReducedGTF}" "~{talonReducedGTF}" "~{lraaReducedGTF}" "~{isoscelesReducedGTF}" "~{isoscelesStrictReducedGTF}")
         id_files=("~{bambuGTF}" "~{isoquantGTF}" "~{isoquantGTF_with_polyA}" "~{isoseqGTF}" "~{mandalorionGTF}" "~{mandalorionforkGTF}" "~{stringtieGTF}" "~{lraaGTF}")
-        quant_files=("~{bambuCounts}" "~{espressoCounts}" "~{flairCounts}" "~{isoquantCounts}" "~{isoquantCounts_with_polyA}" "~{oarfishCounts}" "~{salmonCounts}" "~{stringtieCounts}" "~{lraaCounts}" "~{lraaCounts_noEM}" "~{lraa_quant_tracking}" "~{lraa_quant_tracking_noEM}" "~{lraaCounts_noEM_minMapQ}" "~{lraa_quant_tracking_noEM_minMapQ}" "~{lraaCounts_minMapQ}" "~{lraa_quant_tracking_minMapQ}" "~{gffcompareCounts}" "~{lrquantCounts}")
-    
+        quant_files=("~{bambuCounts}" "~{espressoCounts}" "~{flairCounts}" "~{isoquantCounts}" "~{isoquantCounts_with_polyA}" "~{oarfishCounts}" "~{salmonCounts}" "~{stringtieCounts}" "~{lraaCounts}" "~{lraaCounts_noEM}" "~{lraa_quant_tracking}" "~{lraa_quant_tracking_noEM}" "~{lraaCounts_noEM_minMapQ}" "~{lraa_quant_tracking_noEM_minMapQ}" "~{lraaCounts_minMapQ}" "~{lraa_quant_tracking_minMapQ}" "~{gffcompareCounts}" "~{lrquantCounts}" "~{isoscelesCounts}")
+
         # Loop over the files for each directory
         for file in "${reduced_files[@]}"; do
           [ -f "$file" ] && mv "$file" ID_reduced/
