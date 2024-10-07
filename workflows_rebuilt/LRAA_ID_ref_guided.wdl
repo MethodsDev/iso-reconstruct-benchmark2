@@ -7,7 +7,6 @@ task splitBAMByChromosome {
         String docker
         Int threads
         File referenceGenome
-        File referenceAnnotation_reduced
         Int memoryGB
         Int diskSizeGB
         File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
@@ -31,18 +30,44 @@ task splitBAMByChromosome {
             
             # Generate chromosome-specific FASTA from the whole genome
             samtools faidx ~{referenceGenome} $chr > split_bams/$chr.genome.fasta
-            
-            # Generate chromosome-specific GTF for reduced annotation, if available
-            if [ -f "~{referenceAnnotation_reduced}" ]; then
-                cat ~{referenceAnnotation_reduced} | perl -lane 'if ($F[0] eq "'$chr'") { print; }' > split_bams/$chr.reduced.annot.gtf
-            fi
         done
     >>>
 
     output {
         Array[File] chromosomeBAMs = glob("split_bams/*.bam")
         Array[File] chromosomeFASTAs = glob("split_bams/*.genome.fasta")
-        Array[File] reducedAnnotations = glob("split_bams/*.reduced.annot.gtf")
+    }
+
+    runtime {
+        docker: docker
+        bootDiskSizeGb: 30
+        memory: "~{memoryGB} GiB"
+        disks: "local-disk ~{diskSizeGB} HDD"
+    }
+}
+
+task splitGTFByChromosome {
+    input {
+        File referenceAnnotation_reduced
+        String main_chromosomes
+        String docker
+        Int memoryGB
+        Int diskSizeGB
+    }
+
+    command <<<
+        set -eo pipefail
+        mkdir -p split_gtfs
+        
+        # Loop through each chromosome
+        for chr in ~{main_chromosomes}; do
+            # Generate chromosome-specific GTF for reduced annotation
+            cat ~{referenceAnnotation_reduced} | perl -lane 'if ($F[0] eq "'$chr'") { print; }' > split_gtfs/$chr.reduced.annot.gtf
+        done
+    >>>
+
+    output {
+        Array[File] reducedAnnotations = glob("split_gtfs/*.reduced.annot.gtf")
     }
 
     runtime {
@@ -155,19 +180,27 @@ workflow lraaWorkflow {
                 docker = docker,
                 threads = numThreads,
                 referenceGenome = referenceGenome,
-                referenceAnnotation_reduced = referenceAnnotation_reduced,
                 memoryGB = memoryGB,
                 diskSizeGB = diskSizeGB
         }
 
         chromosomeBAMs = splitBAMByChromosome.chromosomeBAMs
         chromosomeFASTAs = splitBAMByChromosome.chromosomeFASTAs
-        reducedAnnotations = splitBAMByChromosome.reducedAnnotations
     } else {
         chromosomeBAMs = inputBAMArray
         chromosomeFASTAs = [referenceGenome] # Assuming the reference genome is the same for all chromosomes
-        reducedAnnotations = [referenceAnnotation_reduced] # Assuming the reduced annotation is the same for all chromosomes
     }
+
+    call splitGTFByChromosome {
+        input:
+            referenceAnnotation_reduced = referenceAnnotation_reduced,
+            main_chromosomes = main_chromosomes,
+            docker = docker,
+            memoryGB = memoryGB,
+            diskSizeGB = diskSizeGB
+    }
+
+    reducedAnnotations = splitGTFByChromosome.reducedAnnotations
 
     scatter (i in range(length(chromosomeBAMs))) {
         call lraaPerChromosome {
@@ -178,7 +211,7 @@ workflow lraaWorkflow {
                 docker = docker,
                 numThreads = numThreads,
                 LRAA_no_norm = LRAA_no_norm,
-                referenceAnnotation_reduced = reducedAnnotations[0], # Using the same reduced annotation for all chromosomes
+                referenceAnnotation_reduced = reducedAnnotations[i], # Using the specific reduced annotation for each chromosome
                 memoryGB = memoryGB,
                 diskSizeGB = diskSizeGB
         }
