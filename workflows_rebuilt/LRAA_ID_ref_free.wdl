@@ -123,9 +123,11 @@ task mergeResults {
         disks: "local-disk ~{diskSizeGB} HDD"
     }
 }
+
 workflow lraaWorkflow {
     input {
-        File inputBAM
+        File? inputBAM
+        Array[File]? inputBAMArray
         File referenceGenome
         Int numThreads = 4
         Int memoryGB = 32
@@ -137,22 +139,33 @@ workflow lraaWorkflow {
 
     String OutDir = "LRAA_out"
 
-    call splitBAMByChromosome {
-        input:
-            inputBAM = inputBAM,
-            main_chromosomes = main_chromosomes,
-            docker = docker,
-            threads = numThreads,
-            referenceGenome = referenceGenome,
-            memoryGB = memoryGB,
-            diskSizeGB = diskSizeGB
+    Array[File] chromosomeBAMs
+    Array[File] chromosomeFASTAs
+
+    if (defined(inputBAM)) {
+        call splitBAMByChromosome {
+            input:
+                inputBAM = inputBAM,
+                main_chromosomes = main_chromosomes,
+                docker = docker,
+                threads = numThreads,
+                referenceGenome = referenceGenome,
+                memoryGB = memoryGB,
+                diskSizeGB = diskSizeGB
+        }
+
+        chromosomeBAMs = splitBAMByChromosome.chromosomeBAMs
+        chromosomeFASTAs = splitBAMByChromosome.chromosomeFASTAs
+    } else {
+        chromosomeBAMs = inputBAMArray
+        chromosomeFASTAs = [referenceGenome] # Assuming the reference genome is the same for all chromosomes
     }
 
-    scatter (i in range(length(splitBAMByChromosome.chromosomeBAMs))) {
+    scatter (i in range(length(chromosomeBAMs))) {
         call lraaPerChromosome {
             input:
-                inputBAM = splitBAMByChromosome.chromosomeBAMs[i],
-                referenceGenome = splitBAMByChromosome.chromosomeFASTAs[i],
+                inputBAM = chromosomeBAMs[i],
+                referenceGenome = chromosomeFASTAs[i],
                 OutDir = OutDir,
                 docker = docker,
                 numThreads = numThreads,
@@ -161,6 +174,7 @@ workflow lraaWorkflow {
                 diskSizeGB = diskSizeGB
         }
     }
+
     call mergeResults {
         input:
             gtfFiles = lraaPerChromosome.lraaID_reffree_GTF,
@@ -172,5 +186,6 @@ workflow lraaWorkflow {
     
     output {
         File mergedReffreeGTF = mergeResults.mergedGtfFile
+        Array[File]? splitBAMs = if defined(inputBAM) then splitBAMByChromosome.chromosomeBAMs else []
     }
 }
