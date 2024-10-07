@@ -25,8 +25,13 @@ task isoscelesTask {
     command <<<
         bash ~{monitoringScript} > monitoring.log &
 
+        echo "ID_or_Quant_or_Both: ~{ID_or_Quant_or_Both}" >> monitoring.log
+        echo "referenceAnnotation_reduced: ~{referenceAnnotation_reduced}" >> monitoring.log
+        echo "referenceAnnotation_full: ~{referenceAnnotation_full}" >> monitoring.log
+
         if [[ "~{ID_or_Quant_or_Both}" == "ID" ]]; then
             if [[ -n "~{referenceAnnotation_reduced}" ]]; then
+                echo "Running Isosceles with ID mode" >> monitoring.log
                 isosceles -b ~{inputBAM} \
                 -i ~{referenceAnnotation_reduced} \
                 -f ~{referenceGenome} -n ~{numThreads} -m ~{mode} -t ID
@@ -35,6 +40,7 @@ task isoscelesTask {
 
         if [[ "~{ID_or_Quant_or_Both}" == "Quant" ]]; then
             if [[ -n "~{referenceAnnotation_full}" ]]; then
+                echo "Running Isosceles with Quant mode" >> monitoring.log
                 isosceles -b ~{inputBAM} \
                 -q ~{referenceAnnotation_full} \
                 -f ~{referenceGenome} -n ~{numThreads} -m ~{mode} -t Quant
@@ -43,6 +49,7 @@ task isoscelesTask {
 
         if [[ "~{ID_or_Quant_or_Both}" == "Both" ]]; then
             if [[ -n "~{referenceAnnotation_reduced}" && -n "~{referenceAnnotation_full}" ]]; then
+                echo "Running Isosceles with Both mode" >> monitoring.log
                 isosceles -b ~{inputBAM} \
                 -i ~{referenceAnnotation_reduced} \
                 -q ~{referenceAnnotation_full} \
