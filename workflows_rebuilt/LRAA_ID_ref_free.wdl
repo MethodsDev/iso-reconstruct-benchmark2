@@ -133,9 +133,11 @@ workflow lraaWorkflow {
     String OutDir = "LRAA_out"
 
     if (defined(inputBAM)) {
+        File nonOptionalInputBAM = select_first([inputBAM, ""])
+
         call splitBAMByChromosome {
             input:
-                inputBAM = inputBAM,
+                inputBAM = nonOptionalInputBAM,
                 main_chromosomes = main_chromosomes,
                 docker = docker,
                 threads = numThreads,
