@@ -158,8 +158,8 @@ workflow lraaWorkflow {
 
     String OutDir = "LRAA_out"
 
-    Array[Array[File]] exprFilesList = []
-    Array[Array[File]] trackingFilesList = []
+    Array[File] quantExprFiles = []
+    Array[File] quantTrackingFiles = []
 
     if (defined(inputBAM)) {
         File nonOptionalInputBAM = select_first([inputBAM, ""])
@@ -192,8 +192,11 @@ workflow lraaWorkflow {
             }
         }
 
-        exprFilesList = exprFilesList + [lraaPerChromosome.lraaQuantExpr]
-        trackingFilesList = trackingFilesList + [lraaPerChromosome.lraaQuantTracking]
+        Array[Array[File]] exprFilesList = lraaPerChromosome.lraaQuantExpr
+        Array[Array[File]] trackingFilesList = lraaPerChromosome.lraaQuantTracking
+
+        quantExprFiles = quantExprFiles + flatten(exprFilesList)
+        quantTrackingFiles = quantTrackingFiles + flatten(trackingFilesList)
     }
 
     if (defined(inputBAMArray) && defined(referenceGenomeArray)) {
@@ -216,12 +219,12 @@ workflow lraaWorkflow {
             }
         }
 
-        exprFilesList = exprFilesList + [lraaPerChromosomeArray.lraaQuantExpr]
-        trackingFilesList = trackingFilesList + [lraaPerChromosomeArray.lraaQuantTracking]
-    }
+        Array[Array[File]] exprFilesArray = lraaPerChromosomeArray.lraaQuantExpr
+        Array[Array[File]] trackingFilesArray = lraaPerChromosomeArray.lraaQuantTracking
 
-    Array[File] quantExprFiles = flatten(exprFilesList)
-    Array[File] quantTrackingFiles = flatten(trackingFilesList)
+        quantExprFiles = quantExprFiles + flatten(exprFilesArray)
+        quantTrackingFiles = quantTrackingFiles + flatten(trackingFilesArray)
+    }
 
     call mergeResults {
         input:
