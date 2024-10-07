@@ -149,6 +149,7 @@ workflow LongReadRNABenchmark {
         Boolean runTalon = true
         Boolean runLraa = true
         Boolean runLrquant = true
+        Boolean runrelocateOutputs = true
     }
 
     if (runBambu) {
