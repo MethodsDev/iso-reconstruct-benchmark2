@@ -159,9 +159,11 @@ workflow lraaWorkflow {
     String OutDir = "LRAA_out"
 
     if (defined(inputBAM)) {
+        File nonOptionalInputBAM = select_first([inputBAM, ""])
+
         call splitBAMByChromosome {
             input:
-                inputBAM = inputBAM,
+                inputBAM = nonOptionalInputBAM,
                 main_chromosomes = main_chromosomes,
                 docker = docker,
                 threads = numThreads,
@@ -187,11 +189,14 @@ workflow lraaWorkflow {
             }
         }
     } else {
-        scatter (i in range(length(inputBAMArray))) {
+        Array[File] nonOptionalInputBAMArray = select_first([inputBAMArray, []])
+        Array[File] nonOptionalReferenceGenomeArray = select_first([referenceGenomeArray, []])
+
+        scatter (i in range(length(nonOptionalInputBAMArray))) {
             call lraaPerChromosome {
                 input:
-                    inputBAM = inputBAMArray[i],
-                    referenceGenome = referenceGenomeArray[i],
+                    inputBAM = nonOptionalInputBAMArray[i],
+                    referenceGenome = nonOptionalReferenceGenomeArray[i],
                     OutDir = OutDir,
                     docker = docker,
                     numThreads = numThreads,
@@ -204,10 +209,13 @@ workflow lraaWorkflow {
         }
     }
 
+    Array[File] nonOptionalQuantExprFiles = select_first([lraaPerChromosome.lraaQuantExpr, []])
+    Array[File] nonOptionalQuantTrackingFiles = select_first([lraaPerChromosome.lraaQuantTracking, []])
+
     call mergeResults {
         input:
-            quantExprFiles = lraaPerChromosome.lraaQuantExpr,
-            quantTrackingFiles = lraaPerChromosome.lraaQuantTracking,
+            quantExprFiles = nonOptionalQuantExprFiles,
+            quantTrackingFiles = nonOptionalQuantTrackingFiles,
             outputFilePrefix = "merged",
             docker = docker,
             memoryGB = memoryGB,
