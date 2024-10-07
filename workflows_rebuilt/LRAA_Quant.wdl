@@ -27,7 +27,7 @@ task splitBAMByChromosome {
             samtools view -@ ~{threads} -b ~{inputBAM} $chr > split_bams/$chr.bam
             samtools faidx ~{referenceGenome} $chr > split_bams/$chr.genome.fasta
             
-            if [ -f "~{referenceAnnotation_full}" ]; then
+            if [ -f "~{referenceAnnotation_full}") {
                 cat ~{referenceAnnotation_full} | perl -lane 'if ($F[0] eq "'$chr'") { print; }' > split_bams/$chr.full.annot.gtf
             fi
         done
@@ -158,8 +158,8 @@ workflow lraaWorkflow {
 
     String OutDir = "LRAA_out"
 
-    Array[File] quantExprFiles = []
-    Array[File] quantTrackingFiles = []
+    Array[Array[File]] exprFilesList = []
+    Array[Array[File]] trackingFilesList = []
 
     if (defined(inputBAM)) {
         File nonOptionalInputBAM = select_first([inputBAM, ""])
@@ -192,11 +192,8 @@ workflow lraaWorkflow {
             }
         }
 
-        Array[Array[File]] exprFilesList = lraaPerChromosome.lraaQuantExpr
-        Array[Array[File]] trackingFilesList = lraaPerChromosome.lraaQuantTracking
-
-        quantExprFiles = quantExprFiles + flatten(exprFilesList)
-        quantTrackingFiles = quantTrackingFiles + flatten(trackingFilesList)
+        exprFilesList = exprFilesList + [lraaPerChromosome.lraaQuantExpr]
+        trackingFilesList = trackingFilesList + [lraaPerChromosome.lraaQuantTracking]
     }
 
     if (defined(inputBAMArray) && defined(referenceGenomeArray)) {
@@ -219,12 +216,12 @@ workflow lraaWorkflow {
             }
         }
 
-        Array[Array[File]] exprFilesArray = lraaPerChromosomeArray.lraaQuantExpr
-        Array[Array[File]] trackingFilesArray = lraaPerChromosomeArray.lraaQuantTracking
-
-        quantExprFiles = quantExprFiles + flatten(exprFilesArray)
-        quantTrackingFiles = quantTrackingFiles + flatten(trackingFilesArray)
+        exprFilesList = exprFilesList + [lraaPerChromosomeArray.lraaQuantExpr]
+        trackingFilesList = trackingFilesList + [lraaPerChromosomeArray.lraaQuantTracking]
     }
+
+    Array[File] quantExprFiles = flatten(exprFilesList)
+    Array[File] quantTrackingFiles = flatten(trackingFilesList)
 
     call mergeResults {
         input:
