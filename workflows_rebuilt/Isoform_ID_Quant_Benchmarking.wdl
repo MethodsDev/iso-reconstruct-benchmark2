@@ -33,8 +33,6 @@ task relocateOutputs {
         File? isoquantGTF_with_polyA
         File? isoquantReducedGTF_with_polyA
         File? isoquantCounts_with_polyA
-        File? isoquantCounts_OUT
-        File? isoquantCounts_with_polyA_OUT
         File? isoseqReducedGTF
         File? isoseqGTF
         File? mandalorionReducedGTF
@@ -58,8 +56,6 @@ task relocateOutputs {
         File? lraaCounts_minMapQ
         File? lraa_quant_tracking_minMapQ
         File? gffcompareCounts
-        File? lrquantCounts
-        File? lrquantOUT
         File? isoscelesReducedGTF
         File? isoscelesStrictReducedGTF
         File? isoscelesCounts
