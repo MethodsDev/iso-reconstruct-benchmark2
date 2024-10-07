@@ -158,6 +158,9 @@ workflow lraaWorkflow {
 
     String OutDir = "LRAA_out"
 
+    Array[File] quantExprFiles
+    Array[File] quantTrackingFiles
+
     if (defined(inputBAM)) {
         File nonOptionalInputBAM = select_first([inputBAM, ""])
 
@@ -188,6 +191,9 @@ workflow lraaWorkflow {
                     diskSizeGB = diskSizeGB
             }
         }
+
+        quantExprFiles = lraaPerChromosome.lraaQuantExpr
+        quantTrackingFiles = lraaPerChromosome.lraaQuantTracking
     }
 
     if (defined(inputBAMArray) && defined(referenceGenomeArray)) {
@@ -209,18 +215,15 @@ workflow lraaWorkflow {
                     diskSizeGB = diskSizeGB
             }
         }
+
+        quantExprFiles = lraaPerChromosomeArray.lraaQuantExpr
+        quantTrackingFiles = lraaPerChromosomeArray.lraaQuantTracking
     }
-
-    Array[Array[File]] quantExprFilesArray = if defined(inputBAM) then [lraaPerChromosome.lraaQuantExpr] else [lraaPerChromosomeArray.lraaQuantExpr]
-    Array[Array[File]] quantTrackingFilesArray = if defined(inputBAM) then [lraaPerChromosome.lraaQuantTracking] else [lraaPerChromosomeArray.lraaQuantTracking]
-
-    Array[File] quantExprFiles = select_first([flatten(quantExprFilesArray), []])
-    Array[File] quantTrackingFiles = select_first([flatten(quantTrackingFilesArray), []])
 
     call mergeResults {
         input:
-            quantExprFiles = quantExprFiles,
-            quantTrackingFiles = quantTrackingFiles,
+            quantExprFiles = select_first([quantExprFiles, []]),
+            quantTrackingFiles = select_first([quantTrackingFiles, []]),
             outputFilePrefix = "merged",
             docker = docker,
             memoryGB = memoryGB,
