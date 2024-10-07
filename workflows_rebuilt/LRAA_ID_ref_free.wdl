@@ -132,9 +132,6 @@ workflow lraaWorkflow {
 
     String OutDir = "LRAA_out"
 
-    Array[File] chromosomeBAMs
-    Array[File] chromosomeFASTAs
-
     if (defined(inputBAM)) {
         call splitBAMByChromosome {
             input:
@@ -147,26 +144,32 @@ workflow lraaWorkflow {
                 diskSizeGB = diskSizeGB
         }
 
-        # Assign outputs from splitBAMByChromosome
-        Array[File] chromosomeBAMs = splitBAMByChromosome.chromosomeBAMs
-        Array[File] chromosomeFASTAs = splitBAMByChromosome.chromosomeFASTAs
+        scatter (i in range(length(splitBAMByChromosome.chromosomeBAMs))) {
+            call lraaPerChromosome {
+                input:
+                    inputBAM = splitBAMByChromosome.chromosomeBAMs[i],
+                    referenceGenome = splitBAMByChromosome.chromosomeFASTAs[i],
+                    OutDir = OutDir,
+                    docker = docker,
+                    numThreads = numThreads,
+                    LRAA_no_norm = LRAA_no_norm,
+                    memoryGB = memoryGB,
+                    diskSizeGB = diskSizeGB
+            }
+        }
     } else {
-        # Assign inputs directly
-        Array[File] chromosomeBAMs = inputBAMArray
-        Array[File] chromosomeFASTAs = referenceGenomeArray
-    }
-
-    scatter (i in range(length(chromosomeBAMs))) {
-        call lraaPerChromosome {
-            input:
-                inputBAM = chromosomeBAMs[i],
-                referenceGenome = chromosomeFASTAs[i],
-                OutDir = OutDir,
-                docker = docker,
-                numThreads = numThreads,
-                LRAA_no_norm = LRAA_no_norm,
-                memoryGB = memoryGB,
-                diskSizeGB = diskSizeGB
+        scatter (i in range(length(inputBAMArray))) {
+            call lraaPerChromosome {
+                input:
+                    inputBAM = inputBAMArray[i],
+                    referenceGenome = referenceGenomeArray[i],
+                    OutDir = OutDir,
+                    docker = docker,
+                    numThreads = numThreads,
+                    LRAA_no_norm = LRAA_no_norm,
+                    memoryGB = memoryGB,
+                    diskSizeGB = diskSizeGB
+            }
         }
     }
 
