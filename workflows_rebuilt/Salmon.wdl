@@ -30,13 +30,10 @@ task salmonTask {
             fi  
             mkdir -p ~{OutDir}
 
-            # Step 1: Convert BAM to FASTQ
             samtools bam2fq ~{inputBAM} > ~{OutDir}/tmp.fastq
 
-            # Step 2: Create transcriptome from reference_full and reference genome using gffread
             gffread ~{referenceAnnotation_full} -g ~{referenceGenome} -w  ~{OutDir}/transcriptome.fa 
 
-            # Step 3: Align reads to reference using minimap2
             minimap2 -a -t ~{numThreads} ~{OutDir}/transcriptome.fa  ~{OutDir}/tmp.fastq | samtools view --threads ~{numThreads} -bS | samtools sort --threads ~{numThreads} > ~{OutDir}/mapped.sorted.bam
             samtools index ~{OutDir}/mapped.sorted.bam
             
