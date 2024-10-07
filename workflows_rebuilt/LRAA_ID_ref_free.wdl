@@ -160,11 +160,11 @@ workflow lraaWorkflow {
     }
 
     if (defined(inputBAMArray) && defined(referenceGenomeArray)) {
-        scatter (i in range(length(inputBAMArray))) {
-            call lraaPerChromosome {
+        scatter (j in range(length(inputBAMArray))) {
+            call lraaPerChromosome as lraaPerChromosomeArray {
                 input:
-                    inputBAM = inputBAMArray[i],
-                    referenceGenome = referenceGenomeArray[i],
+                    inputBAM = inputBAMArray[j],
+                    referenceGenome = referenceGenomeArray[j],
                     OutDir = OutDir,
                     docker = docker,
                     numThreads = numThreads,
@@ -177,7 +177,7 @@ workflow lraaWorkflow {
 
     call mergeResults {
         input:
-            gtfFiles = lraaPerChromosome.lraaID_reffree_GTF,
+            gtfFiles = if defined(inputBAM) then lraaPerChromosome.lraaID_reffree_GTF else lraaPerChromosomeArray.lraaID_reffree_GTF,
             outputFilePrefix = "merged",
             docker = docker,
             memoryGB = memoryGB,
