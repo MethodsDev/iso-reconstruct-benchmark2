@@ -188,15 +188,17 @@ workflow lraaWorkflow {
                     diskSizeGB = diskSizeGB
             }
         }
-    } else {
+    }
+
+    if (defined(inputBAMArray) && defined(referenceGenomeArray)) {
         Array[File] nonOptionalInputBAMArray = select_first([inputBAMArray, []])
         Array[File] nonOptionalReferenceGenomeArray = select_first([referenceGenomeArray, []])
 
-        scatter (i in range(length(nonOptionalInputBAMArray))) {
-            call lraaPerChromosome {
+        scatter (j in range(length(nonOptionalInputBAMArray))) {
+            call lraaPerChromosome as lraaPerChromosomeArray {
                 input:
-                    inputBAM = nonOptionalInputBAMArray[i],
-                    referenceGenome = nonOptionalReferenceGenomeArray[i],
+                    inputBAM = nonOptionalInputBAMArray[j],
+                    referenceGenome = nonOptionalReferenceGenomeArray[j],
                     OutDir = OutDir,
                     docker = docker,
                     numThreads = numThreads,
@@ -209,8 +211,17 @@ workflow lraaWorkflow {
         }
     }
 
-    Array[File] nonOptionalQuantExprFiles = select_first([lraaPerChromosome.lraaQuantExpr, []])
-    Array[File] nonOptionalQuantTrackingFiles = select_first([lraaPerChromosome.lraaQuantTracking, []])
+    Array[File] nonOptionalQuantExprFiles = if (defined(inputBAM)) {
+        select_first([lraaPerChromosome.lraaQuantExpr, []])
+    } else {
+        select_first([lraaPerChromosomeArray.lraaQuantExpr, []])
+    }
+
+    Array[File] nonOptionalQuantTrackingFiles = if (defined(inputBAM)) {
+        select_first([lraaPerChromosome.lraaQuantTracking, []])
+    } else {
+        select_first([lraaPerChromosomeArray.lraaQuantTracking, []])
+    }
 
     call mergeResults {
         input:
