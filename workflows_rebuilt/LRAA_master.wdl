@@ -38,7 +38,7 @@ workflow CombinedWorkflow {
 
         call Quant.lraaWorkflow as QuantFreeWorkflow {
             input:
-                inputBAM = inputBAM,
+                inputBAMArray = IDRefFreeWorkflow.splitBAMs,
                 referenceGenome = referenceGenome,
                 numThreads = numThreads,
                 memoryGB = memoryGB,
@@ -63,7 +63,7 @@ workflow CombinedWorkflow {
 
         call Quant.lraaWorkflow as QuantFree2Workflow {
             input:
-                inputBAM = inputBAM,
+                inputBAMArray = IDRefFreeWorkflow.splitBAMs,
                 referenceGenome = referenceGenome,
                 numThreads = numThreads,
                 memoryGB = memoryGB,
@@ -95,7 +95,7 @@ workflow CombinedWorkflow {
 
         call Quant.lraaWorkflow as QuantGuidedWorkflow {
             input:
-                inputBAM = inputBAM,
+                inputBAMArray = IDRefGuidedWorkflow.splitBAMs,
                 referenceGenome = referenceGenome,
                 numThreads = numThreads,
                 memoryGB = memoryGB,
@@ -120,7 +120,7 @@ workflow CombinedWorkflow {
 
         call Quant.lraaWorkflow as QuantGuided2Workflow {
             input:
-                inputBAM = inputBAM,
+                inputBAMArray = IDRefGuidedWorkflow.splitBAMs,
                 referenceGenome = referenceGenome,
                 numThreads = numThreads,
                 memoryGB = memoryGB,
