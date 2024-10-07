@@ -211,8 +211,8 @@ workflow lraaWorkflow {
         }
     }
 
-    Array[File] quantExprFiles = if defined(inputBAM) then lraaPerChromosome.lraaQuantExpr else lraaPerChromosomeArray.lraaQuantExpr
-    Array[File] quantTrackingFiles = if defined(inputBAM) then lraaPerChromosome.lraaQuantTracking else lraaPerChromosomeArray.lraaQuantTracking
+    Array[File] quantExprFiles = select_all(if defined(inputBAM) then lraaPerChromosome.lraaQuantExpr else lraaPerChromosomeArray.lraaQuantExpr)
+    Array[File] quantTrackingFiles = select_all(if defined(inputBAM) then lraaPerChromosome.lraaQuantTracking else lraaPerChromosomeArray.lraaQuantTracking)
 
     call mergeResults {
         input:
