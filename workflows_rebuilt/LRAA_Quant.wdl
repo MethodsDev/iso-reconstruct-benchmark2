@@ -192,8 +192,11 @@ workflow lraaWorkflow {
             }
         }
 
-        quantExprFiles = quantExprFiles + lraaPerChromosome.lraaQuantExpr
-        quantTrackingFiles = quantTrackingFiles + lraaPerChromosome.lraaQuantTracking
+        Array[File] exprFiles = lraaPerChromosome.lraaQuantExpr
+        Array[File] trackingFiles = lraaPerChromosome.lraaQuantTracking
+
+        quantExprFiles = quantExprFiles + exprFiles
+        quantTrackingFiles = quantTrackingFiles + trackingFiles
     }
 
     if (defined(inputBAMArray) && defined(referenceGenomeArray)) {
@@ -216,8 +219,11 @@ workflow lraaWorkflow {
             }
         }
 
-        quantExprFiles = quantExprFiles + lraaPerChromosomeArray.lraaQuantExpr
-        quantTrackingFiles = quantTrackingFiles + lraaPerChromosomeArray.lraaQuantTracking
+        Array[File] exprFilesArray = lraaPerChromosomeArray.lraaQuantExpr
+        Array[File] trackingFilesArray = lraaPerChromosomeArray.lraaQuantTracking
+
+        quantExprFiles = quantExprFiles + exprFilesArray
+        quantTrackingFiles = quantTrackingFiles + trackingFilesArray
     }
 
     call mergeResults {
