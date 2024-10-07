@@ -211,8 +211,8 @@ workflow lraaWorkflow {
         }
     }
 
-    Array[File] nonOptionalQuantExprFiles
-    Array[File] nonOptionalQuantTrackingFiles
+    Array[File] nonOptionalQuantExprFiles = []
+    Array[File] nonOptionalQuantTrackingFiles = []
 
     if (defined(inputBAM)) {
         nonOptionalQuantExprFiles = select_first([lraaPerChromosome.lraaQuantExpr, []])
