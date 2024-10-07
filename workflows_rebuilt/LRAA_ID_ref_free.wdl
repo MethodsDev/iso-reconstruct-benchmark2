@@ -7,6 +7,7 @@ task splitBAMByChromosome {
         String docker
         Int threads
         File referenceGenome
+        File referenceAnnotation_reduced
         Int memoryGB
         Int diskSizeGB
         File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
@@ -30,12 +31,18 @@ task splitBAMByChromosome {
             
             # Generate chromosome-specific FASTA from the whole genome
             samtools faidx ~{referenceGenome} $chr > split_bams/$chr.genome.fasta
+            
+            # Generate chromosome-specific GTF for reduced annotation, if available
+            if [ -f "~{referenceAnnotation_reduced}" ]; then
+                cat ~{referenceAnnotation_reduced} | perl -lane 'if ($F[0] eq "'$chr'") { print; }' > split_bams/$chr.reduced.annot.gtf
+            fi
         done
     >>>
 
     output {
         Array[File] chromosomeBAMs = glob("split_bams/*.bam")
         Array[File] chromosomeFASTAs = glob("split_bams/*.genome.fasta")
+        Array[File] reducedAnnotations = glob("split_bams/*.reduced.annot.gtf")
     }
 
     runtime {
