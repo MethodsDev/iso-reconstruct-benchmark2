@@ -19,20 +19,14 @@ task splitBAMByChromosome {
         set -eo pipefail
         mkdir -p split_bams
         
-        # Check if BAM index exists, if not, index the input BAM
         if [ ! -f "~{inputBAM}.bai" ]; then
             samtools index -@ ~{threads} ~{inputBAM}
         fi
         
-        # Loop through each chromosome
         for chr in ~{main_chromosomes}; do
-            # Generate chromosome-specific BAM
             samtools view -@ ~{threads} -b ~{inputBAM} $chr > split_bams/$chr.bam
-            
-            # Generate chromosome-specific FASTA from the whole genome
             samtools faidx ~{referenceGenome} $chr > split_bams/$chr.genome.fasta
             
-            # Generate chromosome-specific GTF for full annotation, if available
             if [ -f "~{referenceAnnotation_full}" ]; then
                 cat ~{referenceAnnotation_full} | perl -lane 'if ($F[0] eq "'$chr'") { print; }' > split_bams/$chr.full.annot.gtf
             fi
@@ -114,26 +108,20 @@ task mergeResults {
 
         set -eo pipefail
 
-        # Merge Quant Expression Files with header from the first file only
         quant_expr_output="~{outputFilePrefix}_merged_quant.expr"
         for file in ~{sep=' ' quantExprFiles}; do
             if [[ ! -f "$quant_expr_output" ]]; then
-                # Copy the first file with header
                 cp "$file" "$quant_expr_output"
             else
-                # Append the rest without the header
                 tail -n +2 "$file" >> "$quant_expr_output"
             fi
         done
 
-        # Merge Quant Tracking Files with header from the first file only
         quant_tracking_output="~{outputFilePrefix}_merged_quant.tracking"
         for file in ~{sep=' ' quantTrackingFiles}; do
             if [[ ! -f "$quant_tracking_output" ]]; then
-                # Copy the first file with header
                 cp "$file" "$quant_tracking_output"
             else
-                # Append the rest without the header
                 tail -n +2 "$file" >> "$quant_tracking_output"
             fi
         done
@@ -154,8 +142,10 @@ task mergeResults {
 
 workflow lraaWorkflow {
     input {
-        File inputBAM
+        File? inputBAM
+        Array[File]? inputBAMArray
         File referenceGenome
+        Array[File]? referenceGenomeArray
         Int? LRAA_min_mapping_quality
         Boolean? LRAA_no_norm
         Int numThreads = 4
@@ -168,33 +158,52 @@ workflow lraaWorkflow {
 
     String OutDir = "LRAA_out"
 
-    call splitBAMByChromosome {
-        input:
-            inputBAM = inputBAM,
-            main_chromosomes = main_chromosomes,
-            docker = docker,
-            threads = numThreads,
-            referenceGenome = referenceGenome,
-            referenceAnnotation_full = referenceAnnotation_full,
-            memoryGB = memoryGB,
-            diskSizeGB = diskSizeGB
-    }
-
-    scatter (i in range(length(splitBAMByChromosome.chromosomeBAMs))) {
-        call lraaPerChromosome {
+    if (defined(inputBAM)) {
+        call splitBAMByChromosome {
             input:
-                inputBAM = splitBAMByChromosome.chromosomeBAMs[i],
-                referenceGenome = splitBAMByChromosome.chromosomeFASTAs[i],
-                OutDir = OutDir,
+                inputBAM = inputBAM,
+                main_chromosomes = main_chromosomes,
                 docker = docker,
-                numThreads = numThreads,
-                LRAA_no_norm = LRAA_no_norm,
-                LRAA_min_mapping_quality = LRAA_min_mapping_quality,
-                referenceAnnotation_full = splitBAMByChromosome.fullAnnotations[i],
+                threads = numThreads,
+                referenceGenome = referenceGenome,
+                referenceAnnotation_full = referenceAnnotation_full,
                 memoryGB = memoryGB,
                 diskSizeGB = diskSizeGB
         }
+
+        scatter (i in range(length(splitBAMByChromosome.chromosomeBAMs))) {
+            call lraaPerChromosome {
+                input:
+                    inputBAM = splitBAMByChromosome.chromosomeBAMs[i],
+                    referenceGenome = splitBAMByChromosome.chromosomeFASTAs[i],
+                    OutDir = OutDir,
+                    docker = docker,
+                    numThreads = numThreads,
+                    LRAA_no_norm = LRAA_no_norm,
+                    LRAA_min_mapping_quality = LRAA_min_mapping_quality,
+                    referenceAnnotation_full = splitBAMByChromosome.fullAnnotations[i],
+                    memoryGB = memoryGB,
+                    diskSizeGB = diskSizeGB
+            }
+        }
+    } else {
+        scatter (i in range(length(inputBAMArray))) {
+            call lraaPerChromosome {
+                input:
+                    inputBAM = inputBAMArray[i],
+                    referenceGenome = referenceGenomeArray[i],
+                    OutDir = OutDir,
+                    docker = docker,
+                    numThreads = numThreads,
+                    LRAA_no_norm = LRAA_no_norm,
+                    LRAA_min_mapping_quality = LRAA_min_mapping_quality,
+                    referenceAnnotation_full = referenceAnnotation_full,
+                    memoryGB = memoryGB,
+                    diskSizeGB = diskSizeGB
+            }
+        }
     }
+
     call mergeResults {
         input:
             quantExprFiles = lraaPerChromosome.lraaQuantExpr,
