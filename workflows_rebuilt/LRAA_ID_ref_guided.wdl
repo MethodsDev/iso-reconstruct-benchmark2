@@ -53,84 +53,9 @@ task splitBAMByChromosome {
     }
 }
 
-task lraaPerChromosome {
-    input {
-        File inputBAM
-        File referenceGenome
-        String OutDir
-        String docker
-        Int numThreads
-        Boolean? LRAA_no_norm
-        File referenceAnnotation_reduced
-        Int memoryGB
-        Int diskSizeGB
-        File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
-    }
-
-    String no_norm_flag = if defined(LRAA_no_norm) && LRAA_no_norm then "--no_norm" else ""
-    
-    command <<<
-        bash ~{monitoringScript} > monitoring.log &
-
-        mkdir -p ~{OutDir}/ID_reduced
-    
-        /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
-                                 --bam ~{inputBAM} \
-                                 --output_prefix ~{OutDir}/ID_reduced/LRAA_reduced \
-                                 ~{no_norm_flag} \
-                                 --gtf ~{referenceAnnotation_reduced} --CPU 1
-    >>>
-    
-    output {
-        File lraaID_reduced_GTF = "~{OutDir}/ID_reduced/LRAA_reduced.gtf"
-    }
-    runtime {
-        docker: docker
-        bootDiskSizeGb: 30
-        cpu: "~{numThreads}"
-        memory: "~{memoryGB} GiB"
-        disks: "local-disk ~{diskSizeGB} HDD"
-    }
-}
-
-task mergeResults {
-    input {
-        Array[File] reducedGtfFiles
-        String outputFilePrefix
-        String docker
-        Int memoryGB
-        Int diskSizeGB
-        File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
-    }
-
-    command <<<
-        bash ~{monitoringScript} > monitoring.log &
-
-        set -eo pipefail
-    
-        # Initialize output file
-        reduced_gtf_output="~{outputFilePrefix}_merged_reduced.gtf"
-        
-        # Directly concatenate all input files into the output file
-        cat ~{sep=' ' reducedGtfFiles} > "$reduced_gtf_output"
-    >>>
-
-    output {
-        File mergedReducedGtfFile = "~{outputFilePrefix}_merged_reduced.gtf"
-    }
-
-    runtime {
-        docker: docker
-        cpu: 1
-        memory: "~{memoryGB} GiB"
-        disks: "local-disk ~{diskSizeGB} HDD"
-    }
-}
-
 workflow lraaWorkflow {
     input {
-        File? inputBAM
-        Array[File]? inputBAMArray
+        File inputBAM
         File referenceGenome
         Int numThreads = 4
         Int memoryGB = 32
@@ -143,47 +68,32 @@ workflow lraaWorkflow {
 
     String OutDir = "LRAA_out"
 
-    Array[File] chromosomeBAMs
-    Array[File] chromosomeFASTAs
-    Array[File] reducedAnnotations
-
-    if (defined(inputBAM)) {
-        call splitBAMByChromosome {
-            input:
-                inputBAM = inputBAM,
-                main_chromosomes = main_chromosomes,
-                docker = docker,
-                threads = numThreads,
-                referenceGenome = referenceGenome,
-                referenceAnnotation_reduced = referenceAnnotation_reduced,
-                memoryGB = memoryGB,
-                diskSizeGB = diskSizeGB
-        }
-
-        chromosomeBAMs = splitBAMByChromosome.chromosomeBAMs
-        chromosomeFASTAs = splitBAMByChromosome.chromosomeFASTAs
-        reducedAnnotations = splitBAMByChromosome.reducedAnnotations
-    } else {
-        chromosomeBAMs = inputBAMArray
-        chromosomeFASTAs = [referenceGenome] # Assuming the reference genome is the same for all chromosomes
-        reducedAnnotations = [referenceAnnotation_reduced] # Assuming the reduced annotation is the same for all chromosomes
+    call splitBAMByChromosome {
+        input:
+            inputBAM = inputBAM,
+            main_chromosomes = main_chromosomes,
+            docker = docker,
+            threads = numThreads,
+            referenceGenome = referenceGenome,
+            referenceAnnotation_reduced = referenceAnnotation_reduced,
+            memoryGB = memoryGB,
+            diskSizeGB = diskSizeGB
     }
 
-    scatter (i in range(length(chromosomeBAMs))) {
+    scatter (i in range(length(splitBAMByChromosome.chromosomeBAMs))) {
         call lraaPerChromosome {
             input:
-                inputBAM = chromosomeBAMs[i],
-                referenceGenome = chromosomeFASTAs[i],
+                inputBAM = splitBAMByChromosome.chromosomeBAMs[i],
+                referenceGenome = splitBAMByChromosome.chromosomeFASTAs[i],
                 OutDir = OutDir,
                 docker = docker,
                 numThreads = numThreads,
                 LRAA_no_norm = LRAA_no_norm,
-                referenceAnnotation_reduced = reducedAnnotations[i],
+                referenceAnnotation_reduced = splitBAMByChromosome.reducedAnnotations[i],
                 memoryGB = memoryGB,
                 diskSizeGB = diskSizeGB
         }
     }
-
     call mergeResults {
         input:
             reducedGtfFiles = lraaPerChromosome.lraaID_reduced_GTF,
@@ -195,6 +105,6 @@ workflow lraaWorkflow {
     
     output {
         File mergedReducedGTF = mergeResults.mergedReducedGtfFile
-        Array[File]? splitBAMs = if defined(inputBAM) then splitBAMByChromosome.chromosomeBAMs else []
+        Array[File] splitBAMs = splitBAMByChromosome.chromosomeBAMs
     }
 }
