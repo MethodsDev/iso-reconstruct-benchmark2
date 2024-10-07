@@ -147,11 +147,13 @@ workflow lraaWorkflow {
                 diskSizeGB = diskSizeGB
         }
 
-        chromosomeBAMs = splitBAMByChromosome.chromosomeBAMs
-        chromosomeFASTAs = splitBAMByChromosome.chromosomeFASTAs
+        # Assign outputs from splitBAMByChromosome
+        Array[File] chromosomeBAMs = splitBAMByChromosome.chromosomeBAMs
+        Array[File] chromosomeFASTAs = splitBAMByChromosome.chromosomeFASTAs
     } else {
-        chromosomeBAMs = inputBAMArray
-        chromosomeFASTAs = referenceGenomeArray
+        # Assign inputs directly
+        Array[File] chromosomeBAMs = inputBAMArray
+        Array[File] chromosomeFASTAs = referenceGenomeArray
     }
 
     scatter (i in range(length(chromosomeBAMs))) {
