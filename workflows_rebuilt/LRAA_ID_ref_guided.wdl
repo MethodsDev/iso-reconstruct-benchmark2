@@ -136,9 +136,11 @@ workflow lraaWorkflow {
     Array[File] chromosomeFASTAs
 
     if (defined(inputBAM)) {
+        File nonOptionalInputBAM = select_first([inputBAM, ""])
+
         call splitBAMByChromosome {
             input:
-                inputBAM = inputBAM,
+                inputBAM = nonOptionalInputBAM,
                 main_chromosomes = main_chromosomes,
                 docker = docker,
                 threads = numThreads,
@@ -150,8 +152,11 @@ workflow lraaWorkflow {
         chromosomeBAMs = splitBAMByChromosome.chromosomeBAMs
         chromosomeFASTAs = splitBAMByChromosome.chromosomeFASTAs
     } else {
-        chromosomeBAMs = inputBAMArray
-        chromosomeFASTAs = referenceGenomeArray
+        Array[File] nonOptionalInputBAMArray = select_first([inputBAMArray, []])
+        Array[File] nonOptionalReferenceGenomeArray = select_first([referenceGenomeArray, []])
+
+        chromosomeBAMs = nonOptionalInputBAMArray
+        chromosomeFASTAs = nonOptionalReferenceGenomeArray
     }
 
     scatter (i in range(length(chromosomeBAMs))) {
@@ -168,9 +173,11 @@ workflow lraaWorkflow {
         }
     }
 
+    Array[File] nonOptionalGtfFiles = select_first([lraaPerChromosome.lraaID_refguided_GTF, []])
+
     call mergeResults {
         input:
-            gtfFiles = lraaPerChromosome.lraaID_refguided_GTF,
+            gtfFiles = nonOptionalGtfFiles,
             outputFilePrefix = "merged",
             docker = docker,
             memoryGB = memoryGB,
