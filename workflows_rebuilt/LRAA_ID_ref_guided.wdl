@@ -53,6 +53,80 @@ task splitBAMByChromosome {
     }
 }
 
+task lraaPerChromosome {
+    input {
+        File inputBAM
+        File referenceGenome
+        String OutDir
+        String docker
+        Int numThreads
+        Boolean? LRAA_no_norm
+        File referenceAnnotation_reduced
+        Int memoryGB
+        Int diskSizeGB
+        File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
+    }
+
+    String no_norm_flag = if defined(LRAA_no_norm) && LRAA_no_norm then "--no_norm" else ""
+    
+    command <<<
+        bash ~{monitoringScript} > monitoring.log &
+
+        mkdir -p ~{OutDir}/ID_reduced
+    
+        /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
+                                 --bam ~{inputBAM} \
+                                 --output_prefix ~{OutDir}/ID_reduced/LRAA_reduced \
+                                 ~{no_norm_flag} \
+                                 --gtf ~{referenceAnnotation_reduced} --CPU 1
+    >>>
+    
+    output {
+        File lraaID_reduced_GTF = "~{OutDir}/ID_reduced/LRAA_reduced.gtf"
+    }
+    runtime {
+        docker: docker
+        bootDiskSizeGb: 30
+        cpu: "~{numThreads}"
+        memory: "~{memoryGB} GiB"
+        disks: "local-disk ~{diskSizeGB} HDD"
+    }
+}
+
+task mergeResults {
+    input {
+        Array[File] reducedGtfFiles
+        String outputFilePrefix
+        String docker
+        Int memoryGB
+        Int diskSizeGB
+        File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
+    }
+
+    command <<<
+        bash ~{monitoringScript} > monitoring.log &
+
+        set -eo pipefail
+    
+        # Initialize output file
+        reduced_gtf_output="~{outputFilePrefix}_merged_reduced.gtf"
+        
+        # Directly concatenate all input files into the output file
+        cat ~{sep=' ' reducedGtfFiles} > "$reduced_gtf_output"
+    >>>
+
+    output {
+        File mergedReducedGtfFile = "~{outputFilePrefix}_merged_reduced.gtf"
+    }
+
+    runtime {
+        docker: docker
+        cpu: 1
+        memory: "~{memoryGB} GiB"
+        disks: "local-disk ~{diskSizeGB} HDD"
+    }
+}
+
 workflow lraaWorkflow {
     input {
         File inputBAM
