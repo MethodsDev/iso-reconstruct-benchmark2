@@ -160,11 +160,14 @@ workflow lraaWorkflow {
     }
 
     if (defined(inputBAMArray) && defined(referenceGenomeArray)) {
-        scatter (j in range(length(inputBAMArray))) {
+        Array[File] nonOptionalInputBAMArray = select_first([inputBAMArray, []])
+        Array[File] nonOptionalReferenceGenomeArray = select_first([referenceGenomeArray, []])
+
+        scatter (j in range(length(nonOptionalInputBAMArray))) {
             call lraaPerChromosome as lraaPerChromosomeArray {
                 input:
-                    inputBAM = inputBAMArray[j],
-                    referenceGenome = referenceGenomeArray[j],
+                    inputBAM = nonOptionalInputBAMArray[j],
+                    referenceGenome = nonOptionalReferenceGenomeArray[j],
                     OutDir = OutDir,
                     docker = docker,
                     numThreads = numThreads,
