@@ -18,17 +18,12 @@ task splitBAMByChromosome {
         set -eo pipefail
         mkdir -p split_bams
         
-        # Check if BAM index exists, if not, index the input BAM
         if [ ! -f "~{inputBAM}.bai" ]; then
             samtools index -@ ~{threads} ~{inputBAM}
         fi
         
-        # Loop through each chromosome
         for chr in ~{main_chromosomes}; do
-            # Generate chromosome-specific BAM
             samtools view -@ ~{threads} -b ~{inputBAM} $chr > split_bams/$chr.bam
-            
-            # Generate chromosome-specific FASTA from the whole genome
             samtools faidx ~{referenceGenome} $chr > split_bams/$chr.genome.fasta
         done
     >>>
@@ -36,38 +31,6 @@ task splitBAMByChromosome {
     output {
         Array[File] chromosomeBAMs = glob("split_bams/*.bam")
         Array[File] chromosomeFASTAs = glob("split_bams/*.genome.fasta")
-    }
-
-    runtime {
-        docker: docker
-        bootDiskSizeGb: 30
-        memory: "~{memoryGB} GiB"
-        disks: "local-disk ~{diskSizeGB} HDD"
-    }
-}
-
-task splitGTFByChromosome {
-    input {
-        File referenceAnnotation_reduced
-        String main_chromosomes
-        String docker
-        Int memoryGB
-        Int diskSizeGB
-    }
-
-    command <<<
-        set -eo pipefail
-        mkdir -p split_gtfs
-        
-        # Loop through each chromosome
-        for chr in ~{main_chromosomes}; do
-            # Generate chromosome-specific GTF for reduced annotation
-            cat ~{referenceAnnotation_reduced} | perl -lane 'if ($F[0] eq "'$chr'") { print; }' > split_gtfs/$chr.reduced.annot.gtf
-        done
-    >>>
-
-    output {
-        Array[File] reducedAnnotations = glob("split_gtfs/*.reduced.annot.gtf")
     }
 
     runtime {
@@ -131,14 +94,11 @@ task mergeResults {
 
         set -eo pipefail
 
-        # Initialize output file
         gtf_output="~{outputFilePrefix}_merged.gtf"
         touch "$gtf_output"
 
-        # Convert WDL array to a space-separated string
         gtf_files_str="~{sep=' ' gtfFiles}"
 
-        # Loop through all files and concatenate them
         for file in $gtf_files_str; do
             cat "$file" >> "$gtf_output"
         done
@@ -162,7 +122,6 @@ workflow lraaWorkflow {
         Array[File]? inputBAMArray
         Array[File]? referenceGenomeArray
         File referenceGenome
-        File referenceAnnotation_reduced
         Int numThreads = 4
         Int memoryGB = 32
         Int diskSizeGB = 1024
@@ -175,7 +134,6 @@ workflow lraaWorkflow {
 
     Array[File] chromosomeBAMs
     Array[File] chromosomeFASTAs
-    Array[File] reducedAnnotations
 
     if (defined(inputBAM)) {
         call splitBAMByChromosome {
@@ -196,22 +154,11 @@ workflow lraaWorkflow {
         chromosomeFASTAs = referenceGenomeArray
     }
 
-    call splitGTFByChromosome {
-        input:
-            referenceAnnotation_reduced = referenceAnnotation_reduced,
-            main_chromosomes = main_chromosomes,
-            docker = docker,
-            memoryGB = memoryGB,
-            diskSizeGB = diskSizeGB
-    }
-
-    reducedAnnotations = splitGTFByChromosome.reducedAnnotations
-
     scatter (i in range(length(chromosomeBAMs))) {
         call lraaPerChromosome {
             input:
                 inputBAM = chromosomeBAMs[i],
-                referenceGenome = chromosomeFASTAs[i], # Using the specific reference genome for each chromosome
+                referenceGenome = chromosomeFASTAs[i],
                 OutDir = OutDir,
                 docker = docker,
                 numThreads = numThreads,
