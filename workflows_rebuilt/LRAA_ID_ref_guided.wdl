@@ -1,12 +1,13 @@
 version 1.0
 
-task splitBAMByChromosome {
+task splitBAMAndGTFByChromosome {
     input {
         File inputBAM
         String main_chromosomes
         String docker
         Int threads
         File referenceGenome
+        File referenceAnnotation_reduced
         Int memoryGB
         Int diskSizeGB
         File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
@@ -17,6 +18,7 @@ task splitBAMByChromosome {
 
         set -eo pipefail
         mkdir -p split_bams
+        mkdir -p split_gtfs
         
         if [ ! -f "~{inputBAM}.bai" ]; then
             samtools index -@ ~{threads} ~{inputBAM}
@@ -25,12 +27,14 @@ task splitBAMByChromosome {
         for chr in ~{main_chromosomes}; do
             samtools view -@ ~{threads} -b ~{inputBAM} $chr > split_bams/$chr.bam
             samtools faidx ~{referenceGenome} $chr > split_bams/$chr.genome.fasta
+            cat ~{referenceAnnotation_reduced} | awk -v chr=$chr '$1 == chr' > split_gtfs/$chr.gtf
         done
     >>>
 
     output {
         Array[File] chromosomeBAMs = glob("split_bams/*.bam")
         Array[File] chromosomeFASTAs = glob("split_bams/*.genome.fasta")
+        Array[File] chromosomeGTFs = glob("split_gtfs/*.gtf")
     }
 
     runtime {
@@ -137,23 +141,24 @@ workflow lraaWorkflow {
     if (defined(inputBAM)) {
         File nonOptionalInputBAM = select_first([inputBAM, ""])
 
-        call splitBAMByChromosome {
+        call splitBAMAndGTFByChromosome {
             input:
                 inputBAM = nonOptionalInputBAM,
                 main_chromosomes = main_chromosomes,
                 docker = docker,
                 threads = numThreads,
                 referenceGenome = referenceGenome,
+                referenceAnnotation_reduced = referenceAnnotation_reduced,
                 memoryGB = memoryGB,
                 diskSizeGB = diskSizeGB
         }
 
-        scatter (i in range(length(splitBAMByChromosome.chromosomeBAMs))) {
+        scatter (i in range(length(splitBAMAndGTFByChromosome.chromosomeBAMs))) {
             call lraaPerChromosome {
                 input:
-                    inputBAM = splitBAMByChromosome.chromosomeBAMs[i],
-                    referenceGenome = splitBAMByChromosome.chromosomeFASTAs[i],
-                    referenceAnnotation_reduced = referenceAnnotation_reduced,
+                    inputBAM = splitBAMAndGTFByChromosome.chromosomeBAMs[i],
+                    referenceGenome = splitBAMAndGTFByChromosome.chromosomeFASTAs[i],
+                    referenceAnnotation_reduced = splitBAMAndGTFByChromosome.chromosomeGTFs[i],
                     OutDir = OutDir,
                     docker = docker,
                     numThreads = numThreads,
@@ -173,7 +178,7 @@ workflow lraaWorkflow {
                 input:
                     inputBAM = nonOptionalInputBAMArray[j],
                     referenceGenome = nonOptionalReferenceGenomeArray[j],
-                    referenceAnnotation_reduced = referenceAnnotation_reduced,
+                    referenceAnnotation_reduced = splitBAMAndGTFByChromosome.chromosomeGTFs[j],
                     OutDir = OutDir,
                     docker = docker,
                     numThreads = numThreads,
@@ -197,7 +202,7 @@ workflow lraaWorkflow {
     
     output {
         File mergedRefguidedGTF = mergeResults.mergedGtfFile
-        Array[File]? splitBAMs = if defined(inputBAM) then splitBAMByChromosome.chromosomeBAMs else []
-        Array[File]? splitFASTAs = if defined(inputBAM) then splitBAMByChromosome.chromosomeFASTAs else []
+        Array[File]? splitBAMs = if defined(inputBAM) then splitBAMAndGTFByChromosome.chromosomeBAMs else []
+        Array[File]? splitFASTAs = if defined(inputBAM) then splitBAMAndGTFByChromosome.chromosomeFASTAs else []
     }
 }
