@@ -40,6 +40,7 @@ task splitBAMAndGTFByChromosome {
     runtime {
         docker: docker
         bootDiskSizeGb: 30
+        cpu: "~{numThreads}"
         memory: "~{memoryGB} GiB"
         disks: "local-disk ~{diskSizeGB} HDD"
     }
