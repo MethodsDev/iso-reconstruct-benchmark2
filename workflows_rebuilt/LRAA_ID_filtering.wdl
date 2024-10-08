@@ -36,7 +36,7 @@ workflow TranscriptFiltering {
         File expr_file_path
         Float threshold = 1.0
         Int memoryGB = 32
-        Int diskSizeGB = 1024
+        Int diskSizeGB = 128
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/filtertranscripts:latest"
     }
 
