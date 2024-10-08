@@ -65,7 +65,7 @@ task lraaPerChromosome {
         /usr/local/src/LRAA/LRAA --genome ~{referenceGenome} \
                                  --bam ~{inputBAM} \
                                  --output_prefix ~{OutDir}/ID_refguided/LRAA_refguided \
-                                 ~{no_norm_flag} --CPU 1
+                                 ~{no_norm_flag} --CPU 1 --gtf ~{referenceAnnotation_reduced} 
     >>>
     
     output {
@@ -122,6 +122,7 @@ workflow lraaWorkflow {
         File? inputBAM
         Array[File]? inputBAMArray
         Array[File]? referenceGenomeArray
+        File referenceAnnotation_reduced
         File referenceGenome
         Int numThreads = 4
         Int memoryGB = 32
@@ -152,6 +153,7 @@ workflow lraaWorkflow {
                 input:
                     inputBAM = splitBAMByChromosome.chromosomeBAMs[i],
                     referenceGenome = splitBAMByChromosome.chromosomeFASTAs[i],
+                    referenceAnnotation_reduced = referenceAnnotation_reduced,
                     OutDir = OutDir,
                     docker = docker,
                     numThreads = numThreads,
@@ -171,6 +173,7 @@ workflow lraaWorkflow {
                 input:
                     inputBAM = nonOptionalInputBAMArray[j],
                     referenceGenome = nonOptionalReferenceGenomeArray[j],
+                    referenceAnnotation_reduced = referenceAnnotation_reduced,
                     OutDir = OutDir,
                     docker = docker,
                     numThreads = numThreads,
