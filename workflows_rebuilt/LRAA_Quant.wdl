@@ -47,6 +47,36 @@ task splitBAMByChromosome {
     }
 }
 
+task splitGTFByChromosome {
+    input {
+        File referenceAnnotation_full
+        String main_chromosomes
+        String docker
+        Int memoryGB
+        Int diskSizeGB
+    }
+
+    command <<<
+        set -eo pipefail
+        mkdir -p split_gtfs
+
+        for chr in ~{main_chromosomes}; do
+            cat ~{referenceAnnotation_full} | awk -v chr=$chr '$1 == chr' > split_gtfs/$chr.gtf
+        done
+    >>>
+
+    output {
+        Array[File] chromosomeGTFs = glob("split_gtfs/*.gtf")
+    }
+
+    runtime {
+        docker: docker
+        bootDiskSizeGb: 30
+        memory: "~{memoryGB} GiB"
+        disks: "local-disk ~{diskSizeGB} HDD"
+    }
+}
+
 task lraaPerChromosome {
     input {
         File inputBAM
@@ -158,7 +188,6 @@ workflow lraaWorkflow {
 
     String OutDir = "LRAA_out"
 
-
     if (defined(inputBAM)) {
         File nonOptionalInputBAM = select_first([inputBAM, ""])
         File nonOptionalReferenceGenome = select_first([referenceGenome, ""])
@@ -196,6 +225,15 @@ workflow lraaWorkflow {
         Array[File] nonOptionalInputBAMArray = select_first([inputBAMArray, []])
         Array[File] nonOptionalReferenceGenomeArray = select_first([referenceGenomeArray, []])
 
+        call splitGTFByChromosome {
+            input:
+                referenceAnnotation_full = referenceAnnotation_full,
+                main_chromosomes = main_chromosomes,
+                docker = docker,
+                memoryGB = memoryGB,
+                diskSizeGB = diskSizeGB
+        }
+
         scatter (j in range(length(nonOptionalInputBAMArray))) {
             call lraaPerChromosome as lraaPerChromosomeArray {
                 input:
@@ -206,7 +244,7 @@ workflow lraaWorkflow {
                     numThreads = numThreads,
                     LRAA_no_norm = LRAA_no_norm,
                     LRAA_min_mapping_quality = LRAA_min_mapping_quality,
-                    referenceAnnotation_full = referenceAnnotation_full,
+                    referenceAnnotation_full = splitGTFByChromosome.chromosomeGTFs[j],
                     memoryGB = memoryGB,
                     diskSizeGB = diskSizeGB
             }
