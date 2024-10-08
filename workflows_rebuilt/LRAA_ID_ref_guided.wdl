@@ -172,13 +172,14 @@ workflow lraaWorkflow {
     if (defined(inputBAMArray) && defined(referenceGenomeArray)) {
         Array[File] nonOptionalInputBAMArray = select_first([inputBAMArray, []])
         Array[File] nonOptionalReferenceGenomeArray = select_first([referenceGenomeArray, []])
+        Array[File] nonOptionalChromosomeGTFs = select_first([splitBAMAndGTFByChromosome.chromosomeGTFs, []])
 
         scatter (j in range(length(nonOptionalInputBAMArray))) {
             call lraaPerChromosome as lraaPerChromosomeArray {
                 input:
                     inputBAM = nonOptionalInputBAMArray[j],
                     referenceGenome = nonOptionalReferenceGenomeArray[j],
-                    referenceAnnotation_reduced = splitBAMAndGTFByChromosome.chromosomeGTFs[j],
+                    referenceAnnotation_reduced = nonOptionalChromosomeGTFs[j],
                     OutDir = OutDir,
                     docker = docker,
                     numThreads = numThreads,
