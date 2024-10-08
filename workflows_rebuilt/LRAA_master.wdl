@@ -18,7 +18,7 @@ workflow CombinedWorkflow {
         Int? LRAA_min_mapping_quality = 0
     }
 
-    Int diskSizeGB = 1024
+    Int diskSizeGB = 128
     String dockerImage = "us-central1-docker.pkg.dev/methods-dev-lab/lraa/lraa:latest"
     String outputDir = "LRAA_out"
 
