@@ -6,6 +6,7 @@ task splitBAMAndGTFByChromosome {
         String main_chromosomes
         String docker
         Int numThreads
+        File referenceGenome
         File referenceAnnotation_reduced
         Int memoryGB
         Int diskSizeGB
