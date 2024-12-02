@@ -5,7 +5,7 @@ task splitBAMByChromosome {
         File inputBAM
         String main_chromosomes
         String docker
-        Int threads
+        Int numThreads
         File referenceGenome
         Int memoryGB
         Int diskSizeGB
@@ -19,11 +19,11 @@ task splitBAMByChromosome {
         mkdir -p split_bams
         
         if [ ! -f "~{inputBAM}.bai" ]; then
-            samtools index -@ ~{threads} ~{inputBAM}
+            samtools index -@ ~{numThreads} ~{inputBAM}
         fi
         
         for chr in ~{main_chromosomes}; do
-            samtools view -@ ~{threads} -b ~{inputBAM} $chr > split_bams/$chr.bam
+            samtools view -@ ~{numThreads} -b ~{inputBAM} $chr > split_bams/$chr.bam
             samtools faidx ~{referenceGenome} $chr > split_bams/$chr.genome.fasta
         done
     >>>
@@ -141,7 +141,7 @@ workflow lraaWorkflow {
                 inputBAM = nonOptionalInputBAM,
                 main_chromosomes = main_chromosomes,
                 docker = docker,
-                threads = numThreads,
+                numThreads = numThreads,
                 referenceGenome = referenceGenome,
                 memoryGB = memoryGB,
                 diskSizeGB = diskSizeGB
