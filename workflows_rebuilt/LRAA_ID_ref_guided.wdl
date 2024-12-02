@@ -5,8 +5,7 @@ task splitBAMAndGTFByChromosome {
         File inputBAM
         String main_chromosomes
         String docker
-        Int threads
-        File referenceGenome
+        Int numThreads
         File referenceAnnotation_reduced
         Int memoryGB
         Int diskSizeGB
@@ -21,11 +20,11 @@ task splitBAMAndGTFByChromosome {
         mkdir -p split_gtfs
         
         if [ ! -f "~{inputBAM}.bai" ]; then
-            samtools index -@ ~{threads} ~{inputBAM}
+            samtools index -@ ~{numThreads} ~{inputBAM}
         fi
         
         for chr in ~{main_chromosomes}; do
-            samtools view -@ ~{threads} -b ~{inputBAM} $chr > split_bams/$chr.bam
+            samtools view -@ ~{numThreads} -b ~{inputBAM} $chr > split_bams/$chr.bam
             samtools faidx ~{referenceGenome} $chr > split_bams/$chr.genome.fasta
             cat ~{referenceAnnotation_reduced} | awk -v chr=$chr '$1 == chr' > split_gtfs/$chr.gtf
         done
@@ -147,7 +146,7 @@ workflow lraaWorkflow {
                 inputBAM = nonOptionalInputBAM,
                 main_chromosomes = main_chromosomes,
                 docker = docker,
-                threads = numThreads,
+                numThreads = numThreads,
                 referenceGenome = referenceGenome,
                 referenceAnnotation_reduced = referenceAnnotation_reduced,
                 memoryGB = memoryGB,
