@@ -1,6 +1,6 @@
 version 1.0
 
-# This task uses LRAA latest version
+# This task uses LRAA version 0.2.4
 task lraaTask {
     input {
         File inputBAM
