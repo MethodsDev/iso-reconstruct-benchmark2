@@ -6,10 +6,18 @@ WORKDIR /usr/src/app
 
 # Install necessary packages in one command
 RUN conda install -c defaults -c bioconda -c conda-forge \
-    perl=5.26.2 \
+    python=3.9 \
+    perl \
     libgcc-ng \
-    hmmer \
-    samtools
+    hmmer=3.3.2 \
+    samtools=1.11 \
+    && conda clean -a -y
+
+# Install cpanminus
+RUN apt-get update && apt-get install -y cpanminus
+
+# Install the latest version of Storable Perl module
+RUN cpanm --notest Storable
 
 # Download and install ucsc-faToTwoBit from source
 RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/faToTwoBit && \
@@ -46,3 +54,10 @@ RUN chmod -R 755 espresso
 
 # Set PATH
 ENV PATH /usr/local/bin:$PATH
+
+# Verify installations
+RUN perl -e 'use threads; print("Perl threading support: ok\n")' && \
+    perl -e 'use Storable; print("Storable version: $Storable::VERSION\n")' && \
+    hmmscan -h && \
+    blastn -version && \
+    samtools --version
