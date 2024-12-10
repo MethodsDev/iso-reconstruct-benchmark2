@@ -1,6 +1,6 @@
 version 1.0
 
-# This task uses ESPRESSO version 1.4.0
+# This task uses ESPRESSO version 1.5.0
 task espressoTask {
     input {
         File inputBAM
