@@ -31,7 +31,7 @@ task espressoTask {
         mkdir -p ESPRESSO_out/ID
         echo -e "input.sam\tespresso" > ESPRESSO_out/ID/~{samples_filename}
         
-        if [[ "~{referenceAnnotation_reduced}" != "" && ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both"]]; then
+        if [[ "~{referenceAnnotation_reduced}" != "" && ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") ]]; then
             perl /opt/conda/envs/espresso_env/bin/ESPRESSO_S.pl --sort_buffer_size ~{memoryGB} -L ESPRESSO_out/ID/~{samples_filename} -F ~{referenceGenome} -A ~{referenceAnnotation_reduced} -O ESPRESSO_out/ID -T ~{numThreads}
             perl /opt/conda/envs/espresso_env/bin/ESPRESSO_C.pl --sort_buffer_size ~{memoryGB} -I ESPRESSO_out/ID -F ~{referenceGenome} -X 0 -T ~{numThreads}
             perl /opt/conda/envs/espresso_env/bin/ESPRESSO_Q.pl -L ESPRESSO_out/ID/espresso_samples.tsv.updated -A ~{referenceAnnotation_reduced} -T ~{numThreads}            
@@ -42,7 +42,7 @@ task espressoTask {
     >>>
 
     output {
-        File? espressoCounts = "~{OutDir}/Quant/ESPRESSO_quant.txt"
+        File? espressoCounts = "~{OutDir}/ID/ESPRESSO_quant.txt"
         File? espressoReducedGTF = "~{OutDir}/ID/ESPRESSO_reduced.gtf"
         File monitoringLog = "monitoring.log"
     }
