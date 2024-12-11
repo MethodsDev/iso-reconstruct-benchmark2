@@ -1,59 +1,24 @@
 # Use miniconda3 as base image
 FROM continuumio/miniconda3
 
+# Install mamba
+RUN conda install -c conda-forge mamba -y && conda clean -a -y
+
+# Create a new environment and install ESPRESSO
+RUN mamba create -n espresso_env -c bioconda -c conda-forge espresso=1.5.0-0 && \
+    conda clean -a -y
+
+# Activate the environment and set it as the default
+SHELL ["conda", "run", "-n", "espresso_env", "/bin/bash", "-c"]
+
 # Set the working directory
 WORKDIR /usr/src/app
 
-# Install necessary packages in one command
-RUN conda install -c defaults -c bioconda -c conda-forge \
-    python=3.9 \
-    perl \
-    libgcc-ng \
-    hmmer=3.3.2 \
-    samtools=1.11 \
-    && conda clean -a -y
+# Copy the ESPRESSO repository (if needed)
+# RUN git clone https://github.com/Xinglab/espresso.git
 
-# Install cpanminus
-RUN apt-get update && apt-get install -y cpanminus
-
-# Install the latest version of Storable Perl module
-RUN cpanm --notest Storable
-
-# Download and install ucsc-faToTwoBit from source
-RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/faToTwoBit && \
-    chmod +x faToTwoBit && \
-    mv faToTwoBit /usr/local/bin/
-
-# Update GPG keys and install necessary tools for building from source
-RUN apt-get clean && \
-    apt-get update && \
-    apt-get install -y gnupg build-essential wget git && \
-    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 04EE7237B7D453EC 648ACFD622F3D138
-
-# Download and install ucsc-bedgraphtobigwig from source
-RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bedGraphToBigWig && \
-    chmod +x bedGraphToBigWig && \
-    mv bedGraphToBigWig /usr/local/bin/
-
-# Download and install minimap2 from source
-RUN wget https://github.com/lh3/minimap2/releases/download/v2.22/minimap2-2.22_x64-linux.tar.bz2 && \
-    tar -xvf minimap2-2.22_x64-linux.tar.bz2 && \
-    mv minimap2-2.22_x64-linux/minimap2 /usr/local/bin/
-
-# Download and install a specific version of BLAST
-RUN wget https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.11.0/ncbi-blast-2.11.0+-x64-linux.tar.gz -O blast.tar.gz && \
-    tar -zxvf blast.tar.gz && \
-    mv ncbi-blast-2.11.0+ /usr/local/ && \
-    ln -s /usr/local/ncbi-blast-2.11.0+/bin/* /usr/local/bin/
-
-# Clone the Espresso repository
-RUN git clone https://github.com/Xinglab/espresso.git
-
-# Set the appropriate permissions
-RUN chmod -R 755 espresso
-
-# Set PATH
-ENV PATH /usr/local/bin:$PATH
+# Set the PATH to include the conda environment
+ENV PATH /opt/conda/envs/espresso_env/bin:$PATH
 
 # Verify installations
 RUN perl -e 'use threads; print("Perl threading support: ok\n")' && \
@@ -61,3 +26,6 @@ RUN perl -e 'use threads; print("Perl threading support: ok\n")' && \
     hmmscan -h && \
     blastn -version && \
     samtools --version
+
+# Set the entrypoint to bash
+ENTRYPOINT ["/bin/bash"]
