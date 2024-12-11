@@ -24,8 +24,10 @@ task espressoTask {
 
     command <<<
         bash ~{monitoringScript} > monitoring.log &
+
+        conda activate espresso_env
         mkdir -p ESPRESSO_out
-        
+
         samtools view -h -o input.sam ~{inputBAM}
         
         mkdir -p ESPRESSO_out/ID
