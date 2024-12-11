@@ -47,8 +47,8 @@ task flairTask {
                 -r "~{flairPrefix}_temp.fastq" \
                 -q "~{flairPrefix}_all_corrected.bed" \
                 -o ~{flairPrefix} \
-                -t ~{numThreads} \
-                --stringent --check_splice --generate_map --annotation_reliant generate
+                -t ~{numThreads} #\
+       #         --stringent --check_splice --generate_map --annotation_reliant generate
 
                 mv Flair.isoforms.gtf Flair_reduced.gtf
             fi
