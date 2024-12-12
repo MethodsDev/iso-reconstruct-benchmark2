@@ -15,7 +15,7 @@ task flairTask {
         Int numThreads = 16
         Int memoryGB = 128
         Int diskSizeGB = 2024
-        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/flair@sha256:0e677e58a0cc5c43c25c669c0722d3770c553693698d041fe1f87339b2597732"
+        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/flair:latest"
         File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
     }
 
