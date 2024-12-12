@@ -25,7 +25,11 @@ task espressoTask {
     command <<<
         bash ~{monitoringScript} > monitoring.log &
         mkdir -p ESPRESSO_out
+        mkdir -p ESPRESSO_out/ID
+
+        samtools view -h -o input.sam ~{inputBAM}
         
+        echo -e "input.sam\tespresso" > ESPRESSO_out/ID/~{samples_filename}
         mkdir -p ESPRESSO_out/ID
         echo -e "input.sam\tespresso" > ESPRESSO_out/ID/~{samples_filename}
         
