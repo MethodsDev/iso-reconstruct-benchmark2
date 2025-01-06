@@ -77,6 +77,18 @@ EOF
                 
                 mv ~{OutDir}/ID_reffree/Bambu.gtf  ~{OutDir}/Bambu.gtf
 
+                Rscript -<< EOF
+                library(bambu)
+                test.bam <- "~{inputBAM}"
+                fa.file <- "~{referenceGenome}"
+                gtf.file <- "~{OutDir}/Bambu.gtf"
+                se.quantOnly <- bambu(reads = test.bam, annotations = gtf.file, genome = fa.file, discovery = FALSE)
+                writeBambuOutput(se.quantOnly, path = "~{OutDir}/Quant_ReffreeGTF")
+EOF
+                mv ~{OutDir}/Quant_ReffreeGTF/counts_transcript.txt ~{OutDir}/bambuGTFCounts.txt
+
+
+
             else
                 Rscript -<< EOF
                 library(bambu)
@@ -87,6 +99,18 @@ EOF
 EOF
                 
                 mv ~{OutDir}/ID_reffree/Bambu.gtf  ~{OutDir}/Bambu.gtf
+
+                Rscript -<< EOF
+                library(bambu)
+                test.bam <- "~{inputBAM}"
+                fa.file <- "~{referenceGenome}"
+                gtf.file <- "~{OutDir}/Bambu.gtf"
+                se.quantOnly <- bambu(reads = test.bam, annotations = gtf.file, genome = fa.file, discovery = FALSE)
+                writeBambuOutput(se.quantOnly, path = "~{OutDir}/Quant_ReffreeGTF")
+EOF
+                mv ~{OutDir}/Quant_ReffreeGTF/counts_transcript.txt ~{OutDir}/bambuGTFCounts.txt
+
+
             fi
         fi
 
