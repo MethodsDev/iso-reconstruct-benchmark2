@@ -180,5 +180,8 @@ workflow bambuWorkflow {
         File? bambuGTF = bambuTask.bambuGTF
         File? bambuCounts = bambuTask.bambuCounts
         File monitoringLog = bambuTask.monitoringLog
+        File? bambuReducedGTFCounts = bambuTask.bambuReducedGTFCounts
+        File? bambuNDR1ReducedGTFCounts = bambuTask.bambuNDR1ReducedGTFCounts
+        File? bambuGTFCounts = bambuTask.bambuGTFCounts
     }
 }
