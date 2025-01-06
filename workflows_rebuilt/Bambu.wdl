@@ -112,8 +112,8 @@ EOF
         File? bambuCounts = "~{OutDir}/Bambu_quant.txt"
         File monitoringLog = "monitoring.log"
         File? bambuReducedGTFCounts = "~{OutDir}/ID_reduced/bambuReducedGTFCounts.txt"
-        File? bambuNDR1ReducedGTFCounts = "~{OutDir}/ID_ndr1_reduced/expressed_annotations.gtf.counts"
-        File? bambuGTFCounts = "~{OutDir}/Bambu.gtf"
+        File? bambuNDR1ReducedGTFCounts = "~{OutDir}/ID_ndr1_reduced/bambuNDR1ReducedGTFCounts.txt"
+        File? bambuGTFCounts = "~{OutDir}/bambuGTFCounts.txt"
     }
 
     runtime {
