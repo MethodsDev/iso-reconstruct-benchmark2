@@ -43,13 +43,28 @@ task mandalorionTask {
                 -t ~{numThreads}
                 
                 if [ -f ~{OutDir}/Isoforms.filtered.clean.gtf ]; then
-                    mv ~{OutDir}/Isoforms.filtered.clean.gtf ~{OutDir}/Mandalorion_reduced.gtf             
+                    mv ~{OutDir}/Isoforms.filtered.clean.gtf ~{OutDir}/Mandalorion_reduced.gtf
+                    mv ~{OutDir}/Isoforms.filtered.clean.quant ~{OutDir}/mandalorionReducedGTFCounts.txt
                 fi
             fi
             mv ~{OutDir}_reffree/Isoforms.filtered.clean.gtf ~{OutDir}/Mandalorion.gtf 
-            if [ -d ~{OutDir}_reffree ]; then
-                rm -r ~{OutDir}_reffree        
-            fi
+            mv ~{OutDir}_reffree/Isoforms.filtered.clean.quant ~{OutDir}/mandalorionGTFCounts.txt
+
+    #        if [ -d ~{OutDir}_reffree ]; then
+    #            rm -r ~{OutDir}_reffree        
+    #        fi
+
+        if [ "~{ID_or_Quant_or_Both}" = "Quant" ] || [ "~{ID_or_Quant_or_Both}" = "Both" ]; then
+            python3 /usr/local/src/Mandalorion/Mando.py \
+            -G ~{referenceGenome} \
+            -g ~{referenceAnnotation_full} \
+            -f ~{OutDir}/samtools.bam2fq.fastq \
+            -p ~{OutDir}_Quant \
+            -t ~{numThreads}
+            mv ~{OutDir}_Quant/Isoforms.filtered.clean.gtf ~{OutDir}/mandalorionFullGTF.gtf
+            mv ~{OutDir}_Quant/Isoforms.filtered.clean.quant ~{OutDir}/mandalorionCounts.txt
+        fi
+
         fi
     >>>
 
@@ -57,6 +72,10 @@ task mandalorionTask {
         File? mandalorionReducedGTF = "~{OutDir}/Mandalorion_reduced.gtf"
         File? mandalorionGTF = "~{OutDir}/Mandalorion.gtf"
         File monitoringLog = "monitoring.log"
+        File? mandalorionReducedGTFCounts = "~{OutDir}/mandalorionReducedGTFCounts.txt"
+        File? mandalorionGTFCounts = "~{OutDir}/mandalorionGTFCounts.txt"
+        File? mandalorionFullGTF = "~{OutDir}/mandalorionFullGTF.gtf"
+        File? mandalorionCounts = "~{OutDir}/mandalorionCounts.txt"
     }
 
     runtime {
@@ -96,5 +115,9 @@ workflow mandalorionWorkflow {
         File? mandalorionGTF = mandalorionTask.mandalorionGTF
         File? mandalorionReducedGTF = mandalorionTask.mandalorionReducedGTF
         File monitoringLog = mandalorionTask.monitoringLog
+        File? mandalorionReducedGTFCounts = mandalorionTask.mandalorionReducedGTFCounts
+        File? mandalorionGTFCounts = mandalorionTask.mandalorionGTFCounts
+        File? mandalorionCounts = mandalorionTask.mandalorionCounts
+        File? mandalorionFullGTF = mandalorionTask.mandalorionFullGTF
     }
 }
