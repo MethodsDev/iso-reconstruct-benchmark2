@@ -153,7 +153,7 @@ EOF
         File monitoringLog = "monitoring.log"
         File? flamesReducedGTFCounts = "~{OutDir}/flamesReducedGTFCounts.csv"
         File? flamesFullGTF = "~{OutDir}_Quant/flamesFullGTF.gff3"
-        File? flamesCounts = "~{OutDir}/flamesCounts.csv"
+        File? flamesCounts = "~{OutDir}_Quant/flamesCounts.csv"
 
     }
 
