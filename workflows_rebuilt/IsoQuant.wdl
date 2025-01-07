@@ -37,7 +37,7 @@ task isoquantTask {
             --output ~{OutDir}/ID_reffree
             
             mv ~{OutDir}/ID_reffree/OUT/OUT.transcript_models.gtf ~{OutDir}/IsoQuant.gtf
-            mv ~{OutDir}/ID_reffree/OUT/transcript_model_counts.tsv ~{OutDir}/isoquantGTFCounts.tsv
+            mv ~{OutDir}/ID_reffree/OUT/OUT.transcript_model_counts.tsv ~{OutDir}/isoquantGTFCounts.tsv
 
 
 
@@ -52,7 +52,7 @@ task isoquantTask {
                 --output ~{OutDir}/ID_reduced
                 
             mv ~{OutDir}/ID_reduced/OUT/OUT.transcript_models.gtf ~{OutDir}/IsoQuant_reduced.gtf                              
-            mv ~{OutDir}/ID_reduced/OUT/transcript_model_counts.tsv ~{OutDir}/isoquantReducedGTFCounts.tsv
+            mv ~{OutDir}/ID_reduced/OUT/OUT.transcript_model_counts.tsv ~{OutDir}/isoquantReducedGTFCounts.tsv
             fi
         fi
 
