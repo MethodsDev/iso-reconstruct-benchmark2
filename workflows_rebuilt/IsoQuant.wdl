@@ -37,7 +37,11 @@ task isoquantTask {
             --output ~{OutDir}/ID_reffree
             
             mv ~{OutDir}/ID_reffree/OUT/OUT.transcript_models.gtf ~{OutDir}/IsoQuant.gtf
-            
+            mv ~{OutDir}/ID_reffree/OUT/transcript_model_counts.tsv ~{OutDir}/isoquantGTFCounts.tsv
+
+
+
+
             if [ -f ~{referenceAnnotation_reduced} ]; then
                 /usr/local/src/IsoQuant/isoquant.py \
                 --reference ~{referenceGenome} \
@@ -48,7 +52,7 @@ task isoquantTask {
                 --output ~{OutDir}/ID_reduced
                 
             mv ~{OutDir}/ID_reduced/OUT/OUT.transcript_models.gtf ~{OutDir}/IsoQuant_reduced.gtf                              
-            
+            mv ~{OutDir}/ID_reduced/OUT/transcript_model_counts.tsv ~{OutDir}/isoquantReducedGTFCounts.tsv
             fi
         fi
 
@@ -119,6 +123,8 @@ task isoquantTask {
         File? isoquantCounts_OUT = "IsoQuant_OUT.tar.gz"
         File? isoquantCounts_with_polyA_OUT = "IsoQuant_OUT_with_polyA.tar.gz"
         File monitoringLog = "monitoring.log"
+        File? isoquantReducedGTFCounts = "~{OutDir}/isoquantReducedGTFCounts.tsv"
+        File? isoquantGTFCounts = "~{OutDir}/isoquantGTFCounts.tsv"
     }
 
     runtime {
@@ -166,8 +172,10 @@ workflow isoquantWorkflow {
         File? isoquantGTF_with_polyA = isoquantTask.isoquantGTF_with_polyA
         File? isoquantReducedGTF_with_polyA = isoquantTask.isoquantReducedGTF_with_polyA
         File? isoquantCounts_with_polyA = isoquantTask.isoquantCounts_with_polyA
-        File monitoringLog = isoquantTask.monitoringLog
         File? isoquantCounts_OUT = isoquantTask.isoquantCounts_OUT
         File? isoquantCounts_with_polyA_OUT = isoquantTask.isoquantCounts_with_polyA_OUT
+        File monitoringLog = isoquantTask.monitoringLog
+        File? isoquantReducedGTFCounts = isoquantTask.isoquantReducedGTFCounts
+        File? isoquantGTFCounts = isoquantTask.isoquantGTFCounts
     }
 }
