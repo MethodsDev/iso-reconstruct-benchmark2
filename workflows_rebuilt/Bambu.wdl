@@ -49,7 +49,7 @@ EOF
 
                 awk ' $3 >= 1 ' ~{OutDir}/ID_reduced/counts_transcript.txt | sort -k3,3n > ~{OutDir}/ID_reduced/expressed_annotations.gtf.counts
                 cut -f1 ~{OutDir}/ID_reduced/expressed_annotations.gtf.counts > ~{OutDir}/ID_reduced/expressed_transcripts.txt
-                grep -Ff ~{OutDir}/ID_reduced/expressed_transcripts.txt ~{OutDir}/ID_reduced/extended_annotations.gtf > ~{OutDir}/Bambu_reduced.gtf
+                grep -Ff ~{OutDir}/ID_reduced/expressed_transcripts.txt ~{OutDir}/ID_reduced/extended_annotations.gtf > ~{OutDir}/bambuReducedGTF.gtf
                 mv ~{OutDir}/ID_reduced/expressed_annotations.gtf.counts ~{OutDir}/bambuReducedGTFCounts.txt
 
                 Rscript -<< EOF
@@ -64,7 +64,7 @@ EOF
 
                 awk ' $3 >= 1 ' ~{OutDir}/ID_ndr1_reduced/counts_transcript.txt | sort -k3,3n > ~{OutDir}/ID_ndr1_reduced/expressed_annotations.gtf.counts
                 cut -f1 ~{OutDir}/ID_ndr1_reduced/expressed_annotations.gtf.counts > ~{OutDir}/ID_ndr1_reduced/expressed_transcripts.txt
-                grep -Ff ~{OutDir}/ID_ndr1_reduced/expressed_transcripts.txt ~{OutDir}/ID_ndr1_reduced/extended_annotations.gtf > ~{OutDir}/Bambu_ndr1_reduced.gtf
+                grep -Ff ~{OutDir}/ID_ndr1_reduced/expressed_transcripts.txt ~{OutDir}/ID_ndr1_reduced/extended_annotations.gtf > ~{OutDir}/bambuNDR1ReducedGTF.gtf
                 mv ~{OutDir}/ID_ndr1_reduced/expressed_annotations.gtf.counts ~{OutDir}/bambuNDR1ReducedGTFCounts.txt
 
                 Rscript -<< EOF
@@ -72,16 +72,16 @@ EOF
                 fa.file <- "~{referenceGenome}"
                 lr.bam <- "~{inputBAM}"
                 lr.se <- bambu(reads = lr.bam, rcOutDir = '~{OutDir}/ID_reffree', annotations = NULL, genome = fa.file, quant = FALSE, NDR = 1, ncore = ~{numThreads})
-                writeToGTF(lr.se, "~{OutDir}/ID_reffree/Bambu.gtf")
+                writeToGTF(lr.se, "~{OutDir}/ID_reffree/bambuGTF.gtf")
 EOF
                 
-                mv ~{OutDir}/ID_reffree/Bambu.gtf  ~{OutDir}/Bambu.gtf
+                mv ~{OutDir}/ID_reffree/bambuGTF.gtf  ~{OutDir}/bambuGTF.gtf
 
                 Rscript -<< EOF
                 library(bambu)
                 test.bam <- "~{inputBAM}"
                 fa.file <- "~{referenceGenome}"
-                gtf.file <- "~{OutDir}/Bambu.gtf"
+                gtf.file <- "~{OutDir}/bambuGTF.gtf"
                 se.quantOnly <- bambu(reads = test.bam, annotations = gtf.file, genome = fa.file, discovery = FALSE)
                 writeBambuOutput(se.quantOnly, path = "~{OutDir}/Quant_ReffreeGTF")
 EOF
@@ -95,16 +95,16 @@ EOF
                 fa.file <- "~{referenceGenome}"
                 lr.bam <- "~{inputBAM}"
                 lr.se <- bambu(reads = lr.bam, rcOutDir = '~{OutDir}/ID_reffree', annotations = NULL, genome = fa.file, quant = FALSE, NDR = 1, ncore = ~{numThreads})
-                writeToGTF(lr.se, "~{OutDir}/ID_reffree/Bambu.gtf")
+                writeToGTF(lr.se, "~{OutDir}/ID_reffree/bambuGTF.gtf")
 EOF
                 
-                mv ~{OutDir}/ID_reffree/Bambu.gtf  ~{OutDir}/Bambu.gtf
+                mv ~{OutDir}/ID_reffree/bambuGTF.gtf  ~{OutDir}/bambuGTF.gtf
 
                 Rscript -<< EOF
                 library(bambu)
                 test.bam <- "~{inputBAM}"
                 fa.file <- "~{referenceGenome}"
-                gtf.file <- "~{OutDir}/Bambu.gtf"
+                gtf.file <- "~{OutDir}/bambuGTF.gtf"
                 se.quantOnly <- bambu(reads = test.bam, annotations = gtf.file, genome = fa.file, discovery = FALSE)
                 writeBambuOutput(se.quantOnly, path = "~{OutDir}/Quant_ReffreeGTF")
 EOF
@@ -124,16 +124,16 @@ EOF
             writeBambuOutput(se.quantOnly, path = "~{OutDir}/Quant")
 EOF
 
-            mv ~{OutDir}/Quant/counts_transcript.txt ~{OutDir}/Bambu_quant.txt
+            mv ~{OutDir}/Quant/counts_transcript.txt ~{OutDir}/bambuCounts.txt
         fi
 
     >>>
 
     output {
-        File? bambuReducedGTF = "~{OutDir}/Bambu_reduced.gtf"
-        File? bambuNDR1ReducedGTF = "~{OutDir}/Bambu_ndr1_reduced.gtf"
-        File? bambuGTF = "~{OutDir}/Bambu.gtf"
-        File? bambuCounts = "~{OutDir}/Bambu_quant.txt"
+        File? bambuReducedGTF = "~{OutDir}/bambuReducedGTF.gtf"
+        File? bambuNDR1ReducedGTF = "~{OutDir}/bambuNDR1ReducedGTF.gtf"
+        File? bambuGTF = "~{OutDir}/bambuGTF.gtf"
+        File? bambuCounts = "~{OutDir}/bambuCounts.txt"
         File monitoringLog = "monitoring.log"
         File? bambuReducedGTFCounts = "~{OutDir}/bambuReducedGTFCounts.txt"
         File? bambuNDR1ReducedGTFCounts = "~{OutDir}/bambuNDR1ReducedGTFCounts.txt"
