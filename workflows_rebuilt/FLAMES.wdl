@@ -134,7 +134,7 @@ EOF
         if [ "~{ID_or_Quant_or_Both}" = "Quant" -o "~{ID_or_Quant_or_Both}" = "Both" ] && [ -n "~{referenceAnnotation_full}" ]; then
 
             python3 /usr/local/src/FLAMES/python/bulk_long_pipeline.py \
-            --gff3 ~{referenceAnnotation_reduced} \
+            --gff3 ~{referenceAnnotation_full} \
             --genomefa ~{referenceGenome} \
             --fq_dir ~{OutDir}/fq \
             --inbam ~{inputBAM} \
