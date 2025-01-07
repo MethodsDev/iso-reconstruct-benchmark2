@@ -118,11 +118,11 @@ task isoquantTask {
         File? isoquantReducedGTF = "~{OutDir}/isoquantReducedGTF.gtf"
         File? isoquantCounts = "~{OutDir}/isoquantCounts.tsv"
 
-#        File? isoquantGTF_with_polyA = "~{OutDir}/IsoQuant_with_polyA.gtf"
-#        File? isoquantReducedGTF_with_polyA = "~{OutDir}/IsoQuant_reduced_with_polyA.gtf"
-#        File? isoquantCounts_with_polyA = "~{OutDir}/IsoQuant_quant_with_polyA.tsv"
-#        File? isoquantCounts_OUT = "IsoQuant_OUT.tar.gz"
-#        File? isoquantCounts_with_polyA_OUT = "IsoQuant_OUT_with_polyA.tar.gz"
+        File? isoquantGTF_with_polyA = "~{OutDir}/IsoQuant_with_polyA.gtf"
+        File? isoquantReducedGTF_with_polyA = "~{OutDir}/IsoQuant_reduced_with_polyA.gtf"
+        File? isoquantCounts_with_polyA = "~{OutDir}/IsoQuant_quant_with_polyA.tsv"
+        File? isoquantCounts_OUT = "IsoQuant_OUT.tar.gz"
+        File? isoquantCounts_with_polyA_OUT = "IsoQuant_OUT_with_polyA.tar.gz"
 
         File monitoringLog = "monitoring.log"
         File? isoquantReducedGTFCounts = "~{OutDir}/isoquantReducedGTFCounts.tsv"
