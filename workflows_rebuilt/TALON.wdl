@@ -39,15 +39,16 @@ task talonTask {
                 talon_create_GTF --build ~{datasetName} --db "~{datasetName}.db" -a ~{datasetName} --o ~{talonPrefix} --whitelist "~{talonPrefix}_filter"
                 talon_abundance --db "~{datasetName}.db" --whitelist "~{talonPrefix}_filter" --o ~{talonPrefix}_Quant --build ~{datasetName} -a ~{datasetName}
                 ls -l
-                mv TALON_talon.gtf TALON_reduced.gtf
-#                mv TALON_Quant_talon.tsv 
+                mv TALON_talon.gtf talonReducedGTF.gtf
+                mv TALON_Quant_talon_abundance_filtered.tsv talonReducedGTFCounts.tsv
             fi
         fi
     >>>
 
     output {
-        File? talonReducedGTF = "TALON_out/TALON_reduced.gtf"
+        File? talonReducedGTF = "TALON_out/talonReducedGTF.gtf"
         File monitoringLog = "monitoring.log"
+        File? talonReducedGTFCounts = "TALON_out/talonReducedGTFCounts.tsv"
     }
 
     runtime {
