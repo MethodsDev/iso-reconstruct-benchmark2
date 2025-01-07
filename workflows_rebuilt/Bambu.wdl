@@ -50,7 +50,7 @@ EOF
                 awk ' $3 >= 1 ' ~{OutDir}/ID_reduced/counts_transcript.txt | sort -k3,3n > ~{OutDir}/ID_reduced/expressed_annotations.gtf.counts
                 cut -f1 ~{OutDir}/ID_reduced/expressed_annotations.gtf.counts > ~{OutDir}/ID_reduced/expressed_transcripts.txt
                 grep -Ff ~{OutDir}/ID_reduced/expressed_transcripts.txt ~{OutDir}/ID_reduced/extended_annotations.gtf > ~{OutDir}/Bambu_reduced.gtf
-                mv ~{OutDir}/ID_reduced/expressed_annotations.gtf.counts ~{OutDir}/ID_reduced/bambuReducedGTFCounts.txt
+                mv ~{OutDir}/ID_reduced/expressed_annotations.gtf.counts ~{OutDir}/bambuReducedGTFCounts.txt
 
                 Rscript -<< EOF
                 library(bambu)
@@ -65,7 +65,7 @@ EOF
                 awk ' $3 >= 1 ' ~{OutDir}/ID_ndr1_reduced/counts_transcript.txt | sort -k3,3n > ~{OutDir}/ID_ndr1_reduced/expressed_annotations.gtf.counts
                 cut -f1 ~{OutDir}/ID_ndr1_reduced/expressed_annotations.gtf.counts > ~{OutDir}/ID_ndr1_reduced/expressed_transcripts.txt
                 grep -Ff ~{OutDir}/ID_ndr1_reduced/expressed_transcripts.txt ~{OutDir}/ID_ndr1_reduced/extended_annotations.gtf > ~{OutDir}/Bambu_ndr1_reduced.gtf
-                mv ~{OutDir}/ID_ndr1_reduced/expressed_annotations.gtf.counts ~{OutDir}/ID_ndr1_reduced/bambuNDR1ReducedGTFCounts.txt
+                mv ~{OutDir}/ID_ndr1_reduced/expressed_annotations.gtf.counts ~{OutDir}/bambuNDR1ReducedGTFCounts.txt
 
                 Rscript -<< EOF
                 library(bambu)
@@ -135,8 +135,8 @@ EOF
         File? bambuGTF = "~{OutDir}/Bambu.gtf"
         File? bambuCounts = "~{OutDir}/Bambu_quant.txt"
         File monitoringLog = "monitoring.log"
-        File? bambuReducedGTFCounts = "~{OutDir}/ID_reduced/bambuReducedGTFCounts.txt"
-        File? bambuNDR1ReducedGTFCounts = "~{OutDir}/ID_ndr1_reduced/bambuNDR1ReducedGTFCounts.txt"
+        File? bambuReducedGTFCounts = "~{OutDir}/bambuReducedGTFCounts.txt"
+        File? bambuNDR1ReducedGTFCounts = "~{OutDir}/bambuNDR1ReducedGTFCounts.txt"
         File? bambuGTFCounts = "~{OutDir}/bambuGTFCounts.txt"
     }
 
