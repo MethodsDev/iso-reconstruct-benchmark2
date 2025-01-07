@@ -36,7 +36,7 @@ task isoquantTask {
             --threads ~{numThreads} \
             --output ~{OutDir}/ID_reffree
             
-            mv ~{OutDir}/ID_reffree/OUT/OUT.transcript_models.gtf ~{OutDir}/IsoQuant.gtf
+            mv ~{OutDir}/ID_reffree/OUT/OUT.transcript_models.gtf ~{OutDir}/isoquantGTF.gtf
             mv ~{OutDir}/ID_reffree/OUT/OUT.transcript_model_counts.tsv ~{OutDir}/isoquantGTFCounts.tsv
 
 
@@ -51,7 +51,7 @@ task isoquantTask {
                 --threads ~{numThreads} \
                 --output ~{OutDir}/ID_reduced
                 
-            mv ~{OutDir}/ID_reduced/OUT/OUT.transcript_models.gtf ~{OutDir}/IsoQuant_reduced.gtf                              
+            mv ~{OutDir}/ID_reduced/OUT/OUT.transcript_models.gtf ~{OutDir}/isoquantReducedGTF.gtf                              
             mv ~{OutDir}/ID_reduced/OUT/OUT.transcript_model_counts.tsv ~{OutDir}/isoquantReducedGTFCounts.tsv
             fi
         fi
@@ -66,7 +66,7 @@ task isoquantTask {
             --output ~{OutDir}/Quant \
             --no_model_construction
             
-            mv ~{OutDir}/Quant/OUT/OUT.transcript_counts.tsv ~{OutDir}/IsoQuant_quant.tsv
+            mv ~{OutDir}/Quant/OUT/OUT.transcript_counts.tsv ~{OutDir}/isoquantCounts.tsv
 #            tar -czf IsoQuant_OUT.tar.gz ~{OutDir}/Quant
 
         fi
@@ -114,14 +114,16 @@ task isoquantTask {
     >>>
 
     output {
-        File? isoquantGTF = "~{OutDir}/IsoQuant.gtf"
-        File? isoquantReducedGTF = "~{OutDir}/IsoQuant_reduced.gtf"
-        File? isoquantCounts = "~{OutDir}/IsoQuant_quant.tsv"
-        File? isoquantGTF_with_polyA = "~{OutDir}/IsoQuant_with_polyA.gtf"
-        File? isoquantReducedGTF_with_polyA = "~{OutDir}/IsoQuant_reduced_with_polyA.gtf"
-        File? isoquantCounts_with_polyA = "~{OutDir}/IsoQuant_quant_with_polyA.tsv"
-        File? isoquantCounts_OUT = "IsoQuant_OUT.tar.gz"
-        File? isoquantCounts_with_polyA_OUT = "IsoQuant_OUT_with_polyA.tar.gz"
+        File? isoquantGTF = "~{OutDir}/isoquantGTF.gtf"
+        File? isoquantReducedGTF = "~{OutDir}/isoquantReducedGTF.gtf"
+        File? isoquantCounts = "~{OutDir}/isoquantCounts.tsv"
+
+#        File? isoquantGTF_with_polyA = "~{OutDir}/IsoQuant_with_polyA.gtf"
+#        File? isoquantReducedGTF_with_polyA = "~{OutDir}/IsoQuant_reduced_with_polyA.gtf"
+#        File? isoquantCounts_with_polyA = "~{OutDir}/IsoQuant_quant_with_polyA.tsv"
+#        File? isoquantCounts_OUT = "IsoQuant_OUT.tar.gz"
+#        File? isoquantCounts_with_polyA_OUT = "IsoQuant_OUT_with_polyA.tar.gz"
+
         File monitoringLog = "monitoring.log"
         File? isoquantReducedGTFCounts = "~{OutDir}/isoquantReducedGTFCounts.tsv"
         File? isoquantGTFCounts = "~{OutDir}/isoquantGTFCounts.tsv"
