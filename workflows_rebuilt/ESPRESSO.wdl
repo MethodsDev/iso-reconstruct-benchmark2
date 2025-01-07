@@ -26,26 +26,43 @@ task espressoTask {
         bash ~{monitoringScript} > monitoring.log &
         mkdir -p ESPRESSO_out
         mkdir -p ESPRESSO_out/ID
+        mkdir -p ESPRESSO_out/Quant
 
         samtools view -h -o input.sam ~{inputBAM}
         
         echo -e "input.sam\tespresso" > ESPRESSO_out/ID/~{samples_filename}
         mkdir -p ESPRESSO_out/ID
         echo -e "input.sam\tespresso" > ESPRESSO_out/ID/~{samples_filename}
+
+        echo -e "input.sam\tespresso" > ESPRESSO_out/Quant/~{samples_filename}
+        mkdir -p ESPRESSO_out/Quant
+        echo -e "input.sam\tespresso" > ESPRESSO_out/Quant/~{samples_filename}
         
         if [[ "~{referenceAnnotation_reduced}" != "" && ("~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both") ]]; then
             perl /opt/conda/envs/espresso_env/bin/ESPRESSO_S.pl --sort_buffer_size ~{memoryGB} -L ESPRESSO_out/ID/~{samples_filename} -F ~{referenceGenome} -A ~{referenceAnnotation_reduced} -O ESPRESSO_out/ID -T ~{numThreads}
             perl /opt/conda/envs/espresso_env/bin/ESPRESSO_C.pl --sort_buffer_size ~{memoryGB} -I ESPRESSO_out/ID -F ~{referenceGenome} -X 0 -T ~{numThreads}
             perl /opt/conda/envs/espresso_env/bin/ESPRESSO_Q.pl -L ESPRESSO_out/ID/espresso_samples.tsv.updated -A ~{referenceAnnotation_reduced} -T ~{numThreads}            
             mv ESPRESSO_out/ID/espresso_samples_N2_R0_updated.gtf ESPRESSO_out/ID/ESPRESSO_reduced.gtf
-            mv ESPRESSO_out/ID/espresso_samples_N2_R0_abundance.esp ESPRESSO_out/ID/ESPRESSO_quant.txt
+            mv ESPRESSO_out/ID/espresso_samples_N2_R0_abundance.esp ESPRESSO_out/ID/espressoReducedGTFCounts.txt
         fi
-    
+
+
+        if [[("~{ID_or_Quant_or_Both}" == "Quant" || "~{ID_or_Quant_or_Both}" == "Both")]]; then
+            perl /opt/conda/envs/espresso_env/bin/ESPRESSO_S.pl --sort_buffer_size ~{memoryGB} -L ESPRESSO_out/Quant/~{samples_filename} -F ~{referenceGenome} -A ~{referenceAnnotation_full} -O ESPRESSO_out/Quant -T ~{numThreads}
+            perl /opt/conda/envs/espresso_env/bin/ESPRESSO_C.pl --sort_buffer_size ~{memoryGB} -I ESPRESSO_out/Quant -F ~{referenceGenome} -X 0 -T ~{numThreads}
+            perl /opt/conda/envs/espresso_env/bin/ESPRESSO_Q.pl -L ESPRESSO_out/Quant/espresso_samples.tsv.updated -A ~{referenceAnnotation_full} -T ~{numThreads}            
+            mv ESPRESSO_out/Quant/espresso_samples_N2_R0_updated.gtf ESPRESSO_out/Quant/espressoFullGTF.gtf
+            mv ESPRESSO_out/Quant/espresso_samples_N2_R0_abundance.esp ESPRESSO_out/Quant/espressoCounts.txt
+        fi
+
     >>>
 
     output {
-        File? espressoCounts = "~{OutDir}/ID/ESPRESSO_quant.txt"
+        File? espressoReducedGTFCounts = "~{OutDir}/ID/espressoReducedGTFCounts.txt"
         File? espressoReducedGTF = "~{OutDir}/ID/ESPRESSO_reduced.gtf"
+        File? espressoCounts = "~{OutDir}/Quant/espressoCounts.txt"
+        File? espressoFullGTF = "~{OutDir}/Quant/espressoFullGTF.gtf"
+
         File monitoringLog = "monitoring.log"
     }
 
@@ -83,8 +100,10 @@ workflow espressoWorkflow {
     }
 
     output {
-        File? espressoCounts = espressoTask.espressoCounts
+        File? espressoReducedGTFCounts = espressoTask.espressoReducedGTFCounts
         File? espressoReducedGTF = espressoTask.espressoReducedGTF
         File monitoringLog = espressoTask.monitoringLog
+        File? espressoCounts = espressoTask.espressoCounts
+        File? espressoFullGTF = espressoTask.espressoFullGTF
     }
 }
