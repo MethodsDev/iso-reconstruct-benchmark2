@@ -28,8 +28,7 @@ task flairTask {
         mkdir -p ~{OutDir}
         cd ~{OutDir}
         
-        samtools bam2fq ~{inputBAM} > "~{flairPrefix}_temp.fastq"
-
+        samtools bam2fq ~{inputBAM} > temp.fastq
         bam2Bed12 -i ~{inputBAM} > "~{flairPrefix}.bed"
 
         if [ "~{ID_or_Quant_or_Both}" = "ID" -o "~{ID_or_Quant_or_Both}" = "Both" ]; then
@@ -44,19 +43,31 @@ task flairTask {
                 flair collapse \
                 -g ~{referenceGenome} \
                 -f ~{referenceAnnotation_reduced} \
-                -r "~{flairPrefix}_temp.fastq" \
+                -r temp.fastq \
                 -q "~{flairPrefix}_all_corrected.bed" \
                 -o ~{flairPrefix} \
                 -t ~{numThreads} #\
        #         --stringent --check_splice --generate_map --annotation_reliant generate
 
-                mv Flair.isoforms.gtf Flair_reduced.gtf
+                mv Flair.isoforms.gtf flairReducedGTF.gtf
+
+
+                gffread flairReducedGTF.gtf -g ~{referenceGenome} -w transcriptome2.fa
+                sample2=("flair" "condition1" "batch1" "tmp.fastq")
+                manifest_filename2="flair_manifest2.tsv"
+    
+                for i in "${sample2[@]}"; do
+                    echo -e "$i\t\c" >> $manifest_filename2
+                done
+                echo "" >> $manifest_filename2
+
+                flair quantify -r $manifest_filename2 -i transcriptome2.fa -o ReducedQuant -t ~{numThreads}
+                mv ReducedQuant.counts.tsv flairReducedGTFCounts.tsv
             fi
         fi
 
         if [ "~{ID_or_Quant_or_Both}" = "Quant" -o "~{ID_or_Quant_or_Both}" = "Both" ]; then
         
-            samtools bam2fq ~{inputBAM} > tmp.fastq
             gffread ~{referenceAnnotation_full} -g ~{referenceGenome} -w transcriptome.fa
             sample=("flair" "condition1" "batch1" "tmp.fastq")
             manifest_filename="flair_manifest.tsv"
@@ -68,14 +79,15 @@ task flairTask {
             
             flair quantify -r $manifest_filename -i transcriptome.fa -o Quant -t ~{numThreads}
             
-            mv Quant.counts.tsv Flair_quant.tsv
+            mv Quant.counts.tsv flairCounts.tsv
         fi
     >>>
 
     output {
-        File? flairReducedGTF = "~{OutDir}/Flair_reduced.gtf"
-        File? flairCounts = "~{OutDir}/Flair_quant.tsv"
+        File? flairReducedGTF = "~{OutDir}/flairReducedGTF.gtf"
+        File? flairCounts = "~{OutDir}/flairCounts.tsv"
         File monitoringLog = "monitoring.log"
+        File? flairReducedGTFCounts = "~{OutDir}/flairReducedGTFCounts.tsv"
     }
 
     runtime {
