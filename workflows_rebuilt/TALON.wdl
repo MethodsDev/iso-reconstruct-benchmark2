@@ -87,5 +87,6 @@ workflow talonWorkflow {
     output {
         File? talonReducedGTF = talonTask.talonReducedGTF
         File monitoringLog = talonTask.monitoringLog
+        File? talonReducedGTFCounts = talonTask.talonReducedGTFCounts
     }
 }
