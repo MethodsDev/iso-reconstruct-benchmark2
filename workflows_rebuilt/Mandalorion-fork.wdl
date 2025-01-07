@@ -73,7 +73,7 @@ task mandalorionforkTask {
             -p ~{OutDir}_Quant \
             -t ~{numThreads} \
             -s samtools.view.sam
-
+            mv ~{OutDir}_Quant/Isoforms.filtered.clean.gtf ~{OutDir}/mandalorionforkFullGTF.gtf
             mv ~{OutDir}_Quant/Isoforms.filtered.clean.quant ~{OutDir}/mandalorionforkCounts.txt
         fi
     >>>
@@ -84,6 +84,7 @@ task mandalorionforkTask {
         File monitoringLog = "monitoring.log"
         File? mandalorionforkReducedGTFCounts = "~{OutDir}/mandalorionforkReducedGTFCounts.txt"
         File? mandalorionforkGTFCounts = "~{OutDir}/mandalorionforkGTFCounts.txt"
+        File? mandalorionforkFullGTF = "~{OutDir}/mandalorionforkFullGTF.gtf"
         File? mandalorionforkCounts = "~{OutDir}/mandalorionforkCounts.txt"
 
     }
@@ -128,5 +129,6 @@ workflow mandalorionforkWorkflow {
         File? mandalorionforkReducedGTFCounts = mandalorionforkTask.mandalorionforkReducedGTFCounts
         File? mandalorionforkGTFCounts = mandalorionforkTask.mandalorionforkGTFCounts
         File? mandalorionforkCounts = mandalorionforkTask.mandalorionforkCounts
+        File? mandalorionforkFullGTF = mandalorionforkTask.mandalorionforkFullGTF
     }
 }
