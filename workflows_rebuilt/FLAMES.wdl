@@ -120,7 +120,7 @@ EOF
             --inbam ~{inputBAM} \
             --outdir ~{OutDir} \
             --config_file ~{OutDir}/config.json
-            
+            ls -l ~{OutDir}/
             mv ~{OutDir}/isoform_annotated.gff3 ~{OutDir}/FLAMES_reduced.gff3
         fi
     >>>
