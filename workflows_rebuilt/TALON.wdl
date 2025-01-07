@@ -37,7 +37,8 @@ task talonTask {
                 talon --build ~{datasetName} --db "~{datasetName}.db" --o "~{talonPrefix}_raw" --f "~{talonPrefix}.csv" --threads ~{numThreads}
                 talon_filter_transcripts --db "~{datasetName}.db" -a ~{datasetName} --datasets ~{datasetName} --o "~{talonPrefix}_filter"
                 talon_create_GTF --build ~{datasetName} --db "~{datasetName}.db" -a ~{datasetName} --o ~{talonPrefix} --whitelist "~{talonPrefix}_filter"
-                talon_abundance --db "~{datasetName}.db" --whitelist "~{talonPrefix}_filter" --o ~{talonPrefix}_Quant --build ~{datasetName} -a ~{datasetName} 
+                talon_abundance --db "~{datasetName}.db" --whitelist "~{talonPrefix}_filter" --o ~{talonPrefix}_Quant --build ~{datasetName} -a ~{datasetName}
+                ls -l
                 mv TALON_talon.gtf TALON_reduced.gtf
 #                mv TALON_Quant_talon.tsv 
             fi
