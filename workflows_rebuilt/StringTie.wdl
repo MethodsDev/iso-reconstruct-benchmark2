@@ -30,24 +30,24 @@ task stringtieTask {
 
         if [[ "~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both" ]]; then
             stringtie \
-            -o "~{OutDir}/StringTie.gtf" \
+            -o "~{OutDir}/stringtieGTF.gtf" \
             -p ~{numThreads} \
             -L ~{inputBAM} \
             --ref ~{referenceGenome}
 
-            stringtie -e -o "~{OutDir}_IDreffreeQuant/StringTie_quant.gtf" -G "~{OutDir}/StringTie.gtf" -p ~{numThreads} -L ~{inputBAM} --ref ~{referenceGenome}
+            stringtie -e -o "~{OutDir}_IDreffreeQuant/StringTie_quant.gtf" -G "~{OutDir}/stringtieGTF.gtf" -p ~{numThreads} -L ~{inputBAM} --ref ~{referenceGenome}
             echo -e "stringtie\t~{OutDir}_IDreffreeQuant/StringTie_quant.gtf" > ~{OutDir}/stringtie_sample_list2.txt
             prepDE.py -i ~{OutDir}/stringtie_sample_list2.txt -g ~{OutDir}_IDreffreeQuant/gene_count_matrix.csv -t ~{OutDir}/stringtieGTFCounts.csv
 
             if [[ -n "~{referenceAnnotation_reduced}" ]]; then
                 stringtie \
-                -o "~{OutDir}/StringTie_reduced.gtf" \
+                -o "~{OutDir}/stringtieReducedGTF.gtf" \
                 -G ~{referenceAnnotation_reduced} \
                 -p ~{numThreads} \
                 -L ~{inputBAM} \
                 --ref ~{referenceGenome}
 
-            stringtie -e -o "~{OutDir}_IDrefguidedQuant/StringTie_quant.gtf" -G "~{OutDir}/StringTie_reduced.gtf" -p ~{numThreads} -L ~{inputBAM} --ref ~{referenceGenome}
+            stringtie -e -o "~{OutDir}_IDrefguidedQuant/StringTie_quant.gtf" -G "~{OutDir}/stringtieReducedGTF.gtf" -p ~{numThreads} -L ~{inputBAM} --ref ~{referenceGenome}
             echo -e "stringtie\t~{OutDir}_IDrefguidedQuant/StringTie_quant.gtf" > ~{OutDir}/stringtie_sample_list3.txt
             prepDE.py -i ~{OutDir}/stringtie_sample_list3.txt -g ~{OutDir}_IDrefguidedQuant/gene_count_matrix.csv -t ~{OutDir}/stringtieReducedGTFCounts.csv
 
@@ -58,15 +58,15 @@ task stringtieTask {
             if [[ -n "~{referenceAnnotation_full}" ]]; then
                 stringtie -e -o "~{OutDir}/StringTie_quant.gtf" -G ~{referenceAnnotation_full} -p ~{numThreads} -L ~{inputBAM} --ref ~{referenceGenome}
                 echo -e "stringtie\t~{OutDir}/StringTie_quant.gtf" > ~{OutDir}/stringtie_sample_list.txt
-                prepDE.py -i ~{OutDir}/stringtie_sample_list.txt -g ~{OutDir}/gene_count_matrix.csv -t ~{OutDir}/StringTie_quant.csv
+                prepDE.py -i ~{OutDir}/stringtie_sample_list.txt -g ~{OutDir}/gene_count_matrix.csv -t ~{OutDir}/stringtieCounts.csv
             fi
         fi
     >>>
     
     output {
-        File? stringtieGTF = "~{OutDir}/StringTie.gtf"
-        File? stringtieReducedGTF = "~{OutDir}/StringTie_reduced.gtf"
-        File? stringtieCounts = "~{OutDir}/StringTie_quant.csv"
+        File? stringtieGTF = "~{OutDir}/stringtieGTF.gtf"
+        File? stringtieReducedGTF = "~{OutDir}/stringtieReducedGTF.gtf"
+        File? stringtieCounts = "~{OutDir}/stringtieCounts.csv"
         File monitoringLog = "monitoring.log"
         File? stringtieGTFCounts = "~{OutDir}/stringtieGTFCounts.csv"
         File? stringtieReducedGTFCounts = "~{OutDir}/stringtieReducedGTFCounts.csv"
