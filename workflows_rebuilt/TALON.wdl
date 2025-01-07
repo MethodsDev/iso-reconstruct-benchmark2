@@ -41,37 +41,37 @@ task talonTask {
                 talon --build ~{datasetName} --db "~{datasetName}.db" --o "~{talonPrefix}_raw" --f "~{talonPrefix}.csv" --threads ~{numThreads}
                 talon_filter_transcripts --db "~{datasetName}.db" -a ~{datasetName} --datasets ~{datasetName} --o "~{talonPrefix}_filter"
                 talon_create_GTF --build ~{datasetName} --db "~{datasetName}.db" -a ~{datasetName} --o ~{talonPrefix} --whitelist "~{talonPrefix}_filter"
-                talon_abundance --db "~{datasetName}.db" --whitelist "~{talonPrefix}_filter" --o ~{talonPrefix}_Quant --build ~{datasetName} -a ~{datasetName}
+#                talon_abundance --db "~{datasetName}.db" --whitelist "~{talonPrefix}_filter" --o ~{talonPrefix}_Quant --build ~{datasetName} -a ~{datasetName}
                 ls -l
                 mv TALON_talon.gtf talonReducedGTF.gtf
-                mv TALON_Quant_talon_abundance_filtered.tsv talonReducedGTFCounts.tsv
+#                mv TALON_Quant_talon_abundance_filtered.tsv talonReducedGTFCounts.tsv
             fi
         fi
 
 
-        if [[ "~{ID_or_Quant_or_Both}" == "Quant" ]] || [[ "~{ID_or_Quant_or_Both}" == "Both" ]]; then
-            if [[ "~{referenceAnnotation_full}" != "" ]]; then
+#        if [[ "~{ID_or_Quant_or_Both}" == "Quant" ]] || [[ "~{ID_or_Quant_or_Both}" == "Both" ]]; then
+#            if [[ "~{referenceAnnotation_full}" != "" ]]; then
 
-                talon_initialize_database --f ~{referenceAnnotation_full} --g ~{datasetName2} --a ~{datasetName2} --o ~{datasetName2}
-                echo ~{datasetName2},~{datasetName2},~{dataType},"~{talonPrefix}_labeled.md.sam" > "~{talonPrefix2}.csv"
-                talon --build ~{datasetName2} --db "~{datasetName2}.db" --o "~{talonPrefix2}_raw" --f "~{talonPrefix2}.csv" --threads ~{numThreads}
-                talon_filter_transcripts --db "~{datasetName2}.db" -a ~{datasetName2} --datasets ~{datasetName2} --o "~{talonPrefix2}_filter"
-                talon_create_GTF --build ~{datasetName2} --db "~{datasetName2}.db" -a ~{datasetName2} --o ~{talonPrefix2} --whitelist "~{talonPrefix2}_filter"
-                talon_abundance --db "~{datasetName2}.db" --whitelist "~{talonPrefix2}_filter" --o ~{talonPrefix2}_Quant --build ~{datasetName2} -a ~{datasetName2}
-                ls -l
-                mv TALON2_talon.gtf talonFullGTF.gtf
-                mv TALON2_Quant_talon_abundance_filtered.tsv talonCounts.tsv
-            fi
-        fi
+#                talon_initialize_database --f ~{referenceAnnotation_full} --g ~{datasetName2} --a ~{datasetName2} --o ~{datasetName2}
+#                echo ~{datasetName2},~{datasetName2},~{dataType},"~{talonPrefix}_labeled.md.sam" > "~{talonPrefix2}.csv"
+#                talon --build ~{datasetName2} --db "~{datasetName2}.db" --o "~{talonPrefix2}_raw" --f "~{talonPrefix2}.csv" --threads ~{numThreads}
+#                talon_filter_transcripts --db "~{datasetName2}.db" -a ~{datasetName2} --datasets ~{datasetName2} --o "~{talonPrefix2}_filter"
+#                talon_create_GTF --build ~{datasetName2} --db "~{datasetName2}.db" -a ~{datasetName2} --o ~{talonPrefix2} --whitelist "~{talonPrefix2}_filter"
+#                talon_abundance --db "~{datasetName2}.db" --whitelist "~{talonPrefix2}_filter" --o ~{talonPrefix2}_Quant --build ~{datasetName2} -a ~{datasetName2}
+#                ls -l
+#                mv TALON2_talon.gtf talonFullGTF.gtf
+#                mv TALON2_Quant_talon_abundance_filtered.tsv talonCounts.tsv
+#            fi
+#        fi
 
     >>>
 
     output {
         File? talonReducedGTF = "TALON_out/talonReducedGTF.gtf"
         File monitoringLog = "monitoring.log"
-        File? talonReducedGTFCounts = "TALON_out/talonReducedGTFCounts.tsv"
-        File? talonCounts = "TALON_out/talonCounts.tsv"
-        File? talonFullGTF = "TALON_out/talonFullGTF.gtf"
+ #       File? talonReducedGTFCounts = "TALON_out/talonReducedGTFCounts.tsv"
+ #       File? talonCounts = "TALON_out/talonCounts.tsv"
+ #       File? talonFullGTF = "TALON_out/talonFullGTF.gtf"
 
     }
 
@@ -111,8 +111,8 @@ workflow talonWorkflow {
     output {
         File? talonReducedGTF = talonTask.talonReducedGTF
         File monitoringLog = talonTask.monitoringLog
-        File? talonReducedGTFCounts = talonTask.talonReducedGTFCounts
-        File? talonCounts = talonTask.talonCounts
-        File? talonFullGTF = talonTask.talonFullGTF
+#        File? talonReducedGTFCounts = talonTask.talonReducedGTFCounts
+#        File? talonCounts = talonTask.talonCounts
+#        File? talonFullGTF = talonTask.talonFullGTF
     }
 }
