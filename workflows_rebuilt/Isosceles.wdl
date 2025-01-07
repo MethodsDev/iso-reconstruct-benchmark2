@@ -62,6 +62,8 @@ task isoscelesTask {
         File? isoscelesReducedGTF = "Isosceles_de_novo_loose.gtf"
         File? isoscelesStrictReducedGTF = "Isosceles_de_novo_strict.gtf"
         File? isoscelesCounts = "Isosceles_quant.txt"
+        File? isoscelesReducedGTFCounts = "Isosceles_de_novo_loose_counts.txt"
+        File? isoscelesStrictReducedGTFCounts = "Isosceles_de_novo_strict_counts.txt"
         File monitoringLog = "monitoring.log"
     }
 
@@ -102,6 +104,8 @@ workflow isoscelesWorkflow {
         File? isoscelesReducedGTF = isoscelesTask.isoscelesReducedGTF
         File? isoscelesStrictReducedGTF = isoscelesTask.isoscelesStrictReducedGTF
         File? isoscelesCounts = isoscelesTask.isoscelesCounts
+        File? isoscelesReducedGTFCounts = isoscelesTask.isoscelesReducedGTFCounts
+        File? isoscelesStrictReducedGTFCounts = isoscelesTask.isoscelesStrictReducedGTFCounts
         File monitoringLog = isoscelesTask.monitoringLog
     }
 }
