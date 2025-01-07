@@ -42,7 +42,7 @@ task espressoTask {
             perl /opt/conda/envs/espresso_env/bin/ESPRESSO_S.pl --sort_buffer_size ~{memoryGB} -L ESPRESSO_out/ID/~{samples_filename} -F ~{referenceGenome} -A ~{referenceAnnotation_reduced} -O ESPRESSO_out/ID -T ~{numThreads}
             perl /opt/conda/envs/espresso_env/bin/ESPRESSO_C.pl --sort_buffer_size ~{memoryGB} -I ESPRESSO_out/ID -F ~{referenceGenome} -X 0 -T ~{numThreads}
             perl /opt/conda/envs/espresso_env/bin/ESPRESSO_Q.pl -L ESPRESSO_out/ID/espresso_samples.tsv.updated -A ~{referenceAnnotation_reduced} -T ~{numThreads}            
-            mv ESPRESSO_out/ID/espresso_samples_N2_R0_updated.gtf ESPRESSO_out/ID/ESPRESSO_reduced.gtf
+            mv ESPRESSO_out/ID/espresso_samples_N2_R0_updated.gtf ESPRESSO_out/ID/espressoReducedGTF.gtf
             mv ESPRESSO_out/ID/espresso_samples_N2_R0_abundance.esp ESPRESSO_out/ID/espressoReducedGTFCounts.txt
         fi
 
@@ -59,7 +59,7 @@ task espressoTask {
 
     output {
         File? espressoReducedGTFCounts = "~{OutDir}/ID/espressoReducedGTFCounts.txt"
-        File? espressoReducedGTF = "~{OutDir}/ID/ESPRESSO_reduced.gtf"
+        File? espressoReducedGTF = "~{OutDir}/ID/espressoReducedGTF.gtf"
         File? espressoCounts = "~{OutDir}/Quant/espressoCounts.txt"
         File? espressoFullGTF = "~{OutDir}/Quant/espressoFullGTF.gtf"
 
