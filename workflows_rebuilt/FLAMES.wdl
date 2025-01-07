@@ -121,12 +121,16 @@ EOF
             --outdir ~{OutDir} \
             --config_file ~{OutDir}/config.json
             ls -l ~{OutDir}/
-            mv ~{OutDir}/isoform_annotated.gff3 ~{OutDir}/FLAMES_reduced.gff3
+            mv ~{OutDir}/isoform_annotated.gff3 ~{OutDir}/flamesReducedGTF.gff3
+
+            gunzip ~{OutDir}/transcript_count.csv.gz
+            mv ~{OutDir}/transcript_count.csv ~{OutDir}/flamesReducedGTFCounts.csv
         fi
     >>>
 
     output {
-        File? flamesReducedGTF = "~{OutDir}/FLAMES_reduced.gff3"
+        File? flamesReducedGTF = "~{OutDir}/flamesReducedGTF.gff3"
+        File? flamesReducedGTFCounts = "~{OutDir}/flamesReducedGTFCounts.csv"
         File monitoringLog = "monitoring.log"
     }
 
