@@ -67,7 +67,7 @@ task isoquantTask {
             --no_model_construction
             
             mv ~{OutDir}/Quant/OUT/OUT.transcript_counts.tsv ~{OutDir}/IsoQuant_quant.tsv
-            tar -czf IsoQuant_OUT.tar.gz ~{OutDir}/Quant
+#            tar -czf IsoQuant_OUT.tar.gz ~{OutDir}/Quant
 
         fi
 
@@ -107,7 +107,7 @@ task isoquantTask {
                 --no_model_construction
                 
                 mv ~{OutDir}/Quant_with_polyA/OUT/OUT.transcript_counts.tsv ~{OutDir}/IsoQuant_quant_with_polyA.tsv 
-                tar -czf IsoQuant_OUT_with_polyA.tar.gz ~{OutDir}/Quant_with_polyA
+#                tar -czf IsoQuant_OUT_with_polyA.tar.gz ~{OutDir}/Quant_with_polyA
 
             fi
         fi
