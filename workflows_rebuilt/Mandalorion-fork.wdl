@@ -61,9 +61,20 @@ task mandalorionforkTask {
 
 
 
-            if [ -d ~{OutDir}_reffree ]; then
-                rm -r ~{OutDir}_reffree        
-            fi
+#            if [ -d ~{OutDir}_reffree ]; then
+#                rm -r ~{OutDir}_reffree        
+#            fi
+        fi
+        if [ "~{ID_or_Quant_or_Both}" = "Quant" ] || [ "~{ID_or_Quant_or_Both}" = "Both" ]; then
+            python3 /usr/local/src/Mandalorion/Mando.py \
+            -G ~{referenceGenome} \
+            -g ~{referenceAnnotation_full} \
+            -f ~{OutDir}/samtools.bam2fq.fastq \
+            -p ~{OutDir}_Quant \
+            -t ~{numThreads} \
+            -s samtools.view.sam
+
+            mv ~{OutDir}_Quant/Isoforms.filtered.clean.quant ~{OutDir}/mandalorionforkCounts.txt
         fi
     >>>
 
@@ -73,6 +84,8 @@ task mandalorionforkTask {
         File monitoringLog = "monitoring.log"
         File? mandalorionforkReducedGTFCounts = "~{OutDir}/mandalorionforkReducedGTFCounts.txt"
         File? mandalorionforkGTFCounts = "~{OutDir}/mandalorionforkGTFCounts.txt"
+        File? mandalorionforkCounts = "~{OutDir}/mandalorionforkCounts.txt"
+
     }
 
     runtime {
@@ -114,5 +127,6 @@ workflow mandalorionforkWorkflow {
         File monitoringLog = mandalorionforkTask.monitoringLog
         File? mandalorionforkReducedGTFCounts = mandalorionforkTask.mandalorionforkReducedGTFCounts
         File? mandalorionforkGTFCounts = mandalorionforkTask.mandalorionforkGTFCounts
+        File? mandalorionforkCounts = mandalorionforkTask.mandalorionforkCounts
     }
 }
