@@ -53,7 +53,7 @@ task talonTask {
             if [[ "~{referenceAnnotation_full}" != "" ]]; then
 
                 talon_initialize_database --f ~{referenceAnnotation_full} --g ~{datasetName2} --a ~{datasetName2} --o ~{datasetName2}
-                echo ~{datasetName2},~{datasetName2},~{dataType},"~{talonPrefix2}_labeled.md.sam" > "~{talonPrefix2}.csv"
+                echo ~{datasetName2},~{datasetName2},~{dataType},"~{talonPrefix}_labeled.md.sam" > "~{talonPrefix2}.csv"
                 talon --build ~{datasetName2} --db "~{datasetName2}.db" --o "~{talonPrefix2}_raw" --f "~{talonPrefix2}.csv" --threads ~{numThreads}
                 talon_filter_transcripts --db "~{datasetName2}.db" -a ~{datasetName2} --datasets ~{datasetName2} --o "~{talonPrefix2}_filter"
                 talon_create_GTF --build ~{datasetName2} --db "~{datasetName2}.db" -a ~{datasetName2} --o ~{talonPrefix2} --whitelist "~{talonPrefix2}_filter"
