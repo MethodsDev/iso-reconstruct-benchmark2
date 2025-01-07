@@ -40,7 +40,6 @@ task mandalorionforkTask {
             -p ~{OutDir}_reffree \
             -t ~{numThreads} \
             -s samtools.view.sam
-
             
             if [ -n "~{referenceAnnotation_reduced}" ]; then
                 python3 /usr/local/src/Mandalorion/Mando.py \
@@ -52,10 +51,16 @@ task mandalorionforkTask {
                 -s samtools.view.sam
                 
                 if [ -f ~{OutDir}/Isoforms.filtered.clean.gtf ]; then
-                    mv ~{OutDir}/Isoforms.filtered.clean.gtf ~{OutDir}/Mandalorionfork_reduced.gtf             
+                    mv ~{OutDir}/Isoforms.filtered.clean.gtf ~{OutDir}/Mandalorionfork_reduced.gtf
+                    mv ~{OutDir}/Isoforms.filtered.clean.quant ~{OutDir}/mandalorionforkReducedGTFCounts.txt
+
                 fi
             fi
-            mv ~{OutDir}_reffree/Isoforms.filtered.clean.gtf ~{OutDir}/Mandalorionfork.gtf 
+            mv ~{OutDir}_reffree/Isoforms.filtered.clean.gtf ~{OutDir}/Mandalorionfork.gtf
+            mv ~{OutDir}_reffree/Isoforms.filtered.clean.quant ~{OutDir}/mandalorionforkGTFCounts.txt
+
+
+
             if [ -d ~{OutDir}_reffree ]; then
                 rm -r ~{OutDir}_reffree        
             fi
@@ -66,6 +71,8 @@ task mandalorionforkTask {
         File? mandalorionforkReducedGTF = "~{OutDir}/Mandalorionfork_reduced.gtf"
         File? mandalorionforkGTF = "~{OutDir}/Mandalorionfork.gtf"
         File monitoringLog = "monitoring.log"
+        File? mandalorionforkReducedGTFCounts = "~{OutDir}/mandalorionforkReducedGTFCounts.txt"
+        File? mandalorionforkGTFCounts = "~{OutDir}/mandalorionforkGTFCounts.txt"
     }
 
     runtime {
@@ -105,5 +112,7 @@ workflow mandalorionforkWorkflow {
         File? mandalorionforkGTF = mandalorionforkTask.mandalorionforkGTF
         File? mandalorionforkReducedGTF = mandalorionforkTask.mandalorionforkReducedGTF
         File monitoringLog = mandalorionforkTask.monitoringLog
+        File? mandalorionforkReducedGTFCounts = mandalorionforkTask.mandalorionforkReducedGTFCounts
+        File? mandalorionforkGTFCounts = mandalorionforkTask.mandalorionforkGTFCounts
     }
 }
