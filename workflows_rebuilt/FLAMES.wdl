@@ -24,6 +24,8 @@ task flamesTask {
     command <<<
         bash ~{monitoringScript} > monitoring.log &
         mkdir -p ~{OutDir}
+        mkdir -p ~{OutDir}_Quant
+
 
         if [ "~{dataType}" = "pacbio_ccs" ]; then
             cat > ~{OutDir}/config.json << EOF
@@ -126,12 +128,33 @@ EOF
             gunzip ~{OutDir}/transcript_count.csv.gz
             mv ~{OutDir}/transcript_count.csv ~{OutDir}/flamesReducedGTFCounts.csv
         fi
+
+
+
+        if [ "~{ID_or_Quant_or_Both}" = "Quant" -o "~{ID_or_Quant_or_Both}" = "Both" ] && [ -n "~{referenceAnnotation_full}" ]; then
+
+            python3 /usr/local/src/FLAMES/python/bulk_long_pipeline.py \
+            --gff3 ~{referenceAnnotation_reduced} \
+            --genomefa ~{referenceGenome} \
+            --fq_dir ~{OutDir}/fq \
+            --inbam ~{inputBAM} \
+            --outdir ~{OutDir}_Quant \
+            --config_file ~{OutDir}/config.json
+            ls -l ~{OutDir}_Quant/
+            mv ~{OutDir}_Quant/isoform_annotated.gff3 ~{OutDir}_Quant/flamesFullGTF.gff3
+
+            gunzip ~{OutDir}_Quant/transcript_count.csv.gz
+            mv ~{OutDir}_Quant/transcript_count.csv ~{OutDir}/flamesCounts.csv
+        fi
     >>>
 
     output {
         File? flamesReducedGTF = "~{OutDir}/flamesReducedGTF.gff3"
-        File? flamesReducedGTFCounts = "~{OutDir}/flamesReducedGTFCounts.csv"
         File monitoringLog = "monitoring.log"
+        File? flamesReducedGTFCounts = "~{OutDir}/flamesReducedGTFCounts.csv"
+        File? flamesFullGTF = "~{OutDir}_Quant/flamesFullGTF.gff3"
+        File? flamesCounts = "~{OutDir}/flamesCounts.csv"
+
     }
 
     runtime {
@@ -170,5 +193,8 @@ workflow flamesWorkflow {
     output {
         File? flamesReducedGTF = flamesTask.flamesReducedGTF
         File monitoringLog = flamesTask.monitoringLog
+        File? flamesReducedGTFCounts = flamesTask.flamesReducedGTFCounts
+        File? flamesFullGTF = flamesTask.flamesFullGTF
+        File? flamesCounts = flamesTask.flamesCounts
     }
 }
