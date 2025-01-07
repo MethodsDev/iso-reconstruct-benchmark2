@@ -53,7 +53,7 @@ task flairTask {
 
 
                 gffread flairReducedGTF.gtf -g ~{referenceGenome} -w transcriptome2.fa
-                sample2=("flair" "condition1" "batch1" "tmp.fastq")
+                sample2=("flair" "condition1" "batch1" "temp.fastq")
                 manifest_filename2="flair_manifest2.tsv"
     
                 for i in "${sample2[@]}"; do
@@ -69,7 +69,7 @@ task flairTask {
         if [ "~{ID_or_Quant_or_Both}" = "Quant" -o "~{ID_or_Quant_or_Both}" = "Both" ]; then
         
             gffread ~{referenceAnnotation_full} -g ~{referenceGenome} -w transcriptome.fa
-            sample=("flair" "condition1" "batch1" "tmp.fastq")
+            sample=("flair" "condition1" "batch1" "temp.fastq")
             manifest_filename="flair_manifest.tsv"
 
             for i in "${sample[@]}"; do
