@@ -24,7 +24,9 @@ task stringtieTask {
 
     command <<<
         bash ~{monitoringScript} > monitoring.log &
-        mkdir -p $OutDir
+        mkdir -p ~{OutDir}
+        mkdir -p ~{OutDir}_IDreffreeQuant
+        mkdir -p ~{OutDir}_IDrefguidedQuant
 
         if [[ "~{ID_or_Quant_or_Both}" == "ID" || "~{ID_or_Quant_or_Both}" == "Both" ]]; then
             stringtie \
@@ -32,7 +34,11 @@ task stringtieTask {
             -p ~{numThreads} \
             -L ~{inputBAM} \
             --ref ~{referenceGenome}
-            
+
+            stringtie -e -o "~{OutDir}_IDreffreeQuant/StringTie_quant.gtf" -G "~{OutDir}/StringTie.gtf" -p ~{numThreads} -L ~{inputBAM} --ref ~{referenceGenome}
+            echo -e "stringtie\t~{OutDir}_IDreffreeQuant/StringTie_quant.gtf" > ~{OutDir}/stringtie_sample_list2.txt
+            prepDE.py -i ~{OutDir}/stringtie_sample_list2.txt -g ~{OutDir}_IDreffreeQuant/gene_count_matrix.csv -t ~{OutDir}/stringtieGTFCounts.csv
+
             if [[ -n "~{referenceAnnotation_reduced}" ]]; then
                 stringtie \
                 -o "~{OutDir}/StringTie_reduced.gtf" \
@@ -40,6 +46,10 @@ task stringtieTask {
                 -p ~{numThreads} \
                 -L ~{inputBAM} \
                 --ref ~{referenceGenome}
+
+            stringtie -e -o "~{OutDir}_IDrefguidedQuant/StringTie_quant.gtf" -G "~{OutDir}/StringTie_reduced.gtf" -p ~{numThreads} -L ~{inputBAM} --ref ~{referenceGenome}
+            echo -e "stringtie\t~{OutDir}_IDrefguidedQuant/StringTie_quant.gtf" > ~{OutDir}/stringtie_sample_list3.txt
+            prepDE.py -i ~{OutDir}/stringtie_sample_list3.txt -g ~{OutDir}_IDrefguidedQuant/gene_count_matrix.csv -t ~{OutDir}/stringtieReducedGTFCounts.csv
 
             fi
         fi
@@ -58,6 +68,8 @@ task stringtieTask {
         File? stringtieReducedGTF = "~{OutDir}/StringTie_reduced.gtf"
         File? stringtieCounts = "~{OutDir}/StringTie_quant.csv"
         File monitoringLog = "monitoring.log"
+        File? stringtieGTFCounts = "~{OutDir}/stringtieGTFCounts.csv"
+        File? stringtieReducedGTFCounts = "~{OutDir}/stringtieReducedGTFCounts.csv"
     }
 
     runtime {
@@ -98,5 +110,7 @@ workflow stringtieWorkflow {
         File? stringtieReducedGTF = stringtieTask.stringtieReducedGTF
         File? stringtieCounts = stringtieTask.stringtieCounts
         File monitoringLog = stringtieTask.monitoringLog
+        File? stringtieGTFCounts = stringtieTask.stringtieGTFCounts
+        File? stringtieReducedGTFCounts = stringtieTask.stringtieReducedGTFCounts
     }
 }
