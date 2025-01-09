@@ -1,6 +1,6 @@
 version 1.0
 
-# This task uses Isosceles version
+# This task uses Isosceles version 0.2.1
 task isoscelesTask {
     input {
         File inputBAM
