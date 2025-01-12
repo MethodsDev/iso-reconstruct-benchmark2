@@ -109,8 +109,6 @@ task relocateOutputs {
     }
 }
 
-version 1.0
-
 workflow LongReadRNABenchmark {
     input {
         File inputBAM
