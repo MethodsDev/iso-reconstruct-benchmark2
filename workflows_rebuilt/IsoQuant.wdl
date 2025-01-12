@@ -1,132 +1,123 @@
 version 1.0
 
-# This task uses IsoQuant version 3.4.0
-task isoquantTask {
+# This task uses Bambu version 3.4.0
+task bambuTask {
     input {
         File inputBAM
         File inputBAMIndex
-        File? inputBAM_with_polyA_for_IsoQuant
-        File? inputBAMIndex_with_polyA_for_IsoQuant
         File referenceGenome
         File referenceGenomeIndex
         File? referenceAnnotation_reduced
         File? referenceAnnotation_full
         String dataType
         String ID_or_Quant_or_Both
+        String Reffree_or_Refguided_or_Both
         Int cpu = 4
         Int numThreads = 8
         Int memoryGB = 64
-        Int diskSizeGB = 500
-        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/isoquant:latest"
+        Int diskSizeGB = 250
+        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/bambu@sha256:04601e3dd0d7f9c2008c5f430da7aef62277dc8ffd50ecb356d4b48ba962e6c7"
         File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
     }
 
-    String OutDir = "IsoQuant_out"
-    
+    String OutDir = "Bambu_out"
+
     command <<<
-        bash ~{monitoringScript} > monitoring.log &
-        
-        rm -rf ~{OutDir} && mkdir ~{OutDir} 
 
-        if [ "~{ID_or_Quant_or_Both}" = "ID" ] || [ "~{ID_or_Quant_or_Both}" = "Both" ]; then
-            /usr/local/src/IsoQuant/isoquant.py \
-            --reference ~{referenceGenome} \
-            --bam ~{inputBAM} \
-            --data_type ~{dataType} \
-            --threads ~{numThreads} \
-            --output ~{OutDir}/ID_reffree
+    bash ~{monitoringScript} > monitoring.log &
+    mkdir ~{OutDir}
+    mkdir ~{OutDir}/ID_reduced
+    mkdir ~{OutDir}/ID_ndr1_reduced
+    mkdir ~{OutDir}/ID_reffree
+    mkdir ~{OutDir}/Quant
+
+    if [[ "~{ID_or_Quant_or_Both}" != "ID" && -z "~{referenceAnnotation_full}" ]]; then
+        echo "Error: referenceAnnotation_full must be provided if ID_or_Quant_or_Both is not equal to ID."
+        exit 1
+    fi
+
+    if [ "~{ID_or_Quant_or_Both}" == "ID" ] || [ "~{ID_or_Quant_or_Both}" == "Both" ]; then
+        if [ "~{Reffree_or_Refguided_or_Both}" == "Reffree" ] || [ "~{Reffree_or_Refguided_or_Both}" == "Both" ]; then
+            Rscript -<< EOF
+            library(bambu)
+            fa.file <- "~{referenceGenome}"
+            lr.bam <- "~{inputBAM}"
+            lr.se <- bambu(reads = lr.bam, rcOutDir = '~{OutDir}/ID_reffree', annotations = NULL, genome = fa.file, quant = FALSE, NDR = 1, ncore = ~{numThreads})
+            writeToGTF(lr.se, "~{OutDir}/ID_reffree/bambuGTF.gtf")
+EOF
             
-            mv ~{OutDir}/ID_reffree/OUT/OUT.transcript_models.gtf ~{OutDir}/isoquantGTF.gtf
-            mv ~{OutDir}/ID_reffree/OUT/OUT.transcript_model_counts.tsv ~{OutDir}/isoquantGTFCounts.tsv
+            mv ~{OutDir}/ID_reffree/bambuGTF.gtf  ~{OutDir}/bambuGTF.gtf
 
-
-
-
-            if [ -f ~{referenceAnnotation_reduced} ]; then
-                /usr/local/src/IsoQuant/isoquant.py \
-                --reference ~{referenceGenome} \
-                --bam ~{inputBAM} \
-                --genedb ~{referenceAnnotation_reduced} \
-                --data_type ~{dataType} \
-                --threads ~{numThreads} \
-                --output ~{OutDir}/ID_reduced
-                
-            mv ~{OutDir}/ID_reduced/OUT/OUT.transcript_models.gtf ~{OutDir}/isoquantReducedGTF.gtf                              
-            mv ~{OutDir}/ID_reduced/OUT/OUT.transcript_model_counts.tsv ~{OutDir}/isoquantReducedGTFCounts.tsv
-            fi
+            Rscript -<< EOF
+            library(bambu)
+            test.bam <- "~{inputBAM}"
+            fa.file <- "~{referenceGenome}"
+            gtf.file <- "~{OutDir}/bambuGTF.gtf"
+            se.quantOnly <- bambu(reads = test.bam, annotations = gtf.file, genome = fa.file, discovery = FALSE)
+            writeBambuOutput(se.quantOnly, path = "~{OutDir}/Quant_ReffreeGTF")
+EOF
+            mv ~{OutDir}/Quant_ReffreeGTF/counts_transcript.txt ~{OutDir}/bambuGTFCounts.txt
         fi
 
-        if { [ "~{ID_or_Quant_or_Both}" = "Quant" ] || [ "~{ID_or_Quant_or_Both}" = "Both" ]; } && [ -f ~{referenceAnnotation_full} ]; then
-            /usr/local/src/IsoQuant/isoquant.py \
-            --reference ~{referenceGenome} \
-            --bam ~{inputBAM} \
-            --data_type ~{dataType} \
-            --threads ~{numThreads} \
-            --genedb ~{referenceAnnotation_full} \
-            --output ~{OutDir}/Quant \
-            --no_model_construction
-            
-            mv ~{OutDir}/Quant/OUT/OUT.transcript_counts.tsv ~{OutDir}/isoquantCounts.tsv
-#            tar -czf IsoQuant_OUT.tar.gz ~{OutDir}/Quant
+        if [ "~{Reffree_or_Refguided_or_Both}" == "Refguided" ] || [ "~{Reffree_or_Refguided_or_Both}" == "Both" ]; then
+            if [ "~{referenceAnnotation_reduced}" != "" ]; then
+                Rscript -<< EOF
+                library(bambu)
+                fa.file <- "~{referenceGenome}"
+                gtf.file <- "~{referenceAnnotation_reduced}"
+                bambuAnnotations <- prepareAnnotations(gtf.file)
+                lr.bam <- "~{inputBAM}"
+                lr.se <- bambu(reads = lr.bam, rcOutDir = "~{OutDir}/ID_reduced", annotations = bambuAnnotations, genome = fa.file, ncore = ~{numThreads})
+                writeBambuOutput(lr.se, path = "~{OutDir}/ID_reduced")
+EOF
 
-        fi
+                awk ' $3 >= 1 ' ~{OutDir}/ID_reduced/counts_transcript.txt | sort -k3,3n > ~{OutDir}/ID_reduced/expressed_annotations.gtf.counts
+                cut -f1 ~{OutDir}/ID_reduced/expressed_annotations.gtf.counts > ~{OutDir}/ID_reduced/expressed_transcripts.txt
+                grep -Ff ~{OutDir}/ID_reduced/expressed_transcripts.txt ~{OutDir}/ID_reduced/extended_annotations.gtf > ~{OutDir}/bambuReducedGTF.gtf
+                mv ~{OutDir}/ID_reduced/expressed_annotations.gtf.counts ~{OutDir}/bambuReducedGTFCounts.txt
 
-        if [ "~{inputBAM_with_polyA_for_IsoQuant}" != "" ] && [ "~{inputBAMIndex_with_polyA_for_IsoQuant}" != "" ]; then
-            if [ "~{ID_or_Quant_or_Both}" = "ID" ] || [ "~{ID_or_Quant_or_Both}" = "Both" ]; then
-                /usr/local/src/IsoQuant/isoquant.py \
-                --reference ~{referenceGenome} \
-                --bam ~{inputBAM_with_polyA_for_IsoQuant} \
-                --data_type ~{dataType} \
-                --threads ~{numThreads} \
-                --output ~{OutDir}/ID_reffree_with_polyA
-                
-                mv ~{OutDir}/ID_reffree_with_polyA/OUT/OUT.transcript_models.gtf ~{OutDir}/IsoQuant_with_polyA.gtf
+                Rscript -<< EOF
+                library(bambu)
+                fa.file <- "~{referenceGenome}"
+                gtf.file <- "~{referenceAnnotation_reduced}"
+                bambuAnnotations <- prepareAnnotations(gtf.file)
+                lr.bam <- "~{inputBAM}"
+                lr.se <- bambu(reads = lr.bam, rcOutDir = "~{OutDir}/ID_ndr1_reduced", annotations = bambuAnnotations, genome = fa.file, ncore = ~{numThreads}, NDR = 1)
+                writeBambuOutput(lr.se, path = "~{OutDir}/ID_ndr1_reduced")
+EOF
 
-                if [ -f ~{referenceAnnotation_reduced} ]; then
-                    /usr/local/src/IsoQuant/isoquant.py \
-                    --reference ~{referenceGenome} \
-                    --bam ~{inputBAM_with_polyA_for_IsoQuant} \
-                    --genedb ~{referenceAnnotation_reduced} \
-                    --data_type ~{dataType} \
-                    --threads ~{numThreads} \
-                    --output ~{OutDir}/ID_reduced_with_polyA
-                    
-                    mv ~{OutDir}/ID_reduced_with_polyA/OUT/OUT.transcript_models.gtf ~{OutDir}/IsoQuant_reduced_with_polyA.gtf
-
-                fi
-            fi
-
-            if { [ "~{ID_or_Quant_or_Both}" = "Quant" ] || [ "~{ID_or_Quant_or_Both}" = "Both" ]; } && [ -f ~{referenceAnnotation_full} ]; then
-                /usr/local/src/IsoQuant/isoquant.py \
-                --reference ~{referenceGenome} \
-                --bam ~{inputBAM_with_polyA_for_IsoQuant} \
-                --data_type ~{dataType} \
-                --threads ~{numThreads} \
-                --genedb ~{referenceAnnotation_full} \
-                --output ~{OutDir}/Quant_with_polyA \
-                --no_model_construction
-                
-                mv ~{OutDir}/Quant_with_polyA/OUT/OUT.transcript_counts.tsv ~{OutDir}/IsoQuant_quant_with_polyA.tsv 
-#                tar -czf IsoQuant_OUT_with_polyA.tar.gz ~{OutDir}/Quant_with_polyA
-
+                awk ' $3 >= 1 ' ~{OutDir}/ID_ndr1_reduced/counts_transcript.txt | sort -k3,3n > ~{OutDir}/ID_ndr1_reduced/expressed_annotations.gtf.counts
+                cut -f1 ~{OutDir}/ID_ndr1_reduced/expressed_annotations.gtf.counts > ~{OutDir}/ID_ndr1_reduced/expressed_transcripts.txt
+                grep -Ff ~{OutDir}/ID_ndr1_reduced/expressed_transcripts.txt ~{OutDir}/ID_ndr1_reduced/extended_annotations.gtf > ~{OutDir}/bambuNDR1ReducedGTF.gtf
+                mv ~{OutDir}/ID_ndr1_reduced/expressed_annotations.gtf.counts ~{OutDir}/bambuNDR1ReducedGTFCounts.txt
             fi
         fi
+    fi
+
+    if [ "~{referenceAnnotation_full}" != "" ] && ([ "~{ID_or_Quant_or_Both}" == "Quant" ] || [ "~{ID_or_Quant_or_Both}" == "Both" ]); then
+        Rscript -<< EOF
+        library(bambu)
+        test.bam <- "~{inputBAM}"
+        fa.file <- "~{referenceGenome}"
+        gtf.file <- "~{referenceAnnotation_full}"
+        se.quantOnly <- bambu(reads = test.bam, annotations = gtf.file, genome = fa.file, discovery = FALSE)
+        writeBambuOutput(se.quantOnly, path = "~{OutDir}/Quant")
+EOF
+
+        mv ~{OutDir}/Quant/counts_transcript.txt ~{OutDir}/bambuCounts.txt
+    fi
+
     >>>
 
     output {
-        File? isoquantGTF = "~{OutDir}/isoquantGTF.gtf"
-        File? isoquantReducedGTF = "~{OutDir}/isoquantReducedGTF.gtf"
-        File? isoquantCounts = "~{OutDir}/isoquantCounts.tsv"
-
-        File? isoquantGTF_with_polyA = "~{OutDir}/IsoQuant_with_polyA.gtf"
-        File? isoquantReducedGTF_with_polyA = "~{OutDir}/IsoQuant_reduced_with_polyA.gtf"
-        File? isoquantCounts_with_polyA = "~{OutDir}/IsoQuant_quant_with_polyA.tsv"
-        File? isoquantCounts_OUT = "IsoQuant_OUT.tar.gz"
-        File? isoquantCounts_with_polyA_OUT = "IsoQuant_OUT_with_polyA.tar.gz"
-
+        File? bambuReducedGTF = "~{OutDir}/bambuReducedGTF.gtf"
+        File? bambuNDR1ReducedGTF = "~{OutDir}/bambuNDR1ReducedGTF.gtf"
+        File? bambuGTF = "~{OutDir}/bambuGTF.gtf"
+        File? bambuCounts = "~{OutDir}/bambuCounts.txt"
         File monitoringLog = "monitoring.log"
-        File? isoquantReducedGTFCounts = "~{OutDir}/isoquantReducedGTFCounts.tsv"
-        File? isoquantGTFCounts = "~{OutDir}/isoquantGTFCounts.tsv"
+        File? bambuReducedGTFCounts = "~{OutDir}/bambuReducedGTFCounts.txt"
+        File? bambuNDR1ReducedGTFCounts = "~{OutDir}/bambuNDR1ReducedGTFCounts.txt"
+        File? bambuGTFCounts = "~{OutDir}/bambuGTFCounts.txt"
     }
 
     runtime {
@@ -138,46 +129,40 @@ task isoquantTask {
     }
 }
 
-
-workflow isoquantWorkflow {
+workflow bambuWorkflow {
     input {
         File inputBAM
         File inputBAMIndex
-        File? inputBAM_with_polyA_for_IsoQuant
-        File? inputBAMIndex_with_polyA_for_IsoQuant
         File referenceGenome
         File referenceGenomeIndex
         File? referenceAnnotation_reduced
         File? referenceAnnotation_full
         String dataType
         String ID_or_Quant_or_Both
+        String Reffree_or_Refguided_or_Both
     }
 
-    call isoquantTask {
+    call bambuTask {
         input:
             inputBAM = inputBAM,
             inputBAMIndex = inputBAMIndex,
-            inputBAM_with_polyA_for_IsoQuant = inputBAM_with_polyA_for_IsoQuant,
-            inputBAMIndex_with_polyA_for_IsoQuant = inputBAMIndex_with_polyA_for_IsoQuant,
             referenceGenome = referenceGenome,
             referenceGenomeIndex = referenceGenomeIndex,
             referenceAnnotation_reduced = referenceAnnotation_reduced,
             referenceAnnotation_full = referenceAnnotation_full,
             dataType = dataType,
-            ID_or_Quant_or_Both = ID_or_Quant_or_Both
+            ID_or_Quant_or_Both = ID_or_Quant_or_Both,
+            Reffree_or_Refguided_or_Both = Reffree_or_Refguided_or_Both
     }
 
     output {
-        File? isoquantGTF = isoquantTask.isoquantGTF
-        File? isoquantReducedGTF = isoquantTask.isoquantReducedGTF
-        File? isoquantCounts = isoquantTask.isoquantCounts
-        File? isoquantGTF_with_polyA = isoquantTask.isoquantGTF_with_polyA
-        File? isoquantReducedGTF_with_polyA = isoquantTask.isoquantReducedGTF_with_polyA
-        File? isoquantCounts_with_polyA = isoquantTask.isoquantCounts_with_polyA
-        File? isoquantCounts_OUT = isoquantTask.isoquantCounts_OUT
-        File? isoquantCounts_with_polyA_OUT = isoquantTask.isoquantCounts_with_polyA_OUT
-        File monitoringLog = isoquantTask.monitoringLog
-        File? isoquantReducedGTFCounts = isoquantTask.isoquantReducedGTFCounts
-        File? isoquantGTFCounts = isoquantTask.isoquantGTFCounts
+        File? bambuReducedGTF = bambuTask.bambuReducedGTF
+        File? bambuNDR1ReducedGTF = bambuTask.bambuNDR1ReducedGTF
+        File? bambuGTF = bambuTask.bambuGTF
+        File? bambuCounts = bambuTask.bambuCounts
+        File monitoringLog = bambuTask.monitoringLog
+        File? bambuReducedGTFCounts = bambuTask.bambuReducedGTFCounts
+        File? bambuNDR1ReducedGTFCounts = bambuTask.bambuNDR1ReducedGTFCounts
+        File? bambuGTFCounts = bambuTask.bambuGTFCounts
     }
 }
