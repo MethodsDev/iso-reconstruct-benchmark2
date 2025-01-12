@@ -128,3 +128,42 @@ EOF
         errorStrategy: "Continue"
     }
 }
+
+
+workflow bambuWorkflow {
+    input {
+        File inputBAM
+        File inputBAMIndex
+        File referenceGenome
+        File referenceGenomeIndex
+        File? referenceAnnotation_reduced
+        File? referenceAnnotation_full
+        String dataType
+        String ID_or_Quant_or_Both
+        String Reffree_or_Refguided_or_Both
+    }
+
+    call bambuTask {
+        input:
+            inputBAM = inputBAM,
+            inputBAMIndex = inputBAMIndex,
+            referenceGenome = referenceGenome,
+            referenceGenomeIndex = referenceGenomeIndex,
+            referenceAnnotation_reduced = referenceAnnotation_reduced,
+            referenceAnnotation_full = referenceAnnotation_full,
+            dataType = dataType,
+            ID_or_Quant_or_Both = ID_or_Quant_or_Both,
+            Reffree_or_Refguided_or_Both = Reffree_or_Refguided_or_Both
+    }
+
+    output {
+        File? bambuReducedGTF = bambuTask.bambuReducedGTF
+        File? bambuNDR1ReducedGTF = bambuTask.bambuNDR1ReducedGTF
+        File? bambuGTF = bambuTask.bambuGTF
+        File? bambuCounts = bambuTask.bambuCounts
+        File monitoringLog = bambuTask.monitoringLog
+        File? bambuReducedGTFCounts = bambuTask.bambuReducedGTFCounts
+        File? bambuNDR1ReducedGTFCounts = bambuTask.bambuNDR1ReducedGTFCounts
+        File? bambuGTFCounts = bambuTask.bambuGTFCounts
+    }
+}
