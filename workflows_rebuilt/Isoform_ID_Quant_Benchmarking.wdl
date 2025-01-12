@@ -109,6 +109,8 @@ task relocateOutputs {
     }
 }
 
+version 1.0
+
 workflow LongReadRNABenchmark {
     input {
         File inputBAM
@@ -121,6 +123,7 @@ workflow LongReadRNABenchmark {
         File? referenceAnnotation_full
         String dataType
         String ID_or_Quant_or_Both
+        String Reffree_or_Refguided_or_Both
         Boolean? LRAA_no_norm = false
         Int? LRAA_min_mapping_quality
         Boolean runBambu = true
@@ -151,7 +154,8 @@ workflow LongReadRNABenchmark {
                 referenceAnnotation_reduced = referenceAnnotation_reduced,
                 referenceAnnotation_full = referenceAnnotation_full,
                 dataType = dataType,
-                ID_or_Quant_or_Both = ID_or_Quant_or_Both
+                ID_or_Quant_or_Both = ID_or_Quant_or_Both,
+                Reffree_or_Refguided_or_Both = Reffree_or_Refguided_or_Both
         }
     }
 
@@ -165,7 +169,7 @@ workflow LongReadRNABenchmark {
                 referenceAnnotation_reduced = referenceAnnotation_reduced,
                 referenceAnnotation_full = referenceAnnotation_full,
                 dataType = dataType,
-                ID_or_Quant_or_Both = ID_or_Quant_or_Both
+                ID_or_Quant_or_Both = ID_or_Quant_or_Both,
         }
     }
 
@@ -179,7 +183,7 @@ workflow LongReadRNABenchmark {
                 referenceAnnotation_reduced = referenceAnnotation_reduced,
                 referenceAnnotation_full = referenceAnnotation_full,
                 dataType = dataType,
-                ID_or_Quant_or_Both = ID_or_Quant_or_Both
+                ID_or_Quant_or_Both = ID_or_Quant_or_Both,
         }
     }
 
@@ -193,7 +197,7 @@ workflow LongReadRNABenchmark {
                 referenceAnnotation_reduced = referenceAnnotation_reduced,
                 referenceAnnotation_full = referenceAnnotation_full,
                 dataType = dataType,
-                ID_or_Quant_or_Both = ID_or_Quant_or_Both
+                ID_or_Quant_or_Both = ID_or_Quant_or_Both,
         }
     }
 
@@ -209,7 +213,8 @@ workflow LongReadRNABenchmark {
                 referenceAnnotation_reduced = referenceAnnotation_reduced,
                 referenceAnnotation_full = referenceAnnotation_full,
                 dataType = dataType,
-                ID_or_Quant_or_Both = ID_or_Quant_or_Both
+                ID_or_Quant_or_Both = ID_or_Quant_or_Both,
+                Reffree_or_Refguided_or_Both = Reffree_or_Refguided_or_Both
         }
     }
 
@@ -223,7 +228,8 @@ workflow LongReadRNABenchmark {
                 referenceAnnotation_reduced = referenceAnnotation_reduced,
                 referenceAnnotation_full = referenceAnnotation_full,
                 dataType = dataType,
-                ID_or_Quant_or_Both = ID_or_Quant_or_Both
+                ID_or_Quant_or_Both = ID_or_Quant_or_Both,
+                Reffree_or_Refguided_or_Both = Reffree_or_Refguided_or_Both
         }
     }
 
@@ -237,7 +243,8 @@ workflow LongReadRNABenchmark {
                 referenceAnnotation_reduced = referenceAnnotation_reduced,
                 referenceAnnotation_full = referenceAnnotation_full,
                 dataType = dataType,
-                ID_or_Quant_or_Both = ID_or_Quant_or_Both
+                ID_or_Quant_or_Both = ID_or_Quant_or_Both,
+                Reffree_or_Refguided_or_Both = Reffree_or_Refguided_or_Both
         }
     }
 
@@ -251,7 +258,7 @@ workflow LongReadRNABenchmark {
                 referenceAnnotation_reduced = referenceAnnotation_reduced,
                 referenceAnnotation_full = referenceAnnotation_full,
                 dataType = dataType,
-                ID_or_Quant_or_Both = ID_or_Quant_or_Both
+                ID_or_Quant_or_Both = ID_or_Quant_or_Both,
         }
     }
 
@@ -265,7 +272,7 @@ workflow LongReadRNABenchmark {
                 referenceAnnotation_reduced = referenceAnnotation_reduced,
                 referenceAnnotation_full = referenceAnnotation_full,
                 dataType = dataType,
-                ID_or_Quant_or_Both = ID_or_Quant_or_Both
+                ID_or_Quant_or_Both = ID_or_Quant_or_Both,
         }
     }
 
@@ -279,7 +286,7 @@ workflow LongReadRNABenchmark {
                 referenceAnnotation_reduced = referenceAnnotation_reduced,
                 referenceAnnotation_full = referenceAnnotation_full,
                 dataType = dataType,
-                ID_or_Quant_or_Both = ID_or_Quant_or_Both
+                ID_or_Quant_or_Both = ID_or_Quant_or_Both,
         }
     }
 
@@ -293,7 +300,8 @@ workflow LongReadRNABenchmark {
                 referenceAnnotation_reduced = referenceAnnotation_reduced,
                 referenceAnnotation_full = referenceAnnotation_full,
                 dataType = dataType,
-                ID_or_Quant_or_Both = ID_or_Quant_or_Both
+                ID_or_Quant_or_Both = ID_or_Quant_or_Both,
+                Reffree_or_Refguided_or_Both = Reffree_or_Refguided_or_Both
         }
     }
 
@@ -307,7 +315,7 @@ workflow LongReadRNABenchmark {
                 referenceAnnotation_reduced = referenceAnnotation_reduced,
                 referenceAnnotation_full = referenceAnnotation_full,
                 dataType = dataType,
-                ID_or_Quant_or_Both = ID_or_Quant_or_Both
+                ID_or_Quant_or_Both = ID_or_Quant_or_Both,
         }
     }
 
@@ -337,7 +345,7 @@ workflow LongReadRNABenchmark {
                 referenceAnnotation_reduced = referenceAnnotation_reduced,
                 referenceAnnotation_full = referenceAnnotation_full,
                 dataType = dataType,
-                ID_or_Quant_or_Both = ID_or_Quant_or_Both
+                ID_or_Quant_or_Both = ID_or_Quant_or_Both,
         }
     }
 
@@ -351,10 +359,10 @@ workflow LongReadRNABenchmark {
                 referenceAnnotation_reduced = referenceAnnotation_reduced,
                 referenceAnnotation_full = referenceAnnotation_full,
                 dataType = dataType,
-                ID_or_Quant_or_Both = ID_or_Quant_or_Both
+                ID_or_Quant_or_Both = ID_or_Quant_or_Both,
         }
     }
-
+}
     if (runrelocateOutputs) {
         call relocateOutputs {
             input:
