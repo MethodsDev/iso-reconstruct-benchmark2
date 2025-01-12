@@ -11,6 +11,7 @@ task isoseqTask {
         File? referenceAnnotation_full
         String dataType
         String ID_or_Quant_or_Both
+        String Reffree_or_Refguided_or_Both
         Int cpu = 4
         Int numThreads = 8
         Int memoryGB = 64
@@ -22,37 +23,40 @@ task isoseqTask {
     String OutDir = "IsoSeq_out"
 
     command <<<
-        
         bash ~{monitoringScript} > monitoring.log &
         
         rm -rf ~{OutDir} && mkdir ~{OutDir}
     
         samtools bam2fq ~{inputBAM} > ~{OutDir}/temp.fastq
     
-        mkdir ~{OutDir}/isoseq_reffree
-        pbmm2 align --num-threads ~{numThreads} --preset ISOSEQ --sort ~{referenceGenome} ~{OutDir}/temp.fastq ~{OutDir}/isoseq_reffree/pbmm_aligned.bam
-        isoseq3 collapse --do-not-collapse-extra-5exons ~{OutDir}/isoseq_reffree/pbmm_aligned.bam ~{OutDir}/isoseq_reffree/pbmm_aligned.gff
-        cp ~{OutDir}/isoseq_reffree/pbmm_aligned.gff ~{OutDir}/IsoSeq.gff
+        if [[ "~{Reffree_or_Refguided_or_Both}" == "Reffree" || "~{Reffree_or_Refguided_or_Both}" == "Both" ]]; then
+            mkdir ~{OutDir}/isoseq_reffree
+            pbmm2 align --num-threads ~{numThreads} --preset ISOSEQ --sort ~{referenceGenome} ~{OutDir}/temp.fastq ~{OutDir}/isoseq_reffree/pbmm_aligned.bam
+            isoseq3 collapse --do-not-collapse-extra-5exons ~{OutDir}/isoseq_reffree/pbmm_aligned.bam ~{OutDir}/isoseq_reffree/pbmm_aligned.gff
+            cp ~{OutDir}/isoseq_reffree/pbmm_aligned.gff ~{OutDir}/IsoSeq.gff
+        fi
     
-        if [ -f "~{referenceAnnotation_reduced}" ]; then
-            mkdir ~{OutDir}/isoseq
-            pigeon prepare ~{OutDir}/isoseq_reffree/pbmm_aligned.gff
+        if [[ "~{Reffree_or_Refguided_or_Both}" == "Refguided" || "~{Reffree_or_Refguided_or_Both}" == "Both" ]]; then
+            if [ -f "~{referenceAnnotation_reduced}" ]; then
+                mkdir ~{OutDir}/isoseq
+                pigeon prepare ~{OutDir}/isoseq_reffree/pbmm_aligned.gff
     
-            cp ~{referenceAnnotation_reduced} ~{OutDir}/isoseq/ref_reduced.gtf
-            cp ~{referenceGenome} ~{OutDir}/isoseq/ref_genome.fa
+                cp ~{referenceAnnotation_reduced} ~{OutDir}/isoseq/ref_reduced.gtf
+                cp ~{referenceGenome} ~{OutDir}/isoseq/ref_genome.fa
     
-            pigeon prepare ~{OutDir}/isoseq/ref_reduced.gtf ~{OutDir}/isoseq/ref_genome.fa
+                pigeon prepare ~{OutDir}/isoseq/ref_reduced.gtf ~{OutDir}/isoseq/ref_genome.fa
     
-            pigeon classify ~{OutDir}/isoseq_reffree/pbmm_aligned.sorted.gff ~{OutDir}/isoseq/ref_reduced.sorted.gtf ~{referenceGenome} --fl ~{OutDir}/isoseq_reffree/pbmm_aligned.flnc_count.txt -d ~{OutDir}/isoseq
-            cp ~{OutDir}/isoseq_reffree/pbmm_aligned.sorted.gff ~{OutDir}/isoseq/pbmm_aligned.sorted.gff
-            pigeon filter ~{OutDir}/isoseq/pbmm_aligned_classification.txt --isoforms ~{OutDir}/isoseq/pbmm_aligned.sorted.gff
-            cp ~{OutDir}/isoseq/pbmm_aligned.sorted.filtered_lite.gff ~{OutDir}/IsoSeq_reduced.gff
+                pigeon classify ~{OutDir}/isoseq_reffree/pbmm_aligned.sorted.gff ~{OutDir}/isoseq/ref_reduced.sorted.gtf ~{referenceGenome} --fl ~{OutDir}/isoseq_reffree/pbmm_aligned.flnc_count.txt -d ~{OutDir}/isoseq
+                cp ~{OutDir}/isoseq_reffree/pbmm_aligned.sorted.gff ~{OutDir}/isoseq/pbmm_aligned.sorted.gff
+                pigeon filter ~{OutDir}/isoseq/pbmm_aligned_classification.txt --isoforms ~{OutDir}/isoseq/pbmm_aligned.sorted.gff
+                cp ~{OutDir}/isoseq/pbmm_aligned.sorted.filtered_lite.gff ~{OutDir}/IsoSeq_reduced.gff
+            fi
         fi
     >>>
 
     output {
         File isoseqGTF = "~{OutDir}/IsoSeq.gff"
-        File ?isoseqReducedGTF = "~{OutDir}/IsoSeq_reduced.gff"
+        File? isoseqReducedGTF = "~{OutDir}/IsoSeq_reduced.gff"
         File monitoringLog = "monitoring.log"
     }
 
@@ -75,6 +79,7 @@ workflow isoseqWorkflow {
         File? referenceAnnotation_full
         String dataType
         String ID_or_Quant_or_Both
+        String Reffree_or_Refguided_or_Both
     }
 
     call isoseqTask {
@@ -86,7 +91,8 @@ workflow isoseqWorkflow {
             referenceAnnotation_reduced = referenceAnnotation_reduced,
             referenceAnnotation_full = referenceAnnotation_full,
             dataType = dataType,
-            ID_or_Quant_or_Both = ID_or_Quant_or_Both
+            ID_or_Quant_or_Both = ID_or_Quant_or_Both,
+            Reffree_or_Refguided_or_Both = Reffree_or_Refguided_or_Both
     }
 
     output {
