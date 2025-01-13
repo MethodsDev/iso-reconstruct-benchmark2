@@ -29,14 +29,12 @@ task isoseqTask {
     
         samtools bam2fq ~{inputBAM} > ~{OutDir}/temp.fastq
     
-        if [[ "~{Reffree_or_Refguided_or_Both}" == "Reffree" || "~{Reffree_or_Refguided_or_Both}" == "Both" ]]; then
             mkdir ~{OutDir}/isoseq_reffree
             pbmm2 align --num-threads ~{numThreads} --preset ISOSEQ --sort ~{referenceGenome} ~{OutDir}/temp.fastq ~{OutDir}/isoseq_reffree/pbmm_aligned.bam
             isoseq3 collapse --do-not-collapse-extra-5exons ~{OutDir}/isoseq_reffree/pbmm_aligned.bam ~{OutDir}/isoseq_reffree/pbmm_aligned.gff
             cp ~{OutDir}/isoseq_reffree/pbmm_aligned.gff ~{OutDir}/IsoSeq.gff
-        fi
     
-        if [[ "~{Reffree_or_Refguided_or_Both}" == "Refguided" || "~{Reffree_or_Refguided_or_Both}" == "Both" ]]; then
+        if [ "~{Reffree_or_Refguided_or_Both}" == "Refguided"]; then
             if [ -f "~{referenceAnnotation_reduced}" ]; then
                 mkdir ~{OutDir}/isoseq
                 pigeon prepare ~{OutDir}/isoseq_reffree/pbmm_aligned.gff
