@@ -360,7 +360,6 @@ workflow LongReadRNABenchmark {
                 ID_or_Quant_or_Both = ID_or_Quant_or_Both,
         }
     }
-}
     if (runrelocateOutputs) {
         call relocateOutputs {
             input:
