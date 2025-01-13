@@ -29,10 +29,10 @@ task isoseqTask {
     
         samtools bam2fq ~{inputBAM} > ~{OutDir}/temp.fastq
     
-            mkdir ~{OutDir}/isoseq_reffree
-            pbmm2 align --num-threads ~{numThreads} --preset ISOSEQ --sort ~{referenceGenome} ~{OutDir}/temp.fastq ~{OutDir}/isoseq_reffree/pbmm_aligned.bam
-            isoseq3 collapse --do-not-collapse-extra-5exons ~{OutDir}/isoseq_reffree/pbmm_aligned.bam ~{OutDir}/isoseq_reffree/pbmm_aligned.gff
-            cp ~{OutDir}/isoseq_reffree/pbmm_aligned.gff ~{OutDir}/IsoSeq.gff
+        mkdir ~{OutDir}/isoseq_reffree
+        pbmm2 align --num-threads ~{numThreads} --preset ISOSEQ --sort ~{referenceGenome} ~{OutDir}/temp.fastq ~{OutDir}/isoseq_reffree/pbmm_aligned.bam
+        isoseq3 collapse --do-not-collapse-extra-5exons ~{OutDir}/isoseq_reffree/pbmm_aligned.bam ~{OutDir}/isoseq_reffree/pbmm_aligned.gff
+        cp ~{OutDir}/isoseq_reffree/pbmm_aligned.gff ~{OutDir}/IsoSeq.gff
     
         if [ "~{Reffree_or_Refguided_or_Both}" == "Refguided"]; then
             if [ -f "~{referenceAnnotation_reduced}" ]; then
