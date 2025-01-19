@@ -20,6 +20,11 @@ from gtfparse import read_gtf
 from collections import OrderedDict
 
 
+__PALETTE = dict()  # stores (color, linetype) for each sampleName
+# visit for color options:
+# https://matplotlib.org/stable/gallery/color/named_colors.html
+
+
 def getFiles(path, dataType):
     """
     Identify GTFs and count files in a directory.
@@ -52,10 +57,11 @@ def processGtf(gtf):
     print("-processGtf( {} )\n".format(gtf))
     df_polar = read_gtf(gtf)
     df = pd.DataFrame(df_polar)
+    df = df[df["feature"] == "exon"]
     df.columns = df_polar.columns
     # print(df.head())
 
-    df_exons = df[df["feature"] == "exon"].sort_values(by=["transcript_id", "start"])
+    df_exons = df.sort_values(by=["transcript_id", "start"])
 
     df_exons = df_exons[df_exons.transcript_id.duplicated(keep=False)]
     df_exons["next_transcript"] = df_exons["transcript_id"].shift(-1)
@@ -64,7 +70,7 @@ def processGtf(gtf):
     return df_exons
 
 
-def intronIds(df):
+def intronIds(df, include_strand=True):
     """Derive intron strings from the processed GTF dataframe; df_exons."""
     intronDict = {}  # Dict; {transcript ID: intron string}.
     transcriptGeneDict = {}
@@ -77,6 +83,9 @@ def intronIds(df):
             j["start"],
             j["end"],
         )
+
+        if not include_strand:
+            strand = "?"
 
         if "gene_id" in j:
             transcriptGeneDict[txId] = j["gene_id"]
@@ -551,10 +560,27 @@ def calc_TPR_PPV_F1_for_quantiles(i_sample_TP_FP_FN_df, num_bins, novel_intron_i
     return statistics, meanStats
 
 
-def colorAndLabel(sampleName, is_best=False):
+def set_color_palette(sampleName, color, linetype):
+    __PALETTE[sampleName] = (color, linetype)
+    return
+
+
+def colorAndLabel(sampleName):
     """Assign kwargs to a sample's plotting assets."""
     # Assign the sample its legend label (name), color (c), & line style (l).
 
+    if sampleName not in __PALETTE:
+        raise RuntimeError(
+            "Error, {} not in palette. Use BenchmarkingRoutines.set_color_palette() for it first.".format(
+                sampleName
+            )
+        )
+
+    color, linetype = __PALETTE[sampleName]
+
+    return sampleName, color, linetype
+
+    """
     name = None
 
     if "flair" in sampleName:
@@ -621,10 +647,13 @@ def colorAndLabel(sampleName, is_best=False):
         else:
             l = "solid"
 
+
+
     if name is None:
         raise RuntimeError(f"Error, {sampleName} not recognized for color assignment")
 
     return [name, c, l]
+    """
 
 
 def percentileTicks(n):
