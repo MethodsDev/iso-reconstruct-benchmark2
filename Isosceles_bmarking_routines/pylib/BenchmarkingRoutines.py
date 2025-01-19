@@ -126,11 +126,11 @@ def intronIds(df, include_strand=True):
     return intronDf
 
 
-def parseGTFtoIntronIDs(gtf_filename):
+def parseGTFtoIntronIDs(gtf_filename, include_strand=True):
 
     # Produce a dataframe of transcript IDs and their new intron string IDs.
     df_exons = processGtf(gtf_filename)
-    intronDf = intronIds(df_exons)
+    intronDf = intronIds(df_exons, include_strand)
 
     intronDf.reset_index(inplace=True)
 
@@ -138,7 +138,10 @@ def parseGTFtoIntronIDs(gtf_filename):
 
 
 def parseGTFtoIntronIDsandQuants(
-    gtf_filename, quant_tsv, transcript_id_modifier_func=None
+    gtf_filename,
+    quant_tsv,
+    transcript_id_modifier_func=None,
+    include_strand_in_intronId=True,
 ):
     """
     Merge counts with newly assigned intron string IDs.
@@ -146,7 +149,9 @@ def parseGTFtoIntronIDsandQuants(
     - 'tsv': path to TSV of counts.
     """
 
-    intronDf = parseGTFtoIntronIDs(gtf_filename)
+    intronDf = parseGTFtoIntronIDs(
+        gtf_filename, include_strand=include_strand_in_intronId
+    )
 
     countDf = parseQuantsTSV(quant_tsv)
 
