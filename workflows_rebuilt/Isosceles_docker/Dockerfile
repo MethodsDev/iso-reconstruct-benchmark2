@@ -8,3 +8,10 @@ RUN Rscript -e 'devtools::install_github("powellgenomicslab/Nebulosa", upgrade =
 
 RUN Rscript -e 'devtools::install_github("Genentech/Isosceles", ref = "0.2.0", dependencies = TRUE, upgrade = TRUE, INSTALL_opts = "--install-tests")'
 
+RUN Rscript -e 'BiocManager::install(c("optparse"))'
+
+
+COPY Isosceles-runner.Rscript /usr/local/bin
+
+ENTRYPOINT ["/usr/local/bin/Isosceles-runner.Rscript"]
+
