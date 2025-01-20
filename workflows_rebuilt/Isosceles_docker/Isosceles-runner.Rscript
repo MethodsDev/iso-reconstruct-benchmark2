@@ -1,35 +1,36 @@
 #!/usr/bin/env Rscript
 
-options(echo=TRUE) 
+#options(echo=TRUE) 
 
 suppressMessages({
     library(tidyverse)
     library(glue)
     library(Isosceles)
-    library(optparse)
+    library(argparse)
 })
 
 # Set the number of CPUs/threads for the analysis
 ncpu <- 1
 
-
 # Define command line options
-option_list <- list(
-  make_option(c("--bam"), type = "character", default = NULL, help = "Path to BAM file", metavar = "character"),
-  make_option(c("--gtf"), type = "character", default = NULL, help = "Path to GTF file", metavar = "character"),
-  make_option(c("--genome"), type = "character", default = NULL, help = "Path to genome FASTA file", metavar = "character"),
-  make_option(c("--output_prefix"), type = "character", default = NULL, help = "output file prefix", metavar = "character"),
-  make_option(c("--quant_only"), action='store_true', default=FALSE, help="just perform quant only, no novel discovery")
-)
+parser = ArgumentParser()
+
+parser$add_argument(c("--bam"), type = "character", default = NULL, help = "Path to BAM file", metavar = "character", required=TRUE)
+parser$add_argument(c("--gtf"), type = "character", default = NULL, help = "Path to GTF file", metavar = "character")
+parser$add_argument(c("--genome"), type = "character", default = NULL, help = "Path to genome FASTA file", metavar = "character", required=TRUE)
+parser$add_argument(c("--output_prefix"), type = "character", default = NULL, help = "output file prefix", metavar = "character", required=TRUE)
+parser$add_argument(c("--quant_only"), action='store_true', default=FALSE, help="just perform quant only, no novel discovery")
+
 
 # Parse command line options
-opt <- parse_args(OptionParser(option_list = option_list))
+args = parser$parse_args()
 
-bam_file = opt$bam
-gtf_file = opt$gtf
-genome_file = opt$genome
-output_prefix = opt$output_prefix
-quant_only_mode = opt$quant_only
+bam_file = args$bam
+gtf_file = args$gtf
+genome_fasta_file = args$genome
+output_prefix = args$output_prefix
+quant_only_mode = args$quant_only
+
 
 ######################
 # Prep transcript data
@@ -42,11 +43,12 @@ min_bam_splice_read_count <- 2
 min_bam_splice_fraction <- 0.1
 bin_size <- 50
 
-
+message("Parsing bam file: ", bam_file)
 bam_parsed <- bam_to_read_structures(bam_file)
 
 transcript_data <- prepare_transcripts(
-    gtf_file = gtf_file, genome_fasta_file = genome_fasta_file,
+    gtf_file = gtf_file,
+    genome_fasta_file = genome_fasta_file,
     bam_parsed = bam_parsed,
     min_intron_length = min_intron_length,
     max_intron_length = max_intron_length,
@@ -73,9 +75,11 @@ if (quant_only_mode) {
    run_mode <- "de_novo_loose" 
 }
 
+message("Preparing bam_to_tcc under mode: ", run_mode)
 
 se_tcc <- bam_to_tcc(
-    bam_files = bam_file, transcript_data = transcript_data,
+    bam_files = bam_file,
+    transcript_data = transcript_data,
     run_mode = run_mode,
     min_read_count = min_read_count,
     min_relative_expression = min_relative_expression,
@@ -91,20 +95,29 @@ em.maxiter <- 250
 em.conv <- 0.01
 use_length_normalization <- TRUE
 
+message("Running quant")
+
 se_tcc <- readRDS(file.path(result_dir, glue("{sample_id}_quant_se_tcc.rds")))
 se_transcript <- tcc_to_transcript(
-    se_tcc = se_tcc, em.maxiter = em.maxiter, em.conv = em.conv,
-    use_length_normalization = use_length_normalization, ncpu = ncpu
+    se_tcc = se_tcc,
+    em.maxiter = em.maxiter,
+    em.conv = em.conv,
+    use_length_normalization = use_length_normalization,
+    ncpu = ncpu
 )
 
 
 ##########################
 # Write quants output file
 
+
 if (quant_only_mode) {
    quants_outfile = paste0(output_prefix, ".isosceles.counts")
 } else {
    quants_outfile = paste0(output_prefix, ".isosceles.refguided_novel_ID.counts")
+}              
+
+message("writing quants file: ", quants_outfile)
 
 counts = assay(se_transcript, "counts")
 counts <- as.data.frame(counts)
@@ -122,7 +135,7 @@ write.table(counts, file=outfile, row.names=F, sep="\t", quote=F)
 
 if (! quant_only_mode) {
    output_gtf_filename = paste0(output_prefix, ".isosceles.refguided_novel_ID.gtf")
-   message("writing: ", output_gtf_filename)
+   message("writing GTF: ", output_gtf_filename)
    export_gtf(se_transcript, output_gtf_filename)
 }
 
