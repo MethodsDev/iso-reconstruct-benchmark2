@@ -10,7 +10,7 @@ suppressMessages({
 })
 
 # Set the number of CPUs/threads for the analysis
-ncpu <- 1
+
 
 # Define command line options
 parser = ArgumentParser()
@@ -20,6 +20,7 @@ parser$add_argument(c("--gtf"), type = "character", default = NULL, help = "Path
 parser$add_argument(c("--genome"), type = "character", default = NULL, help = "Path to genome FASTA file", metavar = "character", required=TRUE)
 parser$add_argument(c("--output_prefix"), type = "character", default = NULL, help = "output file prefix", metavar = "character", required=TRUE)
 parser$add_argument(c("--quant_only"), action='store_true', default=FALSE, help="just perform quant only, no novel discovery")
+parser$add_argument(c("--ncpu"), type="integer", default=1, help="number of threads")
 
 
 # Parse command line options
@@ -30,7 +31,7 @@ gtf_file = args$gtf
 genome_fasta_file = args$genome
 output_prefix = args$output_prefix
 quant_only_mode = args$quant_only
-
+ncpu = args$ncpu
 
 ######################
 # Prep transcript data
