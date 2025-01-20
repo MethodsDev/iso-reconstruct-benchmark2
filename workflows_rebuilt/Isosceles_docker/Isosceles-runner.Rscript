@@ -36,6 +36,8 @@ ncpu = args$ncpu
 ######################
 # Prep transcript data
 
+names(bam_file) = 'sample_id'
+
 min_intron_length <- 30
 max_intron_length <- 5e6
 known_intron_motifs <- c("GT-AG")
@@ -85,7 +87,8 @@ se_tcc <- bam_to_tcc(
     min_read_count = min_read_count,
     min_relative_expression = min_relative_expression,
     extend_spliced_transcripts = extend_spliced_transcripts,
-    chunk_size = chunk_size, ncpu = ncpu
+    chunk_size = chunk_size,
+    ncpu = ncpu
 )
 
 
@@ -98,7 +101,6 @@ use_length_normalization <- TRUE
 
 message("Running quant")
 
-se_tcc <- readRDS(file.path(result_dir, glue("{sample_id}_quant_se_tcc.rds")))
 se_transcript <- tcc_to_transcript(
     se_tcc = se_tcc,
     em.maxiter = em.maxiter,
