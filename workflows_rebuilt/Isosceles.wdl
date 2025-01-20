@@ -1,6 +1,5 @@
 version 1.0
 
-# This task uses Isosceles version 0.2.1
 task isoscelesTask {
     input {
         String sample_id
