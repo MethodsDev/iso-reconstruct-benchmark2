@@ -16,7 +16,7 @@ suppressMessages({
 parser = ArgumentParser()
 
 parser$add_argument(c("--bam"), type = "character", default = NULL, help = "Path to BAM file", metavar = "character", required=TRUE)
-parser$add_argument(c("--gtf"), type = "character", default = NULL, help = "Path to GTF file", metavar = "character")
+parser$add_argument(c("--gtf"), type = "character", default = NULL, help = "Path to GTF file", metavar = "character", required=TRUE)
 parser$add_argument(c("--genome"), type = "character", default = NULL, help = "Path to genome FASTA file", metavar = "character", required=TRUE)
 parser$add_argument(c("--output_prefix"), type = "character", default = NULL, help = "output file prefix", metavar = "character", required=TRUE)
 parser$add_argument(c("--quant_only"), action='store_true', default=FALSE, help="just perform quant only, no novel discovery")
@@ -130,7 +130,7 @@ counts <- counts %>%
     rownames_to_column(var = "transcript_id") %>%
     select(transcript_id, count)
 
-write.table(counts, file=outfile, row.names=F, sep="\t", quote=F)
+write.table(counts, file=quants_outfile, row.names=F, sep="\t", quote=F)
 
 
 ########################
