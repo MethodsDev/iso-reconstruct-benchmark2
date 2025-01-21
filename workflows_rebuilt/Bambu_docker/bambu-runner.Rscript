@@ -57,10 +57,10 @@ if (quant_only_mode) {
      outdir = "bambu_RefFreeID"
      message("ref-free ID, setting NDR to 1.0")
      NDR=1.0
-     output_prefix = paste0(output_prefix, "Ref-Free")
+     output_prefix = paste0(output_prefix, ".Ref-Free")
    } else {
      outdir = "bambu_RefGuidedId"
-     output_prefix = paste0(output_prefix, "Ref-Guided")
+     output_prefix = paste0(output_prefix, ".Ref-Guided")
    }
    dir.create(outdir)
 
