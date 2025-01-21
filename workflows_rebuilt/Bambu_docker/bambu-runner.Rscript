@@ -1,0 +1,82 @@
+#!/usr/bin/env Rscript
+
+#options(echo=TRUE) 
+
+suppressMessages({
+    library(bambu)
+    library(argparse)
+})
+
+# Set the number of CPUs/threads for the analysis
+
+
+# Define command line options
+parser = ArgumentParser()
+
+parser$add_argument(c("--bam"), type = "character", default = NULL, help = "Path to BAM file", metavar = "character", required=TRUE)
+parser$add_argument(c("--gtf"), type = "character", default = NULL, help = "Path to GTF file", metavar = "character", required=FALSE)
+parser$add_argument(c("--genome"), type = "character", default = NULL, help = "Path to genome FASTA file", metavar = "character", required=TRUE)
+parser$add_argument(c("--output_prefix"), type = "character", default = NULL, help = "output file prefix", metavar = "character", required=TRUE)
+parser$add_argument(c("--quant_only"), action='store_true', default=FALSE, help="just perform quant only, no novel discovery")
+parser$add_argument(c("--ncpu"), type="integer", default=1, help="number of threads")
+parser$add_argument(c("--NDR"), type="double", default=NULL, help="NDR noise discovery rate")
+
+
+# Parse command line options
+args = parser$parse_args()
+
+bam_file = args$bam
+gtf_file = args$gtf
+genome_fasta_file = args$genome
+output_prefix = args$output_prefix
+quant_only_mode = args$quant_only
+ncpu = args$ncpu
+NDR = args$NDR
+
+if (! is.null(gtf_file)) {
+   gtf_file = prepareAnnotations(gtf_file)
+}
+
+if (quant_only_mode) {
+   if (is.null(gtf_file)) {
+      stop("Error, must specify gtf file as input if quant_only mode")
+   }
+
+   bambu.quantOnly <- bambu(reads = bam_file, annotations = gtf_file, genome = genome_fasta_file, discovery = FALSE, ncore=ncpu)
+   outdir = "bambu_QuantOnly"
+   dir.create(outdir)
+   writeBambuOutput(bambu.quantOnly, path = outdir)
+
+   output_prefix = paste0(output_prefix, ".quant_only")
+
+} else {
+
+   # Isoform ID
+   
+   if (is.null(gtf_file)) {
+     outdir = "bambu_RefFreeID"
+     message("ref-free ID, setting NDR to 1.0")
+     NDR=1.0
+     output_prefix = paste0(output_prefix, "Ref-Free")
+   } else {
+     outdir = "bambu_RefGuidedId"
+     output_prefix = paste0(output_prefix, "Ref-Guided")
+   }
+   dir.create(outdir)
+
+   bambu.ID = bambu(reads = bam_file, annotations = gtf_file, genome = genome_fasta_file, discovery = TRUE, ncore = ncpu, NDR=NDR)
+   writeBambuOutput(bambu.ID, path = outdir)
+
+   bambu_gtf_filename = paste0(outdir, "/extended_annotations.gtf")
+   new_gtf_filename = paste0(output_prefix, ".bambu.gtf")
+   file.copy(bambu_gtf_filename, new_gtf_filename)
+
+}
+
+quant_filename = paste0(outdir, "/counts_transcript.txt")
+new_quant_filename = paste0(output_prefix, ".bambu.counts.txt")
+file.copy(quant_filename, new_quant_filename)
+
+message("done.")
+quit(save = "no", status = 0, runLast = FALSE)
+
