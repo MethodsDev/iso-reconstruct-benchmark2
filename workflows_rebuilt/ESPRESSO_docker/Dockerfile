@@ -27,5 +27,5 @@ RUN perl -e 'use threads; print("Perl threading support: ok\n")' && \
     blastn -version && \
     samtools --version
 
-# Set the entrypoint to bash
-ENTRYPOINT ["/bin/bash"]
+COPY ESPRESSO-runner.py /usr/local/bin
+
