@@ -61,6 +61,7 @@ workflow bambuWorkflow {
 
     call bambuTask {
         input:
+            sample_id = sample_id,
             inputBAM = inputBAM,
             inputBAMIndex = inputBAMIndex,
             referenceGenomeFasta = referenceGenomeFasta,
