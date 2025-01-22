@@ -8,7 +8,7 @@ task flairTask {
         File inputBAMIndex
         File referenceGenomeFasta
         File referenceGenomeIndex
-        File? referenceAnnotationGTF
+        File referenceAnnotationGTF
         Boolean quant_only
         
         Int cpu = 4
@@ -33,7 +33,7 @@ task flairTask {
     >>>
 
     output {
-        File flair_gtf = "~{sample_id}.flair.gtf"
+        File? flair_gtf = "~{sample_id}.flair.gtf"
         File flair_counts = "~{sample_id}.flair.counts.tsv"
     }
 
@@ -54,7 +54,8 @@ workflow flairWorkflow {
         File inputBAMIndex
         File referenceGenomeFasta
         File referenceGenomeIndex
-        File? referenceAnnotationGTF
+        File referenceAnnotationGTF
+        Boolean quant_only
     }
 
     call flairTask {
@@ -64,11 +65,12 @@ workflow flairWorkflow {
             inputBAMIndex = inputBAMIndex,
             referenceGenomeFasta = referenceGenomeFasta,
             referenceGenomeIndex = referenceGenomeIndex,
-            referenceAnnotationGTF = referenceAnnotationGTF
+            referenceAnnotationGTF = referenceAnnotationGTF,
+            quant_only = quant_only
     }
 
     output {
-        File flair_gtf = flairTask.flair_gtf
+        File? flair_gtf = flairTask.flair_gtf
         File flair_counts = flairTask.flair_counts
     }
 }
