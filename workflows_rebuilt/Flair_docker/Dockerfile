@@ -22,5 +22,12 @@ RUN flair --help && \
     samtools --version && \
     bam2Bed12 --help
 
-# Set the entrypoint to bash
-ENTRYPOINT ["/bin/bash"]
+
+WORKDIR /usr/local/src
+RUN wget https://github.com/gpertea/gffread/releases/download/v0.12.7/gffread-0.12.7.Linux_x86_64.tar.gz && \
+    tar xvf gffread-0.12.7.Linux_x86_64.tar.gz && \
+    mv gffread-0.12.7.Linux_x86_64/gffread /usr/local/bin
+
+
+COPY flair-runner.py /usr/local/bin
+
