@@ -20,12 +20,7 @@ def main():
     parser.add_argument(
         "--bam", type=str, required=True, help="input bam alignment file"
     )
-    parser.add_argument(
-        "--data_type",
-        type=str,
-        required=True,
-        choices=["assembly", "pacbio_ccs", "nanopore"],
-    )
+
     parser.add_argument(
         "--ncpu", type=int, required=False, default=4, help="num threads"
     )
@@ -34,71 +29,66 @@ def main():
 
     output_prefix = args.output_prefix
     genome_fasta = args.genome
-    gtf_file = args.gtf
+    ref_gtf_file = args.gtf
     bam_file = args.bam
     num_threads = args.ncpu
-    quant_only_flag = args.quant_only
-
-    if quant_only_flag and gtf_file is None:
-        raise RuntimeError("Error, must specify --gtf if --quant_only set")
 
     ## begin
 
-    run_cmd(f"samtools bam2fq ~{bam_file} > temp.fastq")
+    run_cmd(f"samtools bam2fq {bam_file} > temp.fastq")
 
+    # run pbmm2
     cmd = " ".join(
         [
             "pbmm2 align",
             f"--num-threads {num_threads}",
             "--preset ISOSEQ",
             "--sort",
-            f"{referenceGenomeFasta}",
+            f"{genome_fasta}",
             "temp.fastq",
             "pbmm_aligned.bam",
         ]
     )
+    run_cmd(cmd)
 
     # Ref-free isoform ID (needed for ref-guided too)
+    denovo_gff_file = f"{output_prefix}.IsoSeq.ref-free.ID.gff"
     cmd = " ".join(
         [
             "isoseq3 collapse",
             "--do-not-collapse-extra-5exons",
             "pbmm_aligned.bam",
-            f"{output_prefix}.IsoSeq.ref-free.ID.gff",
+            denovo_gff_file,
         ]
     )
 
     run_cmd(cmd)
 
-    if gtf_file is not None:
+    if ref_gtf_file is not None:
+
+        #########################
         # ref-filtered isoform ID
-        cmd = "pigeon prepare {output_prefix}.IsoSeq.ref-free.ID.gff"
+
+        # prep de novo gff file
+        cmd = f"pigeon prepare {denovo_gff_file}"
         run_cmd(cmd)
 
-        cmd = "pigeon prepare {gtf_file} {genome_fasta}"
+        sorted_denovo_gff_file = denovo_gff_file
+        sorted_denovo_gff_file = sorted_denovo_gff_file.replace(".gff", ".sorted.gff")
+
+        # prep ref gtf file
+        cmd = f"pigeon prepare {ref_gtf_file} {genome_fasta}"
         run_cmd(cmd)
+
+        sorted_ref_gtf_file = ref_gtf_file
+        sorted_ref_gtf_file = sorted_ref_gtf_file.replace(".gtf", ".sorted.gtf")
 
         cmd = " ".join(
             [
                 "pigeon classify",
-                "~{output_prefix}.IsoSeq.ref-free.ID.gff",
-                f"{gtf_file}",
-                f"{referenceGenomeFasta}",
-                "--fl pbmm_aligned.flnc_count.txt",
-                "-d .",
-            ]
-        )
-        run_cmd(cmd)
-
-        sorted_gff_file = gff_file
-        sorted_gff_file = sorted_gff_file.replace(".gff", ".sorted.gff")
-
-        cmd = " ".join(
-            [
-                "pigeon classify",
-                "{output_prefix}.IsoSeq.ref-free.ID.sorted.gff",
-                f"{sorted_gff_file}",
-                f"{referenceGenomeFasta}",
+                sorted_ref_gtf_file,
+                sorted_denovo_gff_file,
+                genome_fasta,
                 "--fl pbmm_aligned.flnc_count.txt",
                 "-d .",
             ]
@@ -109,13 +99,18 @@ def main():
             [
                 "pigeon filter",
                 "pbmm_aligned_classification.txt",
-                f"--isoforms {output_prefix}.IsoSeq.ref-free.ID.sorted.gff",
+                f"--isoforms {sorted_denovo_gff_file}",
             ]
         )
         run_cmd(cmd)
 
+        sorted_filtered_denovo_gff_file = sorted_denovo_gff_file
+        sorted_filtered_denovo_gff_file = sorted_filtered_denovo_gff_file.replace(
+            ".sorted.gff", ".sorted.filtered_lite.gff"
+        )
+
         run_cmd(
-            f"cp {output_prefix}.IsoSeq.ref-free.ID.sorted.filtered_lite.gff ~{output_prefix}.IsoSeq.ref-filtered.ID.gff"
+            f"cp {sorted_filtered_denovo_gff_file} {output_prefix}.IsoSeq.ref-filtered.ID.gff"
         )
 
     sys.exit(0)
