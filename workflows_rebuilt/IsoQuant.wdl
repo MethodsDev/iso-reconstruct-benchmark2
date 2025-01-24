@@ -27,7 +27,7 @@ task isoquantTask {
 
         IsoQuant-runner.py  --genome ~{referenceGenomeFasta} \
                             --bam ~{inputBAM} \
-                            --gtf ~{referenceAnnotationGTF} \
+                            ~{"--gtf " + referenceAnnotationGTF} \
                             --data_type ~{data_type} \
                             --output_prefix ~{sample_id} \
                             ~{quant_only_flag}

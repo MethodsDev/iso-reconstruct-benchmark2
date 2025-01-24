@@ -81,7 +81,7 @@ def main():
     else:
         counts_file = f"{output_dir}/OUT/OUT.transcript_model_counts.tsv"
 
-    run_cmd(f"cp {counts_file} {output_prefix}.counts.tsv")
+    run_cmd(f"cp {counts_file} {output_prefix}.IsoQuant.counts.tsv")
 
     run_cmd(f"ln -sf {output_dir}  isoquant_output_dir")
 
