@@ -53,3 +53,7 @@ RUN pip install editdistance
 WORKDIR $SRC
 
 RUN git clone https://github.com/LuyiTian/FLAMES.git
+
+COPY FLAMES-runner.py /usr/local/bin/
+
+COPY *.json /usr/local/bin/
