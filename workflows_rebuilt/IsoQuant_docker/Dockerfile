@@ -43,7 +43,8 @@ WORKDIR /usr/local/src
 
 RUN wget https://github.com/ablab/IsoQuant/releases/download/v3.6.3/IsoQuant-3.6.3.tar.gz && \
          tar xvf IsoQuant-3.6.3.tar.gz && \
-         cd IsoQuant-3.6.3 && \
+         mv IsoQuant-3.6.3 IsoQuant && \
+         cd IsoQuant && \
          pip install -r requirements.txt
          
 #RUN git clone https://github.com/ablab/IsoQuant.git && \
