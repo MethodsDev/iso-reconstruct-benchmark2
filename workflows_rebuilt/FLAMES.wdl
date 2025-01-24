@@ -3,158 +3,37 @@ version 1.0
 # This task uses FLAMES-py version 0.1
 task flamesTask {
     input {
+        String sample_id
         File inputBAM
         File inputBAMIndex
-        File referenceGenome
+        File referenceGenomeFasta
         File referenceGenomeIndex
-        File? referenceAnnotation_reduced
-        File? referenceAnnotation_full
-        String dataType
-        String ID_or_Quant_or_Both
+        File referenceAnnotationGTF
+        String data_type
+        
         Int cpu = 4
         Int numThreads = 8
         Int memoryGB = 64
         Int diskSizeGB = 250
-        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/flames-py@sha256:3ce1f2c8c20088945ce885dcbf486ae377873e30975dad55e54235c3873648d4"
-        File monitoringScript = "gs://mdl-ctat-genome-libs/terra_scripts/cromwell_monitoring_script2.sh"
+        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/flames-py"
     }
     
-    String OutDir = "FLAMES_out"
 
     command <<<
-        bash ~{monitoringScript} > monitoring.log &
-        mkdir -p ~{OutDir}
-        mkdir -p ~{OutDir}_Quant
 
+        set -ex
 
-        if [ "~{dataType}" = "pacbio_ccs" ]; then
-            cat > ~{OutDir}/config.json << EOF
-            {
-                "comment":"this is the default config for nanopore single cell long read data using 10X RNA-seq kit. use splice annotation in alignment.",
-                "pipeline_parameters":{
-                    "do_genome_alignment":true,
-                    "do_isoform_identification":true,
-                    "do_read_realignment":true,
-                    "do_transcript_quantification":true
-                },
-                "global_parameters":{
-                    "generate_raw_isoform":false,
-                    "has_UMI":true
-                },
-                "isoform_parameters":{
-                    "MAX_DIST":10,
-                    "MAX_TS_DIST":120,
-                    "MAX_SPLICE_MATCH_DIST":10,
-                    "min_fl_exon_len":40,
-                    "Max_site_per_splice":3,
-                    "Min_sup_cnt":5,
-                    "Min_cnt_pct":0.001,
-                    "Min_sup_pct":0.2,
-                    "strand_specific":1,
-                    "remove_incomp_reads":4,
-                    "random_seed":666666
-                },
-                "alignment_parameters":{
-                    "use_junctions":true,
-                    "no_flank":false,
-                    "seed":2022
-                },
-                "realign_parameters":{
-                    "use_annotation":true
-                },
-                "transcript_counting":{
-                    "min_tr_coverage":0.4,
-                    "min_read_coverage":0.4
-                }
-            }
-EOF
-        else
-            cat > ~{OutDir}/config.json << EOF
-            {
-                "comment":"this is the default config for nanopore single cell long read data using 10X RNA-seq kit. use splice annotation in alignment.",
-                "pipeline_parameters":{
-                    "do_genome_alignment":true,
-                    "do_isoform_identification":true,
-                    "do_read_realignment":true,
-                    "do_transcript_quantification":true
-                },
-                "global_parameters":{
-                    "generate_raw_isoform":false,
-                    "has_UMI":true
-                },
-                "isoform_parameters":{
-                    "MAX_DIST":10,
-                    "MAX_TS_DIST":120,
-                    "MAX_SPLICE_MATCH_DIST":10,
-                    "min_fl_exon_len":40,
-                    "Max_site_per_splice":3,
-                    "Min_sup_cnt":5,
-                    "Min_cnt_pct":0.001,
-                    "Min_sup_pct":0.2,
-                    "strand_specific":0,
-                    "remove_incomp_reads":4,
-                    "random_seed":666666
-                },
-                "alignment_parameters":{
-                    "use_junctions":true,
-                    "no_flank":false,
-                    "seed":2022
-                },
-                "realign_parameters":{
-                    "use_annotation":true
-                },
-                "transcript_counting":{
-                    "min_tr_coverage":0.4,
-                    "min_read_coverage":0.4
-                }
-            }
-EOF
-        fi
-
-        if [ "~{ID_or_Quant_or_Both}" = "ID" -o "~{ID_or_Quant_or_Both}" = "Both" ] && [ -n "~{referenceAnnotation_reduced}" ]; then
-            rm -rf ~{OutDir}/fq && mkdir ~{OutDir}/fq
-            samtools bam2fq ~{inputBAM} > ~{OutDir}/fq/temp.fastq
-
-            python3 /usr/local/src/FLAMES/python/bulk_long_pipeline.py \
-            --gff3 ~{referenceAnnotation_reduced} \
-            --genomefa ~{referenceGenome} \
-            --fq_dir ~{OutDir}/fq \
-            --inbam ~{inputBAM} \
-            --outdir ~{OutDir} \
-            --config_file ~{OutDir}/config.json
-            ls -l ~{OutDir}/
-            mv ~{OutDir}/isoform_annotated.gff3 ~{OutDir}/flamesReducedGTF.gff3
-
-  #          gunzip ~{OutDir}/transcript_count.csv.gz
-  #          mv ~{OutDir}/transcript_count.csv ~{OutDir}/flamesReducedGTFCounts.csv
-        fi
-
-
-
- #       if [ "~{ID_or_Quant_or_Both}" = "Quant" -o "~{ID_or_Quant_or_Both}" = "Both" ] && [ -n "~{referenceAnnotation_full}" ]; then
-
- #           python3 /usr/local/src/FLAMES/python/bulk_long_pipeline.py \
- #           --gff3 ~{referenceAnnotation_full} \
- #           --genomefa ~{referenceGenome} \
- #           --fq_dir ~{OutDir}/fq \
- #           --inbam ~{inputBAM} \
- #           --outdir ~{OutDir}_Quant \
- #           --config_file ~{OutDir}/config.json
- #           ls -l ~{OutDir}_Quant/
- #           mv ~{OutDir}_Quant/isoform_annotated.gff3 ~{OutDir}_Quant/flamesFullGTF.gff3
-
-#            gunzip ~{OutDir}_Quant/transcript_count.csv.gz
-#            mv ~{OutDir}_Quant/transcript_count.csv ~{OutDir}/flamesCounts.csv
-#        fi
+        FLAMES-runner.py --output_prefix ~{sample_id} \
+                         --genome ~{referenceGenomeFasta} \
+                         --bam ~{inputBAM} \
+                         --gtf ~{referenceAnnotationGTF} \
+                         --data_type ~{data_type}
+                
     >>>
 
     output {
-        File? flamesReducedGTF = "~{OutDir}/flamesReducedGTF.gff3"
-        File monitoringLog = "monitoring.log"
-#        File? flamesReducedGTFCounts = "~{OutDir}/flamesReducedGTFCounts.csv"
-#        File? flamesFullGTF = "~{OutDir}_Quant/flamesFullGTF.gff3"
-#        File? flamesCounts = "~{OutDir}_Quant/flamesCounts.csv"
-
+        File flames_gff3 = "~{sample_id}.FLAMES.gff3"
+        File flames_counts = "~{sample_id}.FLAMES.counts.tsv"
     }
 
     runtime {
@@ -168,33 +47,29 @@ EOF
 
 workflow flamesWorkflow {
     input {
+        String sample_id
         File inputBAM
         File inputBAMIndex
-        File referenceGenome
+        File referenceGenomeFasta
         File referenceGenomeIndex
-        File? referenceAnnotation_reduced
-        File? referenceAnnotation_full
-        String dataType
-        String ID_or_Quant_or_Both
+        File referenceAnnotationGTF
+        String data_type
     }
 
     call flamesTask {
         input:
+            sample_id = sample_id,
             inputBAM = inputBAM,
             inputBAMIndex = inputBAMIndex,
-            referenceGenome = referenceGenome,
+            referenceGenomeFasta = referenceGenomeFasta,
             referenceGenomeIndex = referenceGenomeIndex,
-            referenceAnnotation_reduced = referenceAnnotation_reduced,
-            referenceAnnotation_full = referenceAnnotation_full,
-            dataType = dataType,
-            ID_or_Quant_or_Both = ID_or_Quant_or_Both
+            referenceAnnotationGTF = referenceAnnotationGTF,
+            data_type = data_type
     }
 
     output {
-        File? flamesReducedGTF = flamesTask.flamesReducedGTF
-        File monitoringLog = flamesTask.monitoringLog
-#        File? flamesReducedGTFCounts = flamesTask.flamesReducedGTFCounts
-#        File? flamesFullGTF = flamesTask.flamesFullGTF
-#        File? flamesCounts = flamesTask.flamesCounts
+        File flames_gff3 = flamesTask.flames_gff3
+        File flames_counts = flamesTask.flames_counts
     }
+
 }
