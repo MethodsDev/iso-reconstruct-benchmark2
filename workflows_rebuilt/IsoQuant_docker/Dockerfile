@@ -39,7 +39,17 @@ RUN wget https://github.com/samtools/samtools/releases/download/1.16.1/samtools-
 	make && \
 	make install
 
-RUN git clone https://github.com/ablab/IsoQuant.git && \
-	cd IsoQuant && \
-	git checkout latest && \
-	pip install -r requirements.txt
+WORKDIR /usr/local/src
+
+RUN wget https://github.com/ablab/IsoQuant/releases/download/v3.6.3/IsoQuant-3.6.3.tar.gz && \
+         tar xvf IsoQuant-3.6.3.tar.gz && \
+         cd IsoQuant-3.6.3 && \
+         pip install -r requirements.txt
+         
+#RUN git clone https://github.com/ablab/IsoQuant.git && \
+#	cd IsoQuant && \
+#	git checkout latest && \
+#	pip install -r requirements.txt
+
+
+COPY IsoQuant-runner.py /usr/local/bin/
