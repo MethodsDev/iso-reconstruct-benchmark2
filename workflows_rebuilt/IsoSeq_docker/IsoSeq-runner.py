@@ -28,12 +28,14 @@ def main():
     args = parser.parse_args()
 
     output_prefix = args.output_prefix
-    genome_fasta = args.genome
-    ref_gtf_file = args.gtf
-    bam_file = args.bam
+    genome_fasta = os.path.abspath(args.genome)
+    ref_gtf_file = os.path.abspath(args.gtf) if args.gtf is not None else None
+    bam_file = os.path.abspath(args.bam)
     num_threads = args.ncpu
 
     ## begin
+
+    os.chdir(os.path.dirname(output_prefix))
 
     run_cmd(f"samtools bam2fq {bam_file} > temp.fastq")
 
@@ -83,14 +85,17 @@ def main():
         sorted_ref_gtf_file = ref_gtf_file
         sorted_ref_gtf_file = sorted_ref_gtf_file.replace(".gtf", ".sorted.gtf")
 
+        flnc_count_file = denovo_gff_file
+        flnc_count_file = flnc_count_file.replace(".gff", ".flnc_count.txt")
+
         cmd = " ".join(
             [
                 "pigeon classify",
-                sorted_ref_gtf_file,
                 sorted_denovo_gff_file,
+                sorted_ref_gtf_file,
                 genome_fasta,
-                "--fl pbmm_aligned.flnc_count.txt",
-                "-d .",
+                f"--fl {flnc_count_file}",
+                f"-o {os.path.basename(output_prefix)}",
             ]
         )
         run_cmd(cmd)
@@ -98,7 +103,7 @@ def main():
         cmd = " ".join(
             [
                 "pigeon filter",
-                "pbmm_aligned_classification.txt",
+                f"{output_prefix}_classification.txt",
                 f"--isoforms {sorted_denovo_gff_file}",
             ]
         )
