@@ -41,10 +41,14 @@ RUN wget https://github.com/samtools/samtools/releases/download/1.16.1/samtools-
 	make install
 
 # StringTie
-RUN wget http://ccb.jhu.edu/software/stringtie/dl/stringtie-2.2.1.tar.gz && \
-	tar xvf stringtie-2.2.1.tar.gz && \
-	cd stringtie-2.2.1/ && \
+ENV STRINGTIE_VERSION=2.2.3
+RUN wget http://ccb.jhu.edu/software/stringtie/dl/stringtie-${STRINGTIE_VERSION}.tar.gz && \
+	tar xvf stringtie-${STRINGTIE_VERSION}.tar.gz && \
+	cd stringtie-${STRINGTIE_VERSION}/ && \
 	make release && \
 	cp stringtie $BIN/
 
-COPY prepDE.py /usr/local/bin/prepDE.py
+#COPY prepDE.py /usr/local/bin/prepDE.py
+
+COPY stringtie-runner.py /usr/local/bin
+COPY extract_stringtie_quants.py /usr/local/bin
