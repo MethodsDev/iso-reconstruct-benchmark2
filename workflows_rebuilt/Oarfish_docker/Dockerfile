@@ -1,19 +1,7 @@
 # Use the official Rust nightly image as a base
 FROM rustlang/rust:nightly
 
-# Set the current working directory in the container
-WORKDIR /usr/src/oarfish
 
-# Set environment variables
-ENV SRC=/usr/local/src
-ENV BIN=/usr/local/bin
-ENV PATH="/usr/src/oarfish/target/release:/opt/conda/bin:${PATH}"
-
-# Clone the Oarfish repository
-RUN git clone https://github.com/COMBINE-lab/oarfish.git .
-
-# Build the project
-RUN cargo +nightly build --release
 
 # Download and install Miniconda
 RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
@@ -32,6 +20,20 @@ RUN wget https://github.com/samtools/samtools/releases/download/1.16.1/samtools-
 	make && \
 	make install
 
+
+# Set environment variables
+ENV SRC=/usr/local/src
+ENV BIN=/usr/local/bin
+ENV PATH="/usr/src/oarfish/target/release:/opt/conda/bin:${PATH}"
+
+
 # Install gffread and samtools using conda
 RUN conda install -y -c bioconda gffread
-RUN conda clean -a
+
+
+### Oarfish now.
+
+RUN curl --proto '=https' --tlsv1.2 -LsSf https://github.com/COMBINE-lab/oarfish/releases/download/v0.6.5/oarfish-installer.sh | sh
+
+COPY Oarfish_runner.py /usr/local/bin/
+
