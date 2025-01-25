@@ -72,6 +72,7 @@ workflow oarfishWorkflow {
     call oarfishTask {
         input:
             sample_id = sample_id,
+            inputBAM = inputBAM,
             inputFASTQ = inputFASTQ,
             referenceGenomeFasta = referenceGenomeFasta,
             referenceGenomeIndex = referenceGenomeIndex,
