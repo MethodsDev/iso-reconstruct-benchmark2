@@ -59,7 +59,7 @@ def main():
                 "minimap2 -a ",
                 f"-t {num_threads}",
                 "transcriptome.fa",
-                "tmp.fastq",
+                fastq_file,
                 f" | samtools sort -n --threads {num_threads} -o mapped.namesorted.bam",
             ]
         )
