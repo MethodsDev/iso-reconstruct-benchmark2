@@ -19,6 +19,8 @@ task stringtieTask {
 
     String quant_only_flag = if (quant_only) then "--quant_only" else ""
 
+    String stringtie_mode = if (quant_only) then "quant_only" else if (defined(referenceAnnotationGTF)) then "ref-guided" else "ref-free"
+    
     command <<<
 
         set -ex
@@ -27,14 +29,14 @@ task stringtieTask {
                             --bam ~{inputBAM} \
                             ~{"--gtf " + referenceAnnotationGTF} \
                             ~{quant_only_flag} \
-                            --output_prefix ~{sample_id}
+                            --output_prefix ~{sample_id}.~{stringtie_mode}
 
     >>>
     
     output {
 
-        File stringtie_gtf = "~{sample_id}.stringtie.gtf"
-        File stringtie_quant = "~{sample_id}.stringtie.quant.tsv"
+        File stringtie_gtf = "~{sample_id}.~{stringtie_mode}.stringtie.gtf"
+        File stringtie_quant = "~{sample_id}.~{stringtie_mode}.stringtie.quant.tsv"
     }
 
     runtime {
