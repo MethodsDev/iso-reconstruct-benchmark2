@@ -4,7 +4,8 @@ version 1.0
 task oarfishTask {
     input {
         String sample_id
-        File inputFASTQ
+        File inputBAM # will convert to fastq unless inputFASTQ provided 
+        File? inputFASTQ # if fastq provided, uses it instead of the bam
         File referenceGenomeFasta
         File referenceGenomeIndex
         File referenceAnnotationGTF
@@ -21,13 +22,20 @@ task oarfishTask {
 
 
     command <<<
-        
 
+        set -ex
+
+        inputFASTQ=~{inputFASTQ}
+        if [[ "$inputFASTQ" == "" ]]; then
+           samtools bam2fq ~{inputBAM} > reads.fastq
+           inputFASTQ="reads.fastq"
+        fi
+        
         Oarfish_runner.py \
                      --output_prefix ~{sample_id} \
                      --genome ~{referenceGenomeFasta} \
                      --gtf ~{referenceAnnotationGTF} \
-                     --fastq ~{inputFASTQ} \
+                     --fastq $inputFASTQ \
                      --threads ~{cpu} \
                      --mode ~{oarfish_mode} \
                      --seq_tech ~{oarfish_seq_tech}
@@ -52,7 +60,8 @@ task oarfishTask {
 workflow oarfishWorkflow {
     input {
         String sample_id
-        File inputFASTQ
+        File inputBAM # will convert to fastq unless inputFASTQ provided
+        File? inputFASTQ  # if fastq provided, uses it instead of the bam
         File referenceGenomeFasta
         File referenceGenomeIndex
         File referenceAnnotationGTF
