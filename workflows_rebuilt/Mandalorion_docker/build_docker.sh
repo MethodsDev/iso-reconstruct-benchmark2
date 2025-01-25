@@ -10,5 +10,5 @@ docker build -t us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-bench
 
 
 # verify installation
-docker build -t us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/mandalorion:${VERSION} Mandalorian-runner.py -h
+docker run us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/mandalorion:${VERSION} Mandalorian-runner.py -h
 

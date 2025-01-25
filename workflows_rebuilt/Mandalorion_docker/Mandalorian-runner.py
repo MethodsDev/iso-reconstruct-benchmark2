@@ -22,6 +22,12 @@ def main():
     parser.add_argument(
         "--ncpu", type=int, required=False, default=4, help="num threads"
     )
+    parser.add_argument(
+        "--delayTime",
+        type=int,
+        default=False,
+        help="delay time set in Mandalorian defineIsoforms.py",
+    )
 
     args = parser.parse_args()
 
@@ -30,6 +36,7 @@ def main():
     gtf_file = args.gtf
     bam_file = args.bam
     num_threads = args.ncpu
+    delayTime = args.delayTime
 
     cmd = f"samtools bam2fq {bam_file} > temp.fastq"
     run_cmd(cmd)
@@ -53,7 +60,17 @@ def main():
     if gtf_file is not None:
         cmd += f" -g {gtf_file}"
 
+    if delayTime is not None:
+        cmd += f" --defineIsoformsDelayTime {delayTime}"
+
     run_cmd(cmd)
+
+    run_cmd(
+        f"cp {tmpdir}/Isoforms.filtered.clean.gtf {output_prefix}.Mandalorian.Isoforms.filtered.clean.gtf"
+    )
+    run_cmd(
+        f"cp {tmpdir}/Isoforms.filtered.clean.quant {output_prefix}.Mandalorian.Isoforms.filtered.clean.quant"
+    )
 
     sys.exit(0)
 

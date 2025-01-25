@@ -44,7 +44,9 @@ ENV PATH=${PATH}:/usr/local/src/samtools-1.9
 #	sh setup.sh && \
 #	/usr/local/src/Mandalorion/Mando.py -h
 
-RUN git clone https://github.com/christopher-vollmers/Mandalorion.git && \
+#RUN git clone https://github.com/christopher-vollmers/Mandalorion.git && \
+
+RUN git clone https://github.com/brianjohnhaas/Mandalorion.git && \
     cd Mandalorion && \
 	chmod +x setup.sh && \
 	sh setup.sh && \
