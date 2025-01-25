@@ -25,11 +25,6 @@ ENV BIN=/usr/local/bin
 
 WORKDIR $SRC
 
-RUN git clone https://github.com/christopher-vollmers/Mandalorion.git && \
-	cd Mandalorion && \
-	chmod +x setup.sh && \
-	sh setup.sh && \
-	/usr/local/src/Mandalorion/Mando.py -h
 
 RUN wget https://github.com/samtools/samtools/releases/download/1.9/samtools-1.9.tar.bz2 && \
 	tar jxf samtools-1.9.tar.bz2 && \
@@ -39,3 +34,20 @@ RUN wget https://github.com/samtools/samtools/releases/download/1.9/samtools-1.9
 	make
 
 ENV PATH=${PATH}:/usr/local/src/samtools-1.9
+
+
+#RUN wget https://github.com/christopher-vollmers/Mandalorion/archive/refs/tags/v4.3.1.tar.gz && \
+#    tar xvf v4.3.1.tar.gz && \
+#    mv Mandalorion-4.3.1 Mandalorion && \
+#    cd Mandalorion && \
+#	chmod +x setup.sh && \
+#	sh setup.sh && \
+#	/usr/local/src/Mandalorion/Mando.py -h
+
+RUN git clone https://github.com/christopher-vollmers/Mandalorion.git && \
+    cd Mandalorion && \
+	chmod +x setup.sh && \
+	sh setup.sh && \
+	/usr/local/src/Mandalorion/Mando.py -h
+
+COPY Mandalorian-runner.py /usr/local/bin/
