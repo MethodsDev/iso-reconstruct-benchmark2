@@ -36,7 +36,7 @@ task oarfishTask {
                      --genome ~{referenceGenomeFasta} \
                      --gtf ~{referenceAnnotationGTF} \
                      --fastq $inputFASTQ \
-                     --threads ~{cpu} \
+                     --ncpu ~{cpu} \
                      --mode ~{oarfish_mode} \
                      --seq_tech ~{oarfish_seq_tech}
         
