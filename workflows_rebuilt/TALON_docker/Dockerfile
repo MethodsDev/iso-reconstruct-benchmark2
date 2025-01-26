@@ -34,10 +34,20 @@ RUN wget https://github.com/arq5x/bedtools2/releases/download/v2.30.0/bedtools.s
     mv bedtools.static.binary /usr/local/bin/bedtools
 
 # Install TALON
-RUN wget https://github.com/mortazavilab/TALON/archive/refs/heads/master.zip && \
-    unzip master.zip && \
-    cd TALON-master && \
+#RUN wget https://github.com/mortazavilab/TALON/archive/refs/heads/master.zip && \
+#    unzip master.zip && \
+#    cd TALON-master && \
+#    pip install .
+
+WORKDIR /usr/local/src
+
+RUN wget https://github.com/mortazavilab/TALON/archive/refs/tags/v6.0.tar.gz && \
+    tar xvf v6.0.tar.gz && \
+    cd TALON-6.0 && \
     pip install .
+
+
+COPY TALON-runner.py  /usr/local/bin/
 
 # Keep the container running and provide a shell
 CMD ["bash"]
