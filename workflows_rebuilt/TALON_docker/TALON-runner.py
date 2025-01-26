@@ -21,6 +21,9 @@ def main():
     parser.add_argument(
         "--ncpu", type=int, required=False, default=4, help="num threads"
     )
+    parser.add_argument(
+        "--output_dir", required=False, default=None, help="directory for output files"
+    )
 
     args = parser.parse_args()
 
@@ -29,6 +32,11 @@ def main():
     gtf_file = args.gtf
     bam_file = args.bam
     num_threads = args.ncpu
+    output_dir = args.output_dir
+
+    if output_dir is not None:
+        if not (os.path.exists):
+            os.makedirs(output_dir)
 
     datasetName = os.path.basename(output_prefix)
     talonPrefix = datasetName
@@ -61,8 +69,9 @@ def main():
     cmd = f"talon_abundance --db {datasetName}.db --whitelist {talonPrefix}_filter --o {talonPrefix}_Quant --build {datasetName} -a {datasetName}"
     run_cmd(cmd)
 
-    # mv TALON_talon.gtf talonReducedGTF.gtf
-    # mv TALON_Quant_talon_abundance_filtered.tsv talonReducedGTFCounts.tsv
+    if output_dir is not None:
+        cmd = f"cp {datasetName}* {output_dir}/"
+        run_cmd(cmd)
 
     sys.exit(0)
 
