@@ -39,7 +39,7 @@ workflow QuantOnly_wf {
         Boolean runOarfish = true
         Boolean runStringtie = true
         Boolean runTalon = true
-        Boolean runLraa = true
+        Boolean runLRAA = true
         Boolean runIsosceles = true
 
         Boolean AggregateOutputs = true
@@ -186,7 +186,7 @@ workflow QuantOnly_wf {
         }
     }
 
-    if (runLraa) {
+    if (runLRAA) {
         call lraaWorkflow.LRAA_wf as lraa {
             input:
                 sample_id = sample_id,
