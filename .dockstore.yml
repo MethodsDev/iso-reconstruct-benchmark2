@@ -2,7 +2,7 @@ version: 1.2
 workflows:
   - name: IsoformsQuantOnly
     subclass: WDL
-    primaryDescriptorPath: /workflows_rebuilt/Isoforms_QuantOnly.wdl
+    primaryDescriptorPath: /workflows_rebuilt/IsoformsQuantOnly.wdl
   - name: ISOQUANT
     subclass: WDL
     primaryDescriptorPath: /workflows_rebuilt/IsoQuant.wdl
