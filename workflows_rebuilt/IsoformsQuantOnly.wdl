@@ -27,7 +27,7 @@ workflow QuantOnly_wf {
         String data_type
         String oarfish_seq_tech
         Boolean LRAA_LowFi
-        String LRAA_main_chromosomes
+        String? LRAA_main_chromosomes
         
         Boolean runBambu = true
         Boolean runEspresso = true
@@ -66,6 +66,7 @@ workflow QuantOnly_wf {
                 inputBAM = inputBAM,
                 inputBAMIndex = inputBAMIndex,
                 referenceGenomeFasta = referenceGenomeFasta,
+                referenceGenomeIndex = referenceGenomeIndex,
                 referenceAnnotationGTF = referenceAnnotationGTF
         }
     }
