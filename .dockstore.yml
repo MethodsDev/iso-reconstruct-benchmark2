@@ -6,7 +6,10 @@ workflows:
   - name: IsoformsRefGuidedID
     subclass: WDL
     primaryDescriptorPath: /workflows_rebuilt/Isoforms-ref_guided_ID.wdl
-  - name: ISOQUANT
+  - name: IsoformsRefAnnotFreeDenovoID
+    subclass: WDL
+    primaryDescriptorPath: /workflows_rebuilt/Isoforms-ref_annot_free_denovo_ID.wdl
+- name: ISOQUANT
     subclass: WDL
     primaryDescriptorPath: /workflows_rebuilt/IsoQuant.wdl
   - name: STRINGTIE
