@@ -276,7 +276,7 @@ task AggregateOutputs {
     >>>
 
     output {
-        File? aggregated_files = "All_RefGuided_Outputs_Aggregated.tar.gz"
+        File? aggregated_files = "~{output_dir}.tar.gz"
     }
 
     runtime {
