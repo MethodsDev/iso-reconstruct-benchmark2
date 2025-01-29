@@ -261,7 +261,12 @@ task AggregateOutputs {
 
         set -ex
 
+
+        find . -type f | grep "~{sample_id}" | xargs -n1 mv {} . 
+
+        
         ls -ltr
+
         
         mkdir ~{output_dir}
 
