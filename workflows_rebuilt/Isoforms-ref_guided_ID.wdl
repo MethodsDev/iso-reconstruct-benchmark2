@@ -174,6 +174,8 @@ workflow QuantOnly_wf {
         call AggregateOutputs {
             input:
 
+            sample_id = sample_id,
+            
             bambu_quant = bambu.bambu_quant,
             bambu_gtf = bambu.bambu_gtf,
 
@@ -213,6 +215,8 @@ workflow QuantOnly_wf {
 
 task AggregateOutputs {
     input {
+
+        String sample_id
         
         File? bambu_quant
         File? bambu_gtf
@@ -251,10 +255,24 @@ task AggregateOutputs {
         Int diskSizeGB = 500
     }
 
+    String output_dir = "All_RefGuided_Outputs_Aggregated-~{sample_id}"
+    
     command <<<
 
-        tar -czvf All_RefGuided_Outputs_Aggregated.tar.gz *
+        set -ex
 
+        ls -ltr
+        
+        mkdir ~{output_dir}
+
+        mv ~{sample_id}* ~{output_dir}/
+        
+        tar -czvf ~{output_dir}.tar.gz ~{output_dir}/
+
+        ls -ltr
+
+        echo Done.
+        
     >>>
 
     output {
