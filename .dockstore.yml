@@ -3,6 +3,9 @@ workflows:
   - name: IsoformsQuantOnly
     subclass: WDL
     primaryDescriptorPath: /workflows_rebuilt/IsoformsQuantOnly.wdl
+  - name: IsoformsRefGuidedID
+    subclass: WDL
+    primaryDescriptorPath: /workflows_rebuilt/Isoforms-ref_guided_ID.wdl
   - name: ISOQUANT
     subclass: WDL
     primaryDescriptorPath: /workflows_rebuilt/IsoQuant.wdl
