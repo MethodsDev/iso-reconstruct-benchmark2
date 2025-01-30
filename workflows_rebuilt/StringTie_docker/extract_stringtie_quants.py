@@ -26,6 +26,9 @@ def get_key_val_pairs(info):
     return key_val_dict
 
 
+# print header
+print("\t".join(["gene_id", "transcript_id", "cov", "FPKM", "TPM"]))
+
 with open(stringtie_gtf, "rt") as fh:
     with open(quants_output_file, "wt") as ofh:
         for line in fh:
