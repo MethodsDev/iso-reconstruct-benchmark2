@@ -189,7 +189,7 @@ workflow QuantOnly_wf {
     if (runLRAA) {
         call lraaWorkflow.LRAA_wf as lraa {
             input:
-                sample_id = sample_id,
+                sample_id = sample_id + ".LRAA",
                 inputBAM = inputBAM,
                 referenceGenome = referenceGenomeFasta,
                 annot_gtf = referenceAnnotationGTF,
