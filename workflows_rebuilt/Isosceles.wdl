@@ -34,9 +34,9 @@ task isoscelesTask {
     
     output {
         File isosceles_counts = if (quant_only) then "~{sample_id}.isosceles.counts" else "~{sample_id}.isosceles.refguided_novel_ID.counts"
-        File? isosceles_gtf = "~{sample_id}.isosceles.refguided_novel_ID.gtf"
+        File isosceles_gtf = if (quant_only) then "~{sample_id}.isosceles.gtf" else "~{sample_id}.isosceles.refguided_novel_ID.gtf"
     }
-
+    
     runtime {
         cpu: "~{cpu}"
         memory: "~{memoryGB} GiB"
@@ -70,6 +70,6 @@ workflow isoscelesWorkflow {
 
     output {
         File isosceles_counts = isoscelesTask.isosceles_counts
-        File? isosceles_gtf = isoscelesTask.isosceles_gtf
+        File isosceles_gtf = isoscelesTask.isosceles_gtf
     }
 }

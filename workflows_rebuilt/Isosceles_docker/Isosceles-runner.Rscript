@@ -136,11 +136,15 @@ write.table(counts, file=quants_outfile, row.names=F, sep="\t", quote=F)
 ########################
 # Write gtf if not quant-only-mode
 
-if (! quant_only_mode) {
+if (quant_only_mode) {
+   output_gtf_filename = paste0(output_prefix, ".isosceles.gtf")
+} else {
    output_gtf_filename = paste0(output_prefix, ".isosceles.refguided_novel_ID.gtf")
-   message("writing GTF: ", output_gtf_filename)
-   export_gtf(se_transcript, output_gtf_filename)
 }
+
+message("writing GTF: ", output_gtf_filename)
+export_gtf(se_transcript, output_gtf_filename)
+
 
 message("done.")
 quit(save = "no", status = 0, runLast = FALSE)
