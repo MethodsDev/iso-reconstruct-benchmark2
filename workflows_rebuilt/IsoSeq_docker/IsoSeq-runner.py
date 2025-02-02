@@ -35,7 +35,9 @@ def main():
 
     ## begin
 
-    os.chdir(os.path.dirname(output_prefix))
+    workdir = os.path.dirname(output_prefix)
+    if workdir != "" and workdir != ".":
+        os.chdir(os.path.dirname(output_prefix))
 
     run_cmd(f"samtools bam2fq {bam_file} > temp.fastq")
 
