@@ -121,6 +121,7 @@ workflow QuantOnly_wf {
             isoquant_gtf = isoquant.isoquant_gtf,
             isoquant_counts = isoquant.isoquant_counts,
 
+            isoseq_denovo_gtf = isoseq.isoseq_ref_free_GTF,
             isoseq_gtf = isoseq.isoseq_ref_filtered_GTF,
             isoseq_counts = isoseq.isoseq_counts,
 
@@ -150,6 +151,7 @@ task AggregateOutputs {
         File? isoquant_gtf
         File? isoquant_counts
 
+        File? isoseq_denovo_gtf
         File? isoseq_gtf
         File? isoseq_counts
 
