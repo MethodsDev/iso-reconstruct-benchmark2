@@ -1228,19 +1228,10 @@ def IsoformIdentificationSensitivityPlot(
 def TPR_F1_PPV_plot(
     i_ref_df,
     progname_to_df_dict,
-    num_bins,
-    errorType,
-    plot_title,
+    num_bins=33,
+    plot_title="TPR_F1_PPV by expr quintile",
     novel_intron_ids=None,
 ):
-    """
-    Generates an overall stats plot for one specific downsampled percentage.
-    'ref': The reference dataframe of intron string IDs and ground truth counts.
-    'dfs': a list of sample dataframes from getFiles().
-    'n': an integer representing the number of bins to stratify by.
-    'downsamplePercentage': a 2-character integer representing the downsample % of interest.
-    'is_best': a boolean value affecting the style of plotted lines.
-    """
 
     tickRange = percentileTicks(num_bins)
 
@@ -1376,6 +1367,7 @@ def overall_knownTPR_novelTPR_and_FDR_barplot(
         FDR_val = accuracy_stats["FDR"]
         sensitivity_val = accuracy_stats["Sensitivity"]
         novel_trans_sensitivity = np.nan
+        F1_val = accuracy_stats["F1"]
 
         if novel_intron_ids is not None:
             novel_intron_ids = set(novel_intron_ids)
@@ -1393,6 +1385,8 @@ def overall_knownTPR_novelTPR_and_FDR_barplot(
                 i_sample_TP_FP_FN_df.loc[not_novel_intron_ids, :]
             )
             sensitivity_val = not_novel_accuracy_stats["Sensitivity"]
+
+            F1_val = accuracy_stats_for_novel["F1"]
 
         name, color, line = colorAndLabel(progname)
         opacity = 1.0
@@ -1430,6 +1424,18 @@ def overall_knownTPR_novelTPR_and_FDR_barplot(
                 FDR_val,
             )
         )
+        df_data.append(
+            (
+                progname,
+                color,
+                line,
+                opacity,
+                progname,
+                "F1",
+                F1_val,
+            )
+        )
+
     df = pd.DataFrame(
         df_data,
         columns=[
@@ -1444,18 +1450,18 @@ def overall_knownTPR_novelTPR_and_FDR_barplot(
     )
 
     fig, axs = plt.subplots(
-        ncols=3, nrows=1, figsize=(7, 2.8), dpi=300, layout="constrained", sharey=True
+        ncols=4, nrows=1, figsize=(7, 2.8), dpi=300, layout="constrained", sharey=True
     )
-    tpr = ["knownTPR", "novelTPR", "novelFDR"]
-    for j in range(3):
-        plt_df = df[df["Metric"] == tpr[j]]
+    acc_type = ["knownTPR", "novelTPR", "novelFDR", "F1"]
+    for j in range(4):
+        plt_df = df[df["Metric"] == acc_type[j]]
         plt_df["Value"] *= 100
         axs[j].barh(y=plt_df["Name"], width=plt_df["Value"], color=plt_df["Color"])
         axs[j].set_xlim(0, 100)
         axs[j].spines["right"].set_visible(False)
         axs[j].spines["top"].set_visible(False)
         var = (
-            tpr[j]
+            acc_type[j]
             .replace("known", "Annotated ")
             .replace("novelFDR", "FDR")
             .replace("novel", "Unannotated ")
