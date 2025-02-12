@@ -57,8 +57,8 @@ def processGtf(gtf):
     print("-processGtf( {} )\n".format(gtf))
     df_polar = read_gtf(gtf)
     df = pd.DataFrame(df_polar)
-    df = df[df["feature"] == "exon"]
     df.columns = df_polar.columns
+    df = df[df["feature"] == "exon"]
     # print(df.head())
 
     df_exons = df.sort_values(by=["transcript_id", "start"])
