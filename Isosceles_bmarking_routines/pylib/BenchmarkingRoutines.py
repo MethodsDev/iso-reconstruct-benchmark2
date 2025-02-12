@@ -271,8 +271,9 @@ def assign_binned_expr_quantile(i_ref_df, i_sample_df, num_bins):
     zeros["quantile"][zeros["quantile"] == 3] = np.floor(np.arange(n_3) / n_3 * 2) + 3
     # Recombine the false and true positives into the full bigDf.  The reason bigDf is first split into
     # true and false positives is to ensure that the first quantile bin isn't all zeros for ground truth.
-    bigDf = zeros.append(nonzeros)
-
+    # bigDf = zeros.append(nonzeros)  # deprecated in pandas
+    bigDf = pd.concat([zeros, nonzeros], ignore_index=False)
+    # bigDf.to_csv("ladeda2", sep="\t", index=False, mode="a")
     return bigDf
 
 
