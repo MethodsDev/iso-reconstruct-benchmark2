@@ -36,7 +36,7 @@ def process_file(input_filename):
     elif re.search("FLAMES.gff3$", input_filename) is not None:
         # FLAMES gtf file
         # convert to gtf
-        flames_gtf_filename = input_filename + ".gtf"
+        flames_gtf_filename = os.path.join(output_dir, "FLAMES.gtf")
         if FLAMES_gff3_converter is None:
             raise RuntimeError("flames gff3 converter not set")
         cmd = f"{FLAMES_gff3_converter} {input_filename} > {flames_gtf_filename}"
@@ -104,7 +104,15 @@ def process_file(input_filename):
         return ("LRAA_quant_file", output_filename)
 
     elif re.search("LRAA.*.gtf$", input_filename) is not None:
-        return ("LRAA_gtf_file", input_filename)
+        output_filename = os.path.join(output_dir, "LRAA.gtf")
+        with open(output_filename, "wt") as ofh:
+            with open(input_filename, "rt") as fh:
+                for line in fh:
+                    line = line.rstrip()
+                    if line != "":
+                        print(line, file=ofh)
+
+        return ("LRAA_gtf_file", output_filename)
 
     #################
     ## Mandalorion ##
