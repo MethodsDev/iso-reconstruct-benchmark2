@@ -505,14 +505,14 @@ def calc_knownTPR_novelTPR_and_FDR_for_quantiles(
             )
             if len(novel_introns_in_quantile) > 0:
                 novel_stats_quantile_i = calc_accuracy_stats_for_TP_FP_FN_df(
-                    subBigDf.loc[novel_introns_in_quantile, :]
+                    subBigDf.loc[list(novel_introns_in_quantile), :]
                 )
                 sensitivity_novel = novel_stats_quantile_i["Sensitivity"]
                 novelTPR.append(sensitivity_novel)
 
                 # redo known sensitivity value based on the non-novel introns.
                 not_novel_stats_quantile_i = calc_accuracy_stats_for_TP_FP_FN_df(
-                    subBigDf.loc[not_novel_introns_in_quantile, :]
+                    subBigDf.loc[list(not_novel_introns_in_quantile), :]
                 )
                 sensitivity_known = not_novel_stats_quantile_i["Sensitivity"]
 
@@ -1332,7 +1332,7 @@ def calc_accuracy_stats_for_TP_FP_FN_df(i_sample_TP_FP_FN_df, novel_intron_ids=N
         novel_introns = introns_in_df & novel_introns
         if len(novel_introns) > 0:
             FPs_df = i_sample_TP_FP_FN_df[i_sample_TP_FP_FN_df["class"] == "FP"]
-            i_sample_TP_FP_FN_df = i_sample_TP_FP_FN_df.loc[novel_introns, :]
+            i_sample_TP_FP_FN_df = i_sample_TP_FP_FN_df.loc[list(novel_introns), :]
             # above would only incorporate TP and FNs according to the novel intron ids.
             # must incorporate all the FPs too
             i_sample_TP_FP_FN_df = pd.concat([i_sample_TP_FP_FN_df, FPs_df])
