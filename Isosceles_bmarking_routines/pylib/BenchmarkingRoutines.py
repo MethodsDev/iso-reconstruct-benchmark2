@@ -515,6 +515,8 @@ def calc_knownTPR_novelTPR_and_FDR_for_quantiles(
                     subBigDf.loc[list(not_novel_introns_in_quantile), :]
                 )
                 sensitivity_known = not_novel_stats_quantile_i["Sensitivity"]
+            else:
+                novelTPR.append(np.nan)
 
         knownTPR.append(sensitivity_known)
 
@@ -545,7 +547,7 @@ def calc_TPR_PPV_F1_for_quantiles(i_sample_TP_FP_FN_df, num_bins, novel_intron_i
             novel_introns_in_quantile = introns_in_quantile & novel_introns
             if len(novel_introns_in_quantile) > 0:
                 FPs_df = subBigDf[subBigDf["class"] == "FP"]
-                subBigDf = subBigDf.loc[novel_introns_in_quantile, :]
+                subBigDf = subBigDf.loc[list(novel_introns_in_quantile), :]
                 # above would only incorporate TP and FNs according to the novel intron ids.
                 # must incorporate all the FPs too
                 subBigDf = pd.concat([subBigDf, FPs_df])
@@ -1383,7 +1385,7 @@ def overall_knownTPR_novelTPR_and_FDR_barplot(
             )
 
             not_novel_accuracy_stats = calc_accuracy_stats_for_TP_FP_FN_df(
-                i_sample_TP_FP_FN_df.loc[not_novel_intron_ids, :]
+                i_sample_TP_FP_FN_df.loc[list(not_novel_intron_ids), :]
             )
             sensitivity_val = not_novel_accuracy_stats["Sensitivity"]
 
