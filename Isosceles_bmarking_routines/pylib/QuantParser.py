@@ -91,7 +91,7 @@ def process_file(input_filename):
     ## LRAA ##
     ##########
 
-    elif re.search("LRAA.quant.expr$", input_filename) is not None:
+    elif re.search("LRAA.*.quant.expr$", input_filename) is not None:
         # LRAA
         output_filename = os.path.join(output_dir, "LRAA.tsv")
         make_tsv(
@@ -103,7 +103,7 @@ def process_file(input_filename):
         )
         return ("LRAA_quant_file", output_filename)
 
-    elif re.search("LRAA.gtf$", input_filename) is not None:
+    elif re.search("LRAA.*.gtf$", input_filename) is not None:
         return ("LRAA_gtf_file", input_filename)
 
     #################
