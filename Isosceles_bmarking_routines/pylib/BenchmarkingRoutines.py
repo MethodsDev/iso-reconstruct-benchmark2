@@ -888,6 +888,8 @@ def cor_spearman_barplot(i_ref_df, progname_to_df_dict):
         ax.bar_label(bars, fmt="%.2f", fontsize=12)
     fig.show()
 
+    return plot_df
+
 
 def cor_pearson_barplot(i_ref_df, progname_to_df_dict):
 
@@ -933,6 +935,8 @@ def cor_pearson_barplot(i_ref_df, progname_to_df_dict):
     for bars in ax.containers:
         ax.bar_label(bars, fmt="%.2f", fontsize=12)
     fig.show()
+
+    return plot_df
 
 
 def rel_diff_barplot(i_ref_df, progname_to_df_dict, relDiffType):
@@ -994,6 +998,8 @@ def rel_diff_barplot(i_ref_df, progname_to_df_dict, relDiffType):
     for bars in ax.containers:
         ax.bar_label(bars, fmt="%.2f", fontsize=12)
     fig.show()
+
+    return plot_df
 
 
 def rel_diff_vs_expr_percentile_plot(
@@ -1475,3 +1481,18 @@ def overall_knownTPR_novelTPR_and_FDR_barplot(
         axs[j].set_xlabel(var, fontsize=7)
         for bars in axs[j].containers:
             axs[j].bar_label(bars, fmt="%.1f%%")
+
+    return df
+
+
+# report writing
+def progname_to_i_sample_df_dict_to_tsv(progname_i_sample_df_dict, output_tsv_filename):
+
+    concat_df = None
+
+    for progname, i_sample_df in progname_i_sample_df_dict.items():
+        i_sample_df2 = i_sample_df.copy()
+        i_sample_df2[["progname"]] = progname
+        concat_df = pd.concat([concat_df, i_sample_df2])
+
+    concat_df.to_csv(output_tsv_filename, sep="\t", quoting=csv.QUOTE_NONE)
