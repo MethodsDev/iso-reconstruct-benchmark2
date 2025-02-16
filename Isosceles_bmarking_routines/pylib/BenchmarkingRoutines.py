@@ -982,9 +982,7 @@ def rel_diff_barplot(i_ref_df, progname_to_df_dict, relDiffType):
         program_names.append(program_tuple[0])
         program_colors.append(program_tuple[1])
 
-        program_df = df[["tpm"]].join(
-            ref_quants[["ref_tpm"]], how="inner"
-        )  # .fillna(0)
+        program_df = df[["tpm"]].join(ref_quants[["ref_tpm"]], how="right").fillna(0)
 
         prog_rel_diffs = relativeDiff(
             program_df["ref_tpm"], program_df["tpm"], relDiffType
@@ -1403,9 +1401,14 @@ def overall_knownTPR_novelTPR_and_FDR_barplot(
     """
 
     df_data = []
+
+    all_TP_FP_FN_df = None
+
     for progname, i_sample_df in progname_to_df_dict.items():
 
         i_sample_TP_FP_FN_df = calc_TP_FP_FN(i_ref_df, i_sample_df)
+
+        all_TP_FP_FN_df = pd.concat([all_TP_FP_FN_df, i_sample_TP_FP_FN_df])
 
         accuracy_stats = calc_accuracy_stats_for_TP_FP_FN_df(i_sample_TP_FP_FN_df)
 
@@ -1518,7 +1521,7 @@ def overall_knownTPR_novelTPR_and_FDR_barplot(
         for bars in axs[j].containers:
             axs[j].bar_label(bars, fmt="%.1f%%")
 
-    return df
+    return df, all_TP_FP_FN_df
 
 
 # report writing
