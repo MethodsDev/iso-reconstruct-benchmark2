@@ -207,7 +207,7 @@ def parseQuantsTSV(quant_tsv):
     return countDf
 
 
-def relativeDiff(ground_truth_TPMs, estimated_TPMs, metric):
+def absRelativeDiffEach(ground_truth_TPMs, estimated_TPMs):
     """
     Calculate absolute relative difference between ground truth
     and estimated quantifications.  Metric: 'mean' or 'median'.
@@ -216,10 +216,19 @@ def relativeDiff(ground_truth_TPMs, estimated_TPMs, metric):
     x = np.array(ground_truth_TPMs)  # Ground truth TPMs.
     y = np.array(estimated_TPMs)  # Estimated TPMs.
 
+    absRelDiff = abs(x - y) / ((x + y) / 2)
+
+    return absRelDiff
+
+
+def relativeDiff(ground_truth_TPMs, estimated_TPMs, metric):
+
+    absRelDiff = absRelativeDiffEach(ground_truth_TPMs, estimated_TPMs)
+
     if metric == "mean":
-        return np.mean(abs(x - y) / ((x + y) / 2))
+        return np.mean(absRelDiff)
     elif metric == "median":
-        return np.median(abs(x - y) / ((x + y) / 2))
+        return np.median(absRelDiff)
     else:
         raise RuntimeError("Specify 'mean' or 'median' for argument: 'metric'.")
 
@@ -317,20 +326,27 @@ def measure_rel_diff_by_expr_quantile(
     # Each error value represents the error for its quantile bin, 'i'
     # and is stored in a list (knownError or allError) to be plotted later.
 
+    i_use_df["relDiffs"] = -1
+
     relDiffs = []
     for i in range(num_bins):
         i_quantile_df = i_use_df[i_use_df["quantile"] == i]
 
-        if errorType == "mean":
-            relDiffs.append(
-                relativeDiff(i_quantile_df["ref_tpm"], i_quantile_df["tpm"], "mean")
-            )
-        else:
-            relDiffs.append(
-                relativeDiff(i_quantile_df["ref_tpm"], i_quantile_df["tpm"], "median")
-            )
+        quantile_rel_diffs = None
 
-    return relDiffs, sidebarError
+        rel_diffs = absRelativeDiffEach(i_quantile_df["ref_tpm"], i_quantile_df["tpm"])
+
+        i_use_df.loc[i_quantile_df.index, "relDiffs"] = rel_diffs
+
+        if errorType == "mean":
+            quantile_rel_diffs = np.mean(rel_diffs)
+
+        else:
+            quantile_rel_diffs = np.median(rel_diffs)
+
+        relDiffs.append(quantile_rel_diffs)
+
+    return relDiffs, sidebarError, i_use_df
 
 
 def sensitivity(df):
@@ -748,6 +764,8 @@ def scatterplot_adj(i_ref_df, progname_to_df_dict):
 
     subplotIndex = 0  # to index the subplots
     for program, tpm in countDict.items():  # by program name, alphabetically.
+        print(program)
+        print(tpm)
         groundTruth = tpm[0].copy()
         estimated = tpm[1].copy()
         estimated[estimated <= 0.001] = 0.001  # Set all estimated values that are
@@ -952,6 +970,8 @@ def rel_diff_barplot(i_ref_df, progname_to_df_dict, relDiffType):
     rel_diffs = []
     median_rel_diffs = []
 
+    rellDiffsEachProg = None
+
     for progname, df in progname_to_df_dict.items():
 
         assert (
@@ -962,7 +982,9 @@ def rel_diff_barplot(i_ref_df, progname_to_df_dict, relDiffType):
         program_names.append(program_tuple[0])
         program_colors.append(program_tuple[1])
 
-        program_df = df[["tpm"]].join(ref_quants[["ref_tpm"]], how="inner").fillna(0)
+        program_df = df[["tpm"]].join(
+            ref_quants[["ref_tpm"]], how="inner"
+        )  # .fillna(0)
 
         prog_rel_diffs = relativeDiff(
             program_df["ref_tpm"], program_df["tpm"], relDiffType
@@ -973,9 +995,12 @@ def rel_diff_barplot(i_ref_df, progname_to_df_dict, relDiffType):
             relativeDiff(program_df["ref_tpm"], program_df["tpm"], "median")
         )
 
-        df2 = i_ref_df.copy()
-        df2[relDiffType] = prog_rel_diffs
-        df2.to_csv(progname + "." + relDiffType + ".relDiff.tsv", sep="\t", index=False)
+        df2 = program_df.copy()
+        df2["relativeDiff"] = absRelativeDiffEach(
+            program_df["ref_tpm"], program_df["tpm"]
+        )
+        df2["progname"] = progname
+        rellDiffsEachProg = pd.concat([rellDiffsEachProg, df2])
 
     plot_df = pd.DataFrame(
         {
@@ -998,6 +1023,8 @@ def rel_diff_barplot(i_ref_df, progname_to_df_dict, relDiffType):
     for bars in ax.containers:
         ax.bar_label(bars, fmt="%.2f", fontsize=12)
     fig.show()
+
+    rellDiffsEachProg.to_csv("absRelativeDiffs.tsv", sep="\t", quoting=csv.QUOTE_NONE)
 
     return plot_df
 
@@ -1062,14 +1089,21 @@ def rel_diff_vs_expr_percentile_plot(
     else:
         raise RuntimeError("Specify 'mean' or 'median' for argument: 'errorType'.")
 
+    audit_reldiffs_df = None
+
     errorAnnotations = []
     for progname, i_sample_df in progname_to_df_dict.items():
 
         ###################################
         ## Mesaure the relative differences
-        rel_diffs, sidebarError = measure_rel_diff_by_expr_quantile(
+        rel_diffs, sidebarError, i_used_df = measure_rel_diff_by_expr_quantile(
             i_ref_df, i_sample_df, errorType, num_bins, intron_ids_use
         )
+
+        i_used_df2 = i_used_df.copy()
+        i_used_df2["progname"] = progname
+        audit_reldiffs_df = pd.concat([audit_reldiffs_df, i_used_df2])
+
         name, c, l = colorAndLabel(progname)
         # Assign the sample to its respective panels based on downsample %.
 
@@ -1123,6 +1157,8 @@ def rel_diff_vs_expr_percentile_plot(
         panel.annotate(err, (2.5, h - j * i), size=6, color=color)
 
     panel.legend(loc="center left", bbox_to_anchor=(2.5, 0.5), frameon=False)
+
+    return audit_reldiffs_df
 
 
 def IsoformIdentificationSensitivityPlot(
