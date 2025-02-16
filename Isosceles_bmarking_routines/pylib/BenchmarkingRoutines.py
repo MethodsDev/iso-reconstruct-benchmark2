@@ -1408,7 +1408,10 @@ def overall_knownTPR_novelTPR_and_FDR_barplot(
 
         i_sample_TP_FP_FN_df = calc_TP_FP_FN(i_ref_df, i_sample_df)
 
-        all_TP_FP_FN_df = pd.concat([all_TP_FP_FN_df, i_sample_TP_FP_FN_df])
+        i_sample_TP_FP_FN_df2 = i_sample_TP_FP_FN_df.copy()
+        i_sample_TP_FP_FN_df2["progname"] = progname
+
+        all_TP_FP_FN_df = pd.concat([all_TP_FP_FN_df, i_sample_TP_FP_FN_df2])
 
         accuracy_stats = calc_accuracy_stats_for_TP_FP_FN_df(i_sample_TP_FP_FN_df)
 
