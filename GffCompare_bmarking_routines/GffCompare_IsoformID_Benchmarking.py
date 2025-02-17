@@ -5,6 +5,7 @@ import subprocess
 import argparse
 import logging
 import glob
+import pandas as pd
 
 
 logging.basicConfig(stream=sys.stderr, level=logging.INFO)
@@ -45,31 +46,55 @@ def main():
     dataset_name = args.dataset_name
     exclude_gtf = args.exclude_gtf
 
-    tool_gtfs = list()
+    #
+
+    tool_gtf_pairs = list()
     for filename in glob.glob("raw_prog_results/*gtf") + glob.glob(
         "raw_prog_results/*gff"
     ):
-        if re.search("bambu.gtf$", filename) is not None:
-            tool_gtfs.append(["Bambu.gtf", filename])
+
+        if re.search("FLAMES.gff3", filename) is not None:
+            # convert to gtf
+            outputfile = "FLAMES.gtf"
+            cmd = "/home/bhaas/projects/LRAA_project/LRAA_PAPER_Analyses/iso-reconstruct-benchmark2/misc/FLAMES_gff3_to_gtf_converter.py {} > {}".format(
+                filename, outputfile
+            )
+            subprocess.check_cal(cmd, shell=True)
+            tool_gtf_pairs.append([outputfile, None])
+
+        elif re.search("bambu.gtf$", filename) is not None:
+            tool_gtf_pairs.append(["Bambu.gtf", filename])
         elif re.search("Mandalor.*gtf$", filename) is not None:
-            tool_gtfs.append(["Mandalorion.gtf", filename])
+            tool_gtf_pairs.append(["Mandalorion.gtf", filename])
         elif re.search("IsoQuant.gtf$", filename) is not None:
-            tool_gtfs.append(["IsoQuant.gtf", filename])
+            tool_gtf_pairs.append(["IsoQuant.gtf", filename])
         elif re.search("LRAA.gtf$", filename) is not None:
-            tool_gtfs.append(["LRAA.gtf", filename])
+            tool_gtf_pairs.append(["LRAA.gtf", filename])
         elif re.search("stringtie.gtf$", filename) is not None:
-            tool_gtfs.append(["StringTie.gtf", filename])
+            tool_gtf_pairs.append(["StringTie.gtf", filename])
         elif re.search("IsoSeq.*gff$", filename) is not None:
-            tool_gtfs.append(["IsoSeq.gtf", filename])
+            tool_gtf_pairs.append(["IsoSeq.gtf", filename])
+        elif re.search("isosceles.*gtf$", filename) is not None:
+            tool_gtf_pairs.append(["Isosceles.gtf", filename])
+        elif re.search("flair.gtf$", filename) is not None:
+            tool_gtf_pairs.append(["Flair.gtf", filename])
+        elif re.search("talon.gtf$", filename) is not None:
+            tool_gtf_pairs.append(["TALON.gtf", filename])
+        elif re.search("espresso.gtf", filename) is not None:
+            tool_gtf_pairs.append(["ESPRESSO.gtf", filename])
+
         else:
             raise RuntimeError("Error, not recognizing gtf file: {}".format(filename))
 
     # make symlinks
     tool_names = list()
     tool_gtfs = list()
-    for target_fname, fname in tool_gtfs:
-        subprocess.check_call("ln -sf {} {}".format(fname, target_fname), shell=True)
+    for target_fname, fname in tool_gtf_pairs:
         tool_gtfs.append(target_fname)
+        if fname is not None:
+            subprocess.check_call(
+                "ln -sf {} {}".format(fname, target_fname), shell=True
+            )
         tool_basename = re.sub("\\.(gtf|gff3|gff)$", "", target_fname, flags=re.I)
         tool_names.append(tool_basename)
 
