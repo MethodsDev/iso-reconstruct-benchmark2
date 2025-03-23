@@ -12,7 +12,7 @@ import "https://raw.githubusercontent.com/MethodsDev/LongReadAlignmentAssembler/
 import "Isosceles.wdl" as isoscelesWorkflow
 
 
-workflow QuantOnly_wf {
+workflow RefGuided_wf {
 
     input {
         String sample_id
