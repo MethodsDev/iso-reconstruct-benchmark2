@@ -1437,6 +1437,7 @@ def overall_knownTPR_novelTPR_and_FDR_barplot(
             )
             sensitivity_val = not_novel_accuracy_stats["Sensitivity"]
 
+            FDR_val = accuracy_stats_for_novel["FDR"]
             F1_val = accuracy_stats_for_novel["F1"]
 
         name, color, line = colorAndLabel(progname)
