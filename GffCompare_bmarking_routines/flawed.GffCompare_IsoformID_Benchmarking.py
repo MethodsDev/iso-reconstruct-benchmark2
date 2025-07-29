@@ -8,6 +8,9 @@ import glob
 import pandas as pd
 
 
+# Note, I suspect this is overcounting TPs and maybe FPs and also results in inconsistent truth sets - each method has a different effective truth set being applied based on the logic wihtin. Renameing as 'flawed.' until resolved.
+
+
 logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 logger = logging.getLogger(__name__)
 
