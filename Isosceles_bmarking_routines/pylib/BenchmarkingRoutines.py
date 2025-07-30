@@ -226,9 +226,9 @@ def relativeDiff(ground_truth_TPMs, estimated_TPMs, metric):
     absRelDiff = absRelativeDiffEach(ground_truth_TPMs, estimated_TPMs)
 
     if metric == "mean":
-        return np.mean(absRelDiff)
+        return np.nanmean(absRelDiff)
     elif metric == "median":
-        return np.median(absRelDiff)
+        return np.nanmedian(absRelDiff)
     else:
         raise RuntimeError("Specify 'mean' or 'median' for argument: 'metric'.")
 
@@ -260,27 +260,35 @@ def assign_binned_expr_quantile(i_ref_df, i_sample_df, num_bins):
     # Remove any rows in which both ground truth and estimated TPM is 0.
     dropRows = bigDf[(bigDf[groundTruth] == 0) & (bigDf[estimated] == 0)].index
     bigDf.drop(dropRows, inplace=True)
+
     # Subset bigDf for rows where ground truth is 0; these are all false positives in the sample.
     zeros = bigDf[bigDf[groundTruth] == 0].copy()
+
     # Subset bigDf for rows where ground truth isn't 0, then order them by ground truth expression.
     nonzeros = bigDf[bigDf[groundTruth] > 0].sort_values(by=[groundTruth]).copy()
+
     # Bin the data into n bins based on ground truth expression.
     # .rank(method='first') is required because otherwise we have issues with nonunique bin edge values.
     nonzeros["quantile"] = pd.qcut(
         nonzeros[groundTruth].rank(method="first"), q=num_bins, labels=False
     )
+
     # Assign false positives to bins based on their detected expression
     quantile_expr = nonzeros[groundTruth].groupby(nonzeros["quantile"]).agg("max")
     quantile_expr = quantile_expr + np.arange(len(quantile_expr)) / 1e10
     quantile_expr = [0] + list(quantile_expr)
     zeros["quantile"] = pd.cut(zeros[estimated], quantile_expr, labels=False)
-    n_0 = (zeros["quantile"] == 0).sum()
-    zeros["quantile"][zeros["quantile"] == 0] = np.floor(np.arange(n_0) / n_0 * 3)
-    n_3 = (zeros["quantile"] == 3).sum()
-    zeros["quantile"][zeros["quantile"] == 3] = np.floor(np.arange(n_3) / n_3 * 2) + 3
+
+    # what is happening here? commenting out for now.
+    # n_0 = (zeros["quantile"] == 0).sum()
+    # zeros["quantile"][zeros["quantile"] == 0] = np.floor(np.arange(n_0) / n_0 * 3)
+    # n_3 = (zeros["quantile"] == 3).sum()
+    # zeros["quantile"][zeros["quantile"] == 3] = np.floor(np.arange(n_3) / n_3 * 2) + 3
+
     # Recombine the false and true positives into the full bigDf.  The reason bigDf is first split into
     # true and false positives is to ensure that the first quantile bin isn't all zeros for ground truth.
     # bigDf = zeros.append(nonzeros)  # deprecated in pandas
+
     bigDf = pd.concat([zeros, nonzeros], ignore_index=False)
     # bigDf.to_csv("ladeda2", sep="\t", index=False, mode="a")
     return bigDf
@@ -303,7 +311,9 @@ def measure_rel_diff_by_expr_quantile(
     if intronIds_use is None:
         i_bigDf["use"] = i_bigDf["is_ref"]
     else:
-        i_bigDf.loc[intronIds_use, "use"] = True
+        existing_ids = set(intronIds_use) & set(i_bigDf.index)
+        i_bigDf.loc[list(existing_ids), "use"] = True
+        intronIds_use = existing_ids  # reset
 
     # 'knownDf': the subset of tx that were included in the downsampled GTF.
     i_use_df = i_bigDf[i_bigDf["use"]].copy()

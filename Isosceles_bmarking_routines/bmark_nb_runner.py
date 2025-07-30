@@ -67,6 +67,13 @@ def main():
         "--truth_quant", required=True, type=str, help="truth quant file"
     )
 
+    parser.add_argument(
+        "--Venn_mode",
+        action="store_true",
+        default=False,
+        help="incorporate agreed-upon predicted isoforms into the truth set",
+    )
+
     args = parser.parse_args()
     analysisType = args.analysisType
     truth_gtf = args.truth_gtf
@@ -79,6 +86,9 @@ def main():
     inputs_dict["REF_gtf_file"] = truth_gtf
     inputs_dict["REF_quant_file"] = truth_quant
     inputs_dict["REF_reduced_gtf_file"] = truth_reduced_gtf
+
+    if args.Venn_mode:
+        inputs_dict["IGNORE_NONUNIQUE_NONREF"] = True
 
     template_notebook = analysisType_to_notebook[analysisType]
 
