@@ -3,9 +3,11 @@
 import sys, os, re
 import argparse
 import logging
-import papermill as pm
 import glob
 import shutil
+import tempfile
+import json
+import subprocess
 
 PYLIB_DIR = os.path.join(os.path.dirname(__file__), "pylib")
 sys.path.insert(0, PYLIB_DIR)
@@ -31,6 +33,69 @@ analysisType_to_notebook = {
 QuantParser.FLAMES_gff3_converter = os.path.join(
     os.path.dirname(__file__), "../misc/FLAMES_gff3_to_gtf_converter.py"
 )
+
+
+def execute_notebook_isolated(notebook_to_run, notebook_output, inputs_dict):
+    # Create a temporary file for parameters
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+        json.dump(inputs_dict, f)
+        params_file = f.name
+
+    # Create temporary runtime directory
+    with tempfile.TemporaryDirectory() as temp_dir:
+        runtime_dir = os.path.join(temp_dir, "jupyter_runtime")
+        os.makedirs(runtime_dir, exist_ok=True)
+
+        try:
+            # Build papermill command
+            cmd = [
+                "papermill",
+                "-f",
+                params_file,
+                "--kernel",
+                "python3",
+                "--progress-bar",  # Show progress
+                # "--log-output",  # Show cell outputs
+                "--log-level",
+                "INFO",  # Set log level
+                notebook_to_run,
+                notebook_output,
+            ]
+            cmdstr = " ".join(cmd)
+            logger.info(cmdstr)
+
+            # Set environment for subprocess
+            env = os.environ.copy()
+            env["JUPYTER_RUNTIME_DIR"] = runtime_dir
+
+            result = subprocess.run(
+                cmdstr,
+                # capture_output=True,
+                text=True,
+                env=env,
+                timeout=3600,  # 1 hour timeout, adjust as needed
+                shell=True,
+            )
+
+            if result.returncode != 0:
+                print(f"Papermill stderr: {result.stderr}")
+                print(f"Papermill stdout: {result.stdout}")
+                raise subprocess.CalledProcessError(
+                    result.returncode, cmd, result.stdout, result.stderr
+                )
+
+            return result
+
+        except subprocess.TimeoutExpired:
+            print(f"Notebook execution timed out: {notebook_to_run}")
+            raise
+        except subprocess.CalledProcessError as e:
+            print(f"Papermill execution failed: {e}")
+            raise
+        finally:
+            # Clean up temp file
+            if os.path.exists(params_file):
+                os.unlink(params_file)
 
 
 def main():
@@ -97,11 +162,7 @@ def main():
 
     notebook_output = os.path.abspath(analysisType + ".ipynb")
 
-    pm.execute_notebook(
-        notebook_to_run,
-        notebook_output,
-        parameters=inputs_dict,
-    )
+    execute_notebook_isolated(notebook_to_run, notebook_output, inputs_dict)
 
     print("Done.")
 
