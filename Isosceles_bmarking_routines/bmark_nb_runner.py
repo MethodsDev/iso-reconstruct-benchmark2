@@ -28,6 +28,9 @@ analysisType_to_notebook = {
     "quant_only": os.path.join(notebook_template_dir, "template.quant-only.ipynb"),
     "ref_guided": os.path.join(notebook_template_dir, "template.ref_reduced.ipynb"),
     "ref_free": os.path.join(notebook_template_dir, "template.denovo.ipynb"),
+    "quant_only_no_truthset": os.path.join(
+        notebook_template_dir, "template.quant-only-no-truthset.ipynb"
+    ),
 }
 
 QuantParser.FLAMES_gff3_converter = os.path.join(
@@ -109,8 +112,8 @@ def main():
         "--analysisType",
         type=str,
         required=True,
-        choices=["quant_only", "ref_guided", "ref_free"],
-        help="type of benchmarking to run. Choices: [quant_only, ref_guided, ref_free]",
+        choices=["quant_only", "ref_guided", "ref_free", "quant_only_no_truthset"],
+        help="type of benchmarking to run. Choices: [quant_only, ref_guided, ref_free, quant_only_no_truthset]",
     )
 
     parser.add_argument(
@@ -129,7 +132,7 @@ def main():
     )
 
     parser.add_argument(
-        "--truth_quant", required=True, type=str, help="truth quant file"
+        "--truth_quant", required=False, type=str, help="truth quant file"
     )
 
     parser.add_argument(
