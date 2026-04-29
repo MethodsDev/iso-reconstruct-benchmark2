@@ -1,6 +1,6 @@
 version 1.0
 
-# This task uses Flair version 2.0.0
+# This task uses Flair version 3.0.0
 task flairTask {
     input {
         String sample_id
@@ -16,6 +16,7 @@ task flairTask {
         Int memoryGB = 64
         Int diskSizeGB = 512
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/flair:latest"
+        String flair_version_tag = "v3.0.0"
     }
 
     String quant_only_flag = if (quant_only) then "--quant_only" else ""
@@ -28,13 +29,14 @@ task flairTask {
                         --bam ~{inputBAM} \
                         --gtf ~{referenceAnnotationGTF} \
                         --output_prefix ~{sample_id} \
+                        --flair_version_tag ~{flair_version_tag} \
                         ~{quant_only_flag}
         
     >>>
 
     output {
-        File? flair_gtf = "~{sample_id}.flair.gtf"
-        File flair_counts = "~{sample_id}.flair.counts.tsv"
+        File? flair_gtf = "~{sample_id}.flair-~{flair_version_tag}.flair.gtf"
+        File flair_counts = "~{sample_id}.flair-~{flair_version_tag}.counts.tsv"
     }
 
     runtime {
@@ -56,6 +58,7 @@ workflow flairWorkflow {
         File referenceGenomeIndex
         File referenceAnnotationGTF
         Boolean quant_only
+        String flair_version_tag = "v3.0.0"
     }
 
     call flairTask {
@@ -66,7 +69,8 @@ workflow flairWorkflow {
             referenceGenomeFasta = referenceGenomeFasta,
             referenceGenomeIndex = referenceGenomeIndex,
             referenceAnnotationGTF = referenceAnnotationGTF,
-            quant_only = quant_only
+            quant_only = quant_only,
+            flair_version_tag = flair_version_tag
     }
 
     output {
