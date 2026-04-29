@@ -1,6 +1,6 @@
 version 1.0
 
-# This task uses ESPRESSO version 1.5.0
+# This task uses ESPRESSO version 1.6.0
 task espressoTask {
     input {
         String sample_id
@@ -30,8 +30,8 @@ task espressoTask {
     >>>
 
     output {
-        File espresso_gtf = "~{sample_id}.espresso.gtf"
-        File espresso_counts = "~{sample_id}.espresso.counts.tsv"
+        File espresso_gtf = "~{sample_id}.espresso.v1.6.0.gtf"
+        File espresso_counts = "~{sample_id}.espresso.v1.6.0.counts.tsv"
     }
 
     runtime {

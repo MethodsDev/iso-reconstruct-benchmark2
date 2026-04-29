@@ -5,7 +5,7 @@ FROM continuumio/miniconda3
 RUN conda install -c conda-forge mamba -y && conda clean -a -y
 
 # Create a new environment and install ESPRESSO
-RUN mamba create -n espresso_env -c bioconda -c conda-forge espresso=1.5.0-0 && \
+RUN mamba create -n espresso_env -c bioconda -c conda-forge espresso=1.6.0 && \
     conda clean -a -y
 
 # Activate the environment and set it as the default
@@ -28,4 +28,3 @@ RUN perl -e 'use threads; print("Perl threading support: ok\n")' && \
     samtools --version
 
 COPY ESPRESSO-runner.py /usr/local/bin
-

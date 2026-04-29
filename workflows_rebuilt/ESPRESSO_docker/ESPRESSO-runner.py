@@ -4,6 +4,8 @@ import sys, os, re
 import subprocess
 import argparse
 
+ESPRESSO_VERSION_TOKEN = "v1.6.0"
+
 
 def main():
 
@@ -83,9 +85,13 @@ def main():
     )
     run_cmd(cmd)
 
-    run_cmd(f"cp espresso_samples_N2_R0_updated.gtf {output_prefix}.espresso.gtf")
     run_cmd(
-        f"cp espresso_samples_N2_R0_abundance.esp {output_prefix}.espresso.counts.tsv"
+        f"cp espresso_samples_N2_R0_updated.gtf "
+        f"{output_prefix}.espresso.{ESPRESSO_VERSION_TOKEN}.gtf"
+    )
+    run_cmd(
+        f"cp espresso_samples_N2_R0_abundance.esp "
+        f"{output_prefix}.espresso.{ESPRESSO_VERSION_TOKEN}.counts.tsv"
     )
 
     sys.exit(0)
