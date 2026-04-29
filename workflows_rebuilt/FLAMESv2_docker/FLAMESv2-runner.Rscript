@@ -1,0 +1,134 @@
+#!/usr/bin/env Rscript
+
+suppressPackageStartupMessages({
+  library(argparse)
+  library(FLAMES)
+})
+
+parser <- ArgumentParser(description = "FLAMES v2 runner")
+parser$add_argument("--output_prefix", required = TRUE, help = "Output file prefix")
+parser$add_argument("--genome", required = TRUE, help = "Genome FASTA")
+parser$add_argument("--gtf", required = TRUE, help = "Reference annotation (GTF/GFF3)")
+parser$add_argument("--bam", required = TRUE, help = "Input BAM alignment")
+parser$add_argument("--ncpu", type = "integer", default = 4, help = "Threads")
+parser$add_argument("--data_type", default = "pacbio_ccs", choices = c("pacbio_ccs", "nanopore"))
+parser$add_argument("--quant_only", action = "store_true", default = FALSE, help = "Quantification only (skip isoform identification)")
+
+args <- parser$parse_args()
+
+run_cmd <- function(cmd) {
+  message("CMD: ", cmd)
+  status <- system(cmd)
+  if (status != 0) {
+    stop(sprintf("Command failed with exit code %d: %s", status, cmd))
+  }
+}
+
+outdir <- file.path(getwd(), "flamesv2_out")
+dir.create(outdir, showWarnings = FALSE, recursive = TRUE)
+
+fastq <- file.path(outdir, "input.fastq")
+run_cmd(sprintf("samtools bam2fq %s > %s", shQuote(args$bam), shQuote(fastq)))
+
+strand_specific <- ifelse(args$data_type == "pacbio_ccs", 1L, 0L)
+config_file <- create_config(
+  outdir = outdir,
+  type = "sc_3end",
+  pipeline_parameters.threads = args$ncpu,
+  pipeline_parameters.oarfish_quantification = FALSE,
+  pipeline_parameters.do_isoform_identification = !args$quant_only,
+  isoform_parameters.strand_specific = strand_specific
+)
+
+pipeline <- BulkPipeline(
+  config_file = config_file,
+  outdir = outdir,
+  fastq = setNames(fastq, "sample1"),
+  annotation = args$gtf,
+  genome_fa = args$genome
+)
+pipeline <- run_FLAMES(pipeline)
+
+if (length(pipeline@last_error) > 0) {
+  stop(paste(c("FLAMES pipeline failed:", unlist(pipeline@last_error)), collapse = "\n"))
+}
+
+output_gff3 <- paste0(args$output_prefix, ".FLAMES.gff3")
+output_counts <- paste0(args$output_prefix, ".FLAMES.counts.tsv")
+
+cand_gff <- c(
+  file.path(outdir, "isoform_annotated.filtered.gff3"),
+  file.path(outdir, "isoform_annotated.gff3"),
+  file.path(outdir, "isoform_annotated.gtf")
+)
+existing_gff <- cand_gff[file.exists(cand_gff)]
+if (length(existing_gff) == 0 && args$quant_only) {
+  file.copy(args$gtf, output_gff3, overwrite = TRUE)
+} else if (length(existing_gff) == 0) {
+  stop("Could not find FLAMES isoform annotation output")
+} else {
+  file.copy(existing_gff[[1]], output_gff3, overwrite = TRUE)
+}
+
+cnt_gz <- file.path(outdir, "transcript_count.csv.gz")
+cnt_csv <- file.path(outdir, "transcript_count.csv")
+
+if (file.exists(cnt_gz)) {
+  run_cmd(sprintf("gunzip -c %s > %s", shQuote(cnt_gz), shQuote(cnt_csv)))
+  cnt <- read.csv(cnt_csv, stringsAsFactors = FALSE, check.names = FALSE)
+  required <- c("gene_id", "transcript_id")
+  missing_cols <- setdiff(required, colnames(cnt))
+  if (length(missing_cols) > 0) {
+    stop(sprintf("Missing required columns in transcript count output: %s", paste(missing_cols, collapse = ", ")))
+  }
+
+  sample_cols <- setdiff(colnames(cnt), c("transcript_id", "gene_id", "FSM_match"))
+  if (length(sample_cols) == 0) {
+    stop("No sample count columns found in transcript_count.csv")
+  }
+
+  count_vec <- rowSums(cnt[, sample_cols, drop = FALSE])
+  out <- data.frame(
+    gene_id = cnt$gene_id,
+    transcript_id = cnt$transcript_id,
+    count = count_vec,
+    stringsAsFactors = FALSE
+  )
+} else {
+  quant_files <- Sys.glob(file.path(outdir, "*.quant"))
+  if (length(quant_files) == 0) {
+    stop("Could not find FLAMES quant output (neither transcript_count.csv.gz nor *.quant)")
+  }
+  quant <- read.table(quant_files[[1]], header = TRUE, sep = "\t", stringsAsFactors = FALSE, check.names = FALSE)
+  if (!all(c("tname", "num_reads") %in% colnames(quant))) {
+    stop("Expected columns tname and num_reads in *.quant output")
+  }
+
+  gff <- read.delim(output_gff3, header = FALSE, sep = "\t", comment.char = "#", stringsAsFactors = FALSE)
+  tx <- gff[gff$V3 == "transcript", c("V9")]
+  parse_attr <- function(s, key) {
+    m <- regexec(paste0("(^|;)", key, "=([^;]+)"), s)
+    r <- regmatches(s, m)
+    if (length(r[[1]]) >= 3) r[[1]][3] else NA_character_
+  }
+  tx_id <- vapply(tx$V9, parse_attr, character(1), key = "transcript_id")
+  tx_id[is.na(tx_id)] <- vapply(tx$V9[is.na(tx_id)], parse_attr, character(1), key = "ID")
+  gene_id <- vapply(tx$V9, parse_attr, character(1), key = "Parent")
+  map_df <- data.frame(transcript_id = tx_id, gene_id = gene_id, stringsAsFactors = FALSE)
+  map_df <- map_df[!is.na(map_df$transcript_id), ]
+
+  out <- data.frame(
+    transcript_id = quant$tname,
+    count = as.numeric(quant$num_reads),
+    stringsAsFactors = FALSE
+  )
+  out <- merge(out, map_df, by = "transcript_id", all.x = TRUE, sort = FALSE)
+  out$gene_id[is.na(out$gene_id)] <- out$transcript_id[is.na(out$gene_id)]
+  out <- out[, c("gene_id", "transcript_id", "count")]
+}
+
+write.table(out, file = output_counts, sep = "\t", quote = FALSE, row.names = FALSE)
+
+message("Wrote: ", output_gff3)
+message("Wrote: ", output_counts)
+q(status = 0)
