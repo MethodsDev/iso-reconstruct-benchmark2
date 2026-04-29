@@ -1,11 +1,9 @@
-FROM bioconductor/bioconductor_docker:RELEASE_3_20
+FROM bioconductor/bioconductor_docker:RELEASE_3_22
 
-RUN Rscript -e 'BiocManager::install("bambu")'
-
-
-# Check if bambu is installed
-RUN R -e "if (!('bambu' %in% installed.packages()[,'Package'])) stop('bambu not installed')"
-
-RUN Rscript -e 'BiocManager::install(c("argparse"))'
+# Install runtime dependency, pin bambu to v3.12.1, and verify in one layer
+RUN Rscript -e 'BiocManager::install(c("argparse"), ask = FALSE, update = FALSE)' \
+ && Rscript -e 'install.packages("remotes", repos = "https://cloud.r-project.org")' \
+ && Rscript -e 'remotes::install_github("GoekeLab/bambu@v3.12.1", upgrade = "never", dependencies = TRUE)' \
+ && Rscript -e 'stopifnot(as.character(packageVersion("bambu")) == "3.12.1")'
 
 COPY bambu-runner.Rscript /usr/local/bin/
