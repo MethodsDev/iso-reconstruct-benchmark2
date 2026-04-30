@@ -1,0 +1,10 @@
+{
+  "isoquantWorkflow.sample_id": "testSample.quant_only",
+  "isoquantWorkflow.inputBAM": "data/sim.fasta.mm2.bam",
+  "isoquantWorkflow.inputBAMIndex": "data/sim.fasta.mm2.bam.bai",
+  "isoquantWorkflow.referenceGenomeFasta": "data/SIRVs1-7.genome.fa",
+  "isoquantWorkflow.referenceGenomeIndex": "data/SIRVs1-7.genome.fa.fai",
+  "isoquantWorkflow.referenceAnnotationGTF": "data/SIRVs1-7.annot.reduced.gtf",
+  "isoquantWorkflow.quant_only": true,
+  "isoquantWorkflow.data_type": "pacbio_ccs"
+}

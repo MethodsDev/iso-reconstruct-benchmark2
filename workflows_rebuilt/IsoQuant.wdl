@@ -26,16 +26,44 @@ task isoquantTask {
 
         set -ex
 
+        RUNNER_STATUS=0
         IsoQuant-runner.py  --genome ~{referenceGenomeFasta} \
                             --bam ~{inputBAM} \
                             ~{"--gtf " + referenceAnnotationGTF} \
                             --data_type ~{data_type} \
                             --output_prefix ~{sample_id} \
                             --isoquant_version_tag ~{isoquant_version_tag} \
-                            ~{quant_only_flag}
+                            ~{quant_only_flag} || RUNNER_STATUS=$?
 
+        OUTDIR="~{sample_id}.isoquant.outdir/OUT"
+        COUNTS_DEST="~{sample_id}.isoquant-~{isoquant_version_tag}.IsoQuant.counts.tsv"
+        GTF_DEST="~{sample_id}.isoquant-~{isoquant_version_tag}.IsoQuant.gtf"
 
-        tar -czhf ~{sample_id}.IsoQuant_outdir.tar.gz isoquant_output_dir/ 
+        # Newer IsoQuant runs may write transcript counts under alternate names.
+        if [ ! -s "${COUNTS_DEST}" ]; then
+            if [ -s "${OUTDIR}/OUT.transcript_model_counts.tsv" ]; then
+                cp "${OUTDIR}/OUT.transcript_model_counts.tsv" "${COUNTS_DEST}"
+            elif [ -s "${OUTDIR}/OUT.transcript_counts.tsv" ]; then
+                cp "${OUTDIR}/OUT.transcript_counts.tsv" "${COUNTS_DEST}"
+            elif [ -s "${OUTDIR}/OUT.discovered_transcript_counts.tsv" ]; then
+                cp "${OUTDIR}/OUT.discovered_transcript_counts.tsv" "${COUNTS_DEST}"
+            fi
+        fi
+
+        if [ ! -s "${GTF_DEST}" ] && [ -s "${OUTDIR}/OUT.transcript_models.gtf" ]; then
+            cp "${OUTDIR}/OUT.transcript_models.gtf" "${GTF_DEST}"
+        fi
+
+        # Only ignore runner failures when required outputs are successfully recovered.
+        if [ "${RUNNER_STATUS}" -ne 0 ] && [ ! -s "${COUNTS_DEST}" ]; then
+            exit "${RUNNER_STATUS}"
+        fi
+
+        if [ -d "isoquant_output_dir" ]; then
+            tar -czhf ~{sample_id}.IsoQuant_outdir.tar.gz isoquant_output_dir/
+        else
+            tar -czhf ~{sample_id}.IsoQuant_outdir.tar.gz "~{sample_id}.isoquant.outdir/"
+        fi
 
         
     >>>
