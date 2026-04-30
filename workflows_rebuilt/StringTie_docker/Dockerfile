@@ -41,8 +41,8 @@ RUN wget https://github.com/samtools/samtools/releases/download/1.16.1/samtools-
 	make install
 
 # StringTie
-ENV STRINGTIE_VERSION=2.2.3
-RUN wget http://ccb.jhu.edu/software/stringtie/dl/stringtie-${STRINGTIE_VERSION}.tar.gz && \
+ENV STRINGTIE_VERSION=3.0.3
+RUN wget https://github.com/gpertea/stringtie/releases/download/v${STRINGTIE_VERSION}/stringtie-${STRINGTIE_VERSION}.tar.gz && \
 	tar xvf stringtie-${STRINGTIE_VERSION}.tar.gz && \
 	cd stringtie-${STRINGTIE_VERSION}/ && \
 	make release && \

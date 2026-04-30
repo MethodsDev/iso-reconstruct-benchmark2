@@ -27,6 +27,13 @@ def main():
         default=False,
         help="only perform quantification, no isoform discovery.",
     )
+    parser.add_argument(
+        "--stringtie_version_tag",
+        type=str,
+        required=False,
+        default="v3.0.3",
+        help="version tag token included in output file names",
+    )
 
     args = parser.parse_args()
 
@@ -36,13 +43,15 @@ def main():
     bam_file = args.bam
     num_threads = args.ncpu
     quant_only_flag = args.quant_only
+    stringtie_version_tag = args.stringtie_version_tag
+    output_base = f"{output_prefix}.stringtie-{stringtie_version_tag}"
 
     if quant_only_flag and gtf_file is None:
         raise RuntimeError("need gtf file if quant_only mode")
 
     ## begin
 
-    cmd = f"stringtie {bam_file} -L --ref {genome_fasta} -p {num_threads} -o {output_prefix}.stringtie.gtf"
+    cmd = f"stringtie {bam_file} -L --ref {genome_fasta} -p {num_threads} -o {output_base}.stringtie.gtf"
 
     if gtf_file:
         cmd += f" -G {gtf_file}"
@@ -53,7 +62,7 @@ def main():
     run_cmd(cmd)
 
     # get quants
-    cmd = f"extract_stringtie_quants.py {output_prefix}.stringtie.gtf {output_prefix}.stringtie.quant.tsv"
+    cmd = f"extract_stringtie_quants.py {output_base}.stringtie.gtf {output_base}.stringtie.quant.tsv"
     run_cmd(cmd)
 
     sys.exit(0)

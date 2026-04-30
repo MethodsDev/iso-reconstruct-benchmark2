@@ -15,6 +15,7 @@ task stringtieTask {
         Int memoryGB = 64
         Int diskSizeGB = 250
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/stringtie"
+        String stringtie_version_tag = "v3.0.3"
     }
 
     String quant_only_flag = if (quant_only) then "--quant_only" else ""
@@ -29,14 +30,15 @@ task stringtieTask {
                             --bam ~{inputBAM} \
                             ~{"--gtf " + referenceAnnotationGTF} \
                             ~{quant_only_flag} \
+                            --stringtie_version_tag ~{stringtie_version_tag} \
                             --output_prefix ~{sample_id}.~{stringtie_mode}
 
     >>>
     
     output {
 
-        File stringtie_gtf = "~{sample_id}.~{stringtie_mode}.stringtie.gtf"
-        File stringtie_quant = "~{sample_id}.~{stringtie_mode}.stringtie.quant.tsv"
+        File stringtie_gtf = "~{sample_id}.~{stringtie_mode}.stringtie-~{stringtie_version_tag}.stringtie.gtf"
+        File stringtie_quant = "~{sample_id}.~{stringtie_mode}.stringtie-~{stringtie_version_tag}.stringtie.quant.tsv"
     }
 
     runtime {
