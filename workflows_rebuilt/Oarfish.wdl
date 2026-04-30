@@ -1,6 +1,6 @@
 version 1.0
 
-# This task uses Oarfish version 4.5.0
+# This task uses Oarfish version v0.9.4
 task oarfishTask {
     input {
         String sample_id
@@ -11,6 +11,7 @@ task oarfishTask {
         File referenceAnnotationGTF
         String oarfish_seq_tech # ont-cdna, ont-drna, pac-bio, or pac-bio-hifi
         String oarfish_mode # byAlignment or byReads
+        String oarfish_version_tag = "v0.9.4"
         
         Int cpu = 4
         Int numThreads = 8
@@ -38,12 +39,13 @@ task oarfishTask {
                      --fastq $inputFASTQ \
                      --ncpu ~{cpu} \
                      --mode ~{oarfish_mode} \
-                     --seq_tech ~{oarfish_seq_tech}
+                     --seq_tech ~{oarfish_seq_tech} \
+                     --oarfish_version_tag ~{oarfish_version_tag}
         
     >>>
 
     output {
-        File oarfish_quant = "~{sample_id}.Oarfish.~{oarfish_mode}.quant"
+        File oarfish_quant = "~{sample_id}.oarfish-~{oarfish_version_tag}.Oarfish.~{oarfish_mode}.quant"
        
     }
 
@@ -67,6 +69,7 @@ workflow oarfishWorkflow {
         File referenceAnnotationGTF
         String oarfish_seq_tech # ont-cdna, ont-drna, pac-bio, or pac-bio-hifi
         String oarfish_mode # byAlignment or byReads 
+        String oarfish_version_tag = "v0.9.4"
     }
 
     call oarfishTask {
@@ -78,7 +81,8 @@ workflow oarfishWorkflow {
             referenceGenomeIndex = referenceGenomeIndex,
             referenceAnnotationGTF = referenceAnnotationGTF,
             oarfish_seq_tech = oarfish_seq_tech,
-            oarfish_mode = oarfish_mode
+            oarfish_mode = oarfish_mode,
+            oarfish_version_tag = oarfish_version_tag
     }
 
     output {

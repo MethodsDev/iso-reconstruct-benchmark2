@@ -37,6 +37,12 @@ def main():
         default="pac-bio",
         help="seq tech mode for byReads mode",
     )
+    parser.add_argument(
+        "--oarfish_version_tag",
+        type=str,
+        default="v0.9.4",
+        help="oarfish version token to include in output file names",
+    )
 
     args = parser.parse_args()
 
@@ -45,6 +51,8 @@ def main():
     gtf_file = args.gtf
     fastq_file = args.fastq
     oarfish_mode = args.mode
+    oarfish_version_tag = args.oarfish_version_tag
+    output_base = f"{output_prefix}.oarfish-{oarfish_version_tag}.Oarfish"
 
     num_threads = args.ncpu
 
@@ -69,7 +77,7 @@ def main():
             [
                 "oarfish",
                 "--alignments mapped.namesorted.bam",
-                f"-o {output_prefix}.Oarfish.byAlignment",
+                f"-o {output_base}.byAlignment",
                 "--model-coverage",
                 f"--threads {num_threads}",
             ]
@@ -83,10 +91,10 @@ def main():
             [
                 "oarfish",
                 f"--reads {fastq_file}",
-                f"-o {output_prefix}.Oarfish.byReads",
+                f"-o {output_base}.byReads",
                 "--model-coverage",
                 f"--threads {num_threads}",
-                "--reference  transcriptome.fa",
+                "--annotated transcriptome.fa",
                 f"--seq-tech {seq_tech}",
             ]
         )

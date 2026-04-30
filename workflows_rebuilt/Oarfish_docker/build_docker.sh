@@ -9,6 +9,5 @@ docker build -t us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-bench
 docker build -t us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/oarfish:latest .
 
 # verify installation
-docker run --rm -it us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/oarfish Oarfish_runner.py -h
-
+docker run --rm us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/oarfish Oarfish_runner.py -h
 

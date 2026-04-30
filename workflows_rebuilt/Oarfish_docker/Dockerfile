@@ -27,13 +27,16 @@ ENV BIN=/usr/local/bin
 ENV PATH="/usr/src/oarfish/target/release:/opt/conda/bin:${PATH}"
 
 
+# Accept required Anaconda channel Terms of Service for non-interactive builds.
+RUN conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main && \
+    conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
+
 # Install gffread and samtools using conda
 RUN conda install -y -c bioconda gffread
 
 
 ### Oarfish now.
 
-RUN curl --proto '=https' --tlsv1.2 -LsSf https://github.com/COMBINE-lab/oarfish/releases/download/v0.6.5/oarfish-installer.sh | sh
+RUN curl --proto '=https' --tlsv1.2 -LsSf https://github.com/COMBINE-lab/oarfish/releases/download/v0.9.4/oarfish-installer.sh | sh
 
 COPY Oarfish_runner.py /usr/local/bin/
-
