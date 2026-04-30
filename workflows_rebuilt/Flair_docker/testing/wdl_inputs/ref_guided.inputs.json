@@ -1,0 +1,10 @@
+{
+  "flairWorkflow.sample_id": "testSample.ref_guided",
+  "flairWorkflow.inputBAM": "data/sim.fasta.mm2.bam",
+  "flairWorkflow.inputBAMIndex": "data/sim.fasta.mm2.bam.bai",
+  "flairWorkflow.referenceGenomeFasta": "data/SIRVs1-7.genome.fa",
+  "flairWorkflow.referenceGenomeIndex": "data/SIRVs1-7.genome.fa.fai",
+  "flairWorkflow.referenceAnnotationGTF": "data/SIRVs1-7.annot.reduced.gtf",
+  "flairWorkflow.quant_only": false,
+  "flairWorkflow.flair_version_tag": "v3.0.0"
+}
