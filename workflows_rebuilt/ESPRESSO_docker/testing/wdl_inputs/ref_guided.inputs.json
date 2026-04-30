@@ -1,0 +1,8 @@
+{
+  "espressoWorkflow.sample_id": "testSample.ref_guided",
+  "espressoWorkflow.inputBAM": "data/sim.fasta.mm2.bam",
+  "espressoWorkflow.inputBAMIndex": "data/sim.fasta.mm2.bam.bai",
+  "espressoWorkflow.referenceGenomeFasta": "data/SIRVs1-7.genome.fa",
+  "espressoWorkflow.referenceGenomeIndex": "data/SIRVs1-7.genome.fa.fai",
+  "espressoWorkflow.referenceAnnotationGTF": "data/SIRVs1-7.annot.reduced.gtf"
+}

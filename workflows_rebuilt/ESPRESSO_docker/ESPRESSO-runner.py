@@ -30,7 +30,6 @@ def main():
         default=10,
         help="sort memory in GB",
     )
-
     args = parser.parse_args()
 
     output_prefix = args.output_prefix
@@ -50,13 +49,13 @@ def main():
     # run espresso S
     cmd = " ".join(
         [
-            "perl /opt/conda/envs/espresso_env/bin/ESPRESSO_S.pl",
-            "--sort_buffer_size {}".format(sort_buffer_memGB),
-            f"-L {samples_file}",
-            f"-F {genome_fasta}",
-            f"-A {gtf_file}",
-            "-O . ",
-            f"-T {num_threads}",
+        "perl /opt/conda/envs/espresso_env/bin/ESPRESSO_S.pl",
+        "--sort_buffer_size {}".format(sort_buffer_memGB),
+        f"-L {samples_file}",
+        f"-F {genome_fasta}",
+        f"-A {gtf_file}",
+        "-O . ",
+        f"-T {num_threads}",
         ]
     )
     run_cmd(cmd)
@@ -77,10 +76,10 @@ def main():
     # run espresso Q
     cmd = " ".join(
         [
-            "perl /opt/conda/envs/espresso_env/bin/ESPRESSO_Q.pl",
-            f"-L {samples_file}.updated",
-            f"-A {gtf_file}",
-            f"-T {num_threads}",
+        "perl /opt/conda/envs/espresso_env/bin/ESPRESSO_Q.pl",
+        f"-L {samples_file}.updated",
+        f"-A {gtf_file}",
+        f"-T {num_threads}",
         ]
     )
     run_cmd(cmd)

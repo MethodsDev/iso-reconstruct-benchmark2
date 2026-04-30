@@ -17,7 +17,6 @@ task espressoTask {
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/espresso:latest"
     }
 
-
     command <<<
 
         set -ex
