@@ -35,6 +35,13 @@ def main():
         default=False,
         help="only perform quantification, no isoform discovery.",
     )
+    parser.add_argument(
+        "--isoquant_version_tag",
+        type=str,
+        required=False,
+        default="v3.13.0",
+        help="version token appended to final output filenames",
+    )
 
     args = parser.parse_args()
 
@@ -45,6 +52,9 @@ def main():
     num_threads = args.ncpu
     quant_only_flag = args.quant_only
     data_type = args.data_type
+    isoquant_version_tag = args.isoquant_version_tag
+
+    versioned_output_prefix = f"{output_prefix}.isoquant-{isoquant_version_tag}"
 
     if quant_only_flag and gtf_file is None:
         raise RuntimeError("Error, must specify --gtf if --quant_only set")
@@ -74,14 +84,28 @@ def main():
 
     isoquant_models_gtf = f"{output_dir}/OUT/OUT.transcript_models.gtf"
     if os.path.exists(isoquant_models_gtf):
-        run_cmd(f"cp {isoquant_models_gtf} {output_prefix}.IsoQuant.gtf")
+        run_cmd(f"cp {isoquant_models_gtf} {versioned_output_prefix}.IsoQuant.gtf")
 
     if quant_only_flag:
         counts_file = f"{output_dir}/OUT/OUT.transcript_counts.tsv"
     else:
-        counts_file = f"{output_dir}/OUT/OUT.transcript_model_counts.tsv"
+        # IsoQuant output naming changed across versions/modes.
+        candidate_count_files = [
+            f"{output_dir}/OUT/OUT.transcript_model_counts.tsv",
+            f"{output_dir}/OUT/OUT.discovered_transcript_counts.tsv",
+            f"{output_dir}/OUT/OUT.transcript_counts.tsv",
+        ]
+        counts_file = None
+        for candidate in candidate_count_files:
+            if os.path.exists(candidate):
+                counts_file = candidate
+                break
+        if counts_file is None:
+            raise RuntimeError(
+                f"Error, no expected counts file found among: {candidate_count_files}"
+            )
 
-    run_cmd(f"cp {counts_file} {output_prefix}.IsoQuant.counts.tsv")
+    run_cmd(f"cp {counts_file} {versioned_output_prefix}.IsoQuant.counts.tsv")
 
     run_cmd(f"ln -sf {output_dir}  isoquant_output_dir")
 

@@ -33,24 +33,24 @@ RUN wget https://github.com/lh3/minimap2/releases/download/v2.22/minimap2-2.22_x
 
 # samtools
 RUN wget https://github.com/samtools/samtools/releases/download/1.16.1/samtools-1.16.1.tar.bz2 && \
-	tar xvf samtools-1.16.1.tar.bz2 && \
-	cd samtools-1.16.1 && \
-	./configure && \
-	make && \
-	make install
+    tar xvf samtools-1.16.1.tar.bz2 && \
+    cd samtools-1.16.1 && \
+    ./configure && \
+    make && \
+    make install
 
 WORKDIR /usr/local/src
 
-RUN wget https://github.com/ablab/IsoQuant/releases/download/v3.6.3/IsoQuant-3.6.3.tar.gz && \
-         tar xvf IsoQuant-3.6.3.tar.gz && \
-         mv IsoQuant-3.6.3 IsoQuant && \
+RUN wget https://github.com/ablab/IsoQuant/releases/download/v3.13.0/IsoQuant-3.13.0.tar.gz && \
+         tar xvf IsoQuant-3.13.0.tar.gz && \
+         mv IsoQuant-3.13.0 IsoQuant && \
          cd IsoQuant && \
          pip install -r requirements.txt
-         
+
 #RUN git clone https://github.com/ablab/IsoQuant.git && \
-#	cd IsoQuant && \
-#	git checkout latest && \
-#	pip install -r requirements.txt
+#    cd IsoQuant && \
+#    git checkout latest && \
+#    pip install -r requirements.txt
 
 
 COPY IsoQuant-runner.py /usr/local/bin/

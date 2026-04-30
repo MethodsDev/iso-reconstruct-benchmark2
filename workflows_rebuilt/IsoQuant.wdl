@@ -15,6 +15,7 @@ task isoquantTask {
         Int numThreads = 8
         Int memoryGB = 64
         Int diskSizeGB = 500
+        String isoquant_version_tag = "v3.13.0"
         String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/isoquant:latest"
     }
 
@@ -30,6 +31,7 @@ task isoquantTask {
                             ~{"--gtf " + referenceAnnotationGTF} \
                             --data_type ~{data_type} \
                             --output_prefix ~{sample_id} \
+                            --isoquant_version_tag ~{isoquant_version_tag} \
                             ~{quant_only_flag}
 
 
@@ -39,8 +41,8 @@ task isoquantTask {
     >>>
 
     output {
-        File? isoquant_gtf = "~{sample_id}.IsoQuant.gtf"
-        File isoquant_counts = "~{sample_id}.IsoQuant.counts.tsv"
+        File? isoquant_gtf = "~{sample_id}.isoquant-~{isoquant_version_tag}.IsoQuant.gtf"
+        File isoquant_counts = "~{sample_id}.isoquant-~{isoquant_version_tag}.IsoQuant.counts.tsv"
         File isoquant_outdir_tgz = "~{sample_id}.IsoQuant_outdir.tar.gz"
 
     }
