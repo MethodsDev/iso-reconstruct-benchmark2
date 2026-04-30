@@ -39,6 +39,9 @@ workflows:
   - name: FLAMES
     subclass: WDL
     primaryDescriptorPath: /workflows_rebuilt/FLAMES.wdl
+  - name: FLAMESV2
+    subclass: WDL
+    primaryDescriptorPath: /workflows_rebuilt/FLAMESv2.wdl
   - name: OARFISH
     subclass: WDL
     primaryDescriptorPath: /workflows_rebuilt/Oarfish.wdl
