@@ -1,0 +1,8 @@
+{
+  "bambuWorkflow.sample_id": "testSample",
+  "bambuWorkflow.inputBAM": "data/sim.fasta.mm2.bam",
+  "bambuWorkflow.inputBAMIndex": "data/sim.fasta.mm2.bam.bai",
+  "bambuWorkflow.referenceGenomeFasta": "data/SIRVs1-7.genome.fa",
+  "bambuWorkflow.referenceGenomeIndex": "data/SIRVs1-7.genome.fa.fai",
+  "bambuWorkflow.quant_only": false
+}
