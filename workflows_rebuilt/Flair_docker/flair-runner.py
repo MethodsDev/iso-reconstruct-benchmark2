@@ -121,18 +121,8 @@ def run_cmd(cmd):
 
 def generate_reads_bed(bam_file, output_prefix):
     reads_bed_file = f"{output_prefix}-reads.bed"
-    try:
-        run_cmd(f"bam2Bed12 -i {bam_file} > {reads_bed_file}")
-        return
-    except subprocess.CalledProcessError:
-        # FLAIR 3.0.0 conda packaging can ship a broken bam2Bed12 entrypoint.
-        # Fallback to bedtools to generate BED12 from BAM.
-        print(
-            "WARNING: bam2Bed12 failed; falling back to bedtools bamtobed -bed12",
-            file=sys.stderr,
-        )
-        run_cmd(f"bedtools bamtobed -bed12 -i {bam_file} > {reads_bed_file}")
-        return
+    run_cmd(f"bam2Bed12 -i {bam_file} > {reads_bed_file}")
+    return
 
 
 def get_flair_cmd():
