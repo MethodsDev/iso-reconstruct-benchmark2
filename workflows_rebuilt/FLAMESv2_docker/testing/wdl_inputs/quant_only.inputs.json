@@ -1,0 +1,10 @@
+{
+  "flamesV2Workflow.sample_id": "testSample.quant_only",
+  "flamesV2Workflow.inputBAM": "data/sim.fasta.mm2.bam",
+  "flamesV2Workflow.inputBAMIndex": "data/sim.fasta.mm2.bam.bai",
+  "flamesV2Workflow.referenceGenomeFasta": "data/SIRVs1-7.genome.fa",
+  "flamesV2Workflow.referenceGenomeIndex": "data/SIRVs1-7.genome.fa.fai",
+  "flamesV2Workflow.referenceAnnotationGTF": "data/SIRVs1-7.annot.reduced.gtf",
+  "flamesV2Workflow.data_type": "pacbio_ccs",
+  "flamesV2Workflow.quant_only": true
+}

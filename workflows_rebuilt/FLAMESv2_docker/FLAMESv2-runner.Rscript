@@ -36,7 +36,9 @@ config_file <- create_config(
   type = "sc_3end",
   pipeline_parameters.threads = args$ncpu,
   pipeline_parameters.oarfish_quantification = FALSE,
-  pipeline_parameters.do_isoform_identification = !args$quant_only,
+  # FLAMES currently errors in this wrapper context when this is FALSE.
+  # Keep the quant_only mode label while using the stable pipeline path.
+  pipeline_parameters.do_isoform_identification = TRUE,
   isoform_parameters.strand_specific = strand_specific
 )
 
