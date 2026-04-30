@@ -1,0 +1,10 @@
+{
+  "oarfishWorkflow.sample_id": "testSample",
+  "oarfishWorkflow.inputBAM": "data/sim.fasta.mm2.bam",
+  "oarfishWorkflow.inputFASTQ": "data/reads.fastq.gz",
+  "oarfishWorkflow.referenceGenomeFasta": "data/SIRVs1-7.genome.fa",
+  "oarfishWorkflow.referenceGenomeIndex": "data/SIRVs1-7.genome.fa.fai",
+  "oarfishWorkflow.referenceAnnotationGTF": "data/SIRVs1-7.annot.reduced.gtf",
+  "oarfishWorkflow.oarfish_seq_tech": "pac-bio-hifi",
+  "oarfishWorkflow.oarfish_mode": "byAlignment"
+}
