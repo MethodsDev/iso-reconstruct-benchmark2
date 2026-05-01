@@ -123,6 +123,18 @@ def process_file(
                 cmd = f"{FLAMES_gff3_converter} {input_filename} > {out}"
                 subprocess.check_call(cmd, shell=True)
                 return ("gtf", e, out)
+            if converter == "strip_blanks":
+                # gtfparse.read_gtf trips on blank lines (treats the missing
+                # attribute column as None and tries to iterate it). LRAA's
+                # denovo GTF includes blank lines as transcript-group
+                # separators, so we copy through with blanks removed.
+                os.makedirs(PROCESSED_DIR, exist_ok=True)
+                out = os.path.join(PROCESSED_DIR, f"{e['name']}.gtf")
+                with open(input_filename, "rt") as fh, open(out, "wt") as ofh:
+                    for line in fh:
+                        if line.strip():
+                            ofh.write(line)
+                return ("gtf", e, out)
             raise ValueError(
                 f"entry '{e['name']}': unknown gtf_converter '{converter}'"
             )
