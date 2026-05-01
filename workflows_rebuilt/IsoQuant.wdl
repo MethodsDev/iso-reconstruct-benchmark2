@@ -39,14 +39,22 @@ task isoquantTask {
         COUNTS_DEST="~{sample_id}.isoquant-~{isoquant_version_tag}.IsoQuant.counts.tsv"
         GTF_DEST="~{sample_id}.isoquant-~{isoquant_version_tag}.IsoQuant.gtf"
 
-        # Newer IsoQuant runs may write transcript counts under alternate names.
+        # Fallback for when the runner inside the docker image fails to
+        # produce COUNTS_DEST (e.g., because a stale runner only knows
+        # the old `transcript_model_counts.tsv` candidate and that file
+        # is missing in newer IsoQuant versions). Order matters: in
+        # ref-guided mode v3.13.0 emits both `transcript_counts.tsv`
+        # (reference transcripts only) and
+        # `discovered_transcript_counts.tsv` (reference + newly
+        # discovered models). Always prefer the discovered file so the
+        # novels make it through to downstream benchmarking.
         if [ ! -s "${COUNTS_DEST}" ]; then
             if [ -s "${OUTDIR}/OUT.transcript_model_counts.tsv" ]; then
                 cp "${OUTDIR}/OUT.transcript_model_counts.tsv" "${COUNTS_DEST}"
-            elif [ -s "${OUTDIR}/OUT.transcript_counts.tsv" ]; then
-                cp "${OUTDIR}/OUT.transcript_counts.tsv" "${COUNTS_DEST}"
             elif [ -s "${OUTDIR}/OUT.discovered_transcript_counts.tsv" ]; then
                 cp "${OUTDIR}/OUT.discovered_transcript_counts.tsv" "${COUNTS_DEST}"
+            elif [ -s "${OUTDIR}/OUT.transcript_counts.tsv" ]; then
+                cp "${OUTDIR}/OUT.transcript_counts.tsv" "${COUNTS_DEST}"
             fi
         fi
 
