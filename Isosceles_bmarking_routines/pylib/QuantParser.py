@@ -1,289 +1,133 @@
 #!/usr/bin/env python3
 
-import sys, os, re
+"""
+Registry-driven quant-file parser.
+
+Each entry in the tool registry (tool_registry.yaml) declares one
+(tool, version) combination: a regex matched against files in
+raw_prog_results/, plus the column indices needed to extract
+(transcript_id, TPM) and the display config used downstream.
+
+The parser walks entries in the order they appear in the registry and
+returns on the first match -- so versioned patterns must be listed
+before the corresponding less-specific -vNA pattern within a family.
+"""
+
+import os
+import re
 import subprocess
+from typing import List, Optional, Tuple
+
 import pandas as pd
+import yaml
 
-FLAMES_gff3_converter = None
+
+PROCESSED_DIR = "processed_prog_results"
+
+# Set by bmark_nb_runner.py before process_file() is called for any
+# entry with gtf_converter: flames_gff3.
+FLAMES_gff3_converter: Optional[str] = None
 
 
-def process_file(input_filename):
+_ENTRY_DEFAULTS = {
+    "quant_pattern": None,
+    "quant_id_col": None,
+    "quant_tpm_col": None,
+    "quant_skip_rows": 0,
+    "quant_no_header": False,
+    "gtf_pattern": None,
+    "gtf_converter": None,
+    "gtf_source": "ref",
+    "color": "gray",
+    "display": True,
+    "venn": True,
+}
 
-    # ensure output dir exists.
-    output_dir = "processed_prog_results"
 
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+def load_registry(path: str) -> List[dict]:
+    with open(path, "rt") as fh:
+        data = yaml.safe_load(fh)
+    if not isinstance(data, dict) or "tools" not in data:
+        raise ValueError(f"{path}: expected a top-level 'tools' list")
 
-    ## indicate which columns contain the transcript_id and the read count or TPM value.
+    entries: List[dict] = []
+    seen_names = set()
+    for raw in data["tools"]:
+        if "name" not in raw or "family" not in raw:
+            raise ValueError(f"{path}: entry missing 'name' or 'family': {raw!r}")
+        if raw["name"] in seen_names:
+            raise ValueError(f"{path}: duplicate tool name '{raw['name']}'")
+        if raw.get("quant_pattern") is None and raw.get("gtf_pattern") is None:
+            raise ValueError(
+                f"{path}: entry '{raw['name']}' has neither quant_pattern nor gtf_pattern"
+            )
+        if raw.get("quant_pattern") is not None and (
+            raw.get("quant_id_col") is None or raw.get("quant_tpm_col") is None
+        ):
+            raise ValueError(
+                f"{path}: entry '{raw['name']}' has quant_pattern "
+                f"but missing quant_id_col / quant_tpm_col"
+            )
+        e = {**_ENTRY_DEFAULTS, **raw}
+        seen_names.add(e["name"])
+        entries.append(e)
+    return entries
 
-    ############
-    ## FLAMES ##
-    ############
 
-    if re.search("FLAMES.counts.tsv$", input_filename) is not None:
-        # FLAMES quant
-        output_filename = os.path.join(output_dir, "FLAMES.tsv")
-        make_tsv(
-            input_filename,
-            output_filename,
-            "\t",
-            1,
-            2,
-        )
-        return ("FLAMES_quant_file", output_filename)
+def process_file(
+    input_filename: str, entries: List[dict]
+) -> Tuple[Optional[str], Optional[dict], Optional[str]]:
+    """
+    Match input_filename against the registry. On a quant match,
+    write the normalized TSV to processed_prog_results/<name>.tsv and
+    return ("quant", entry, that_path). On a GTF match, either run the
+    declared converter and return ("gtf", entry, processed_path) or
+    pass the raw input through (return ("gtf", entry, input_filename)).
+    Returns (None, None, None) on no match.
 
-    elif re.search("FLAMES.gff3$", input_filename) is not None:
-        # FLAMES gtf file
-        # convert to gtf
-        flames_gtf_filename = os.path.join(output_dir, "FLAMES.gtf")
-        if FLAMES_gff3_converter is None:
-            raise RuntimeError("flames gff3 converter not set")
-        cmd = f"{FLAMES_gff3_converter} {input_filename} > {flames_gtf_filename}"
-        subprocess.check_call(cmd, shell=True)
-        return ("FLAMES_gtf_file", flames_gtf_filename)
+    First-match-wins. Quant patterns are checked before gtf patterns;
+    within each kind, registry order decides.
+    """
 
-    ##############
-    ## IsoQuant ##
-    ##############
+    bn = os.path.basename(input_filename)
 
-    elif re.search("IsoQuant.counts.tsv$", input_filename) is not None:
-        # IsoQuant quant
-        output_filename = os.path.join(output_dir, "IsoQuant.tsv")
-        make_tsv(
-            input_filename,
-            output_filename,
-            "\t",
-            0,
-            1,
-        )
-        return ("IsoQuant_quant_file", output_filename)
+    for e in entries:
+        if e["quant_pattern"] is not None and re.search(e["quant_pattern"], bn):
+            os.makedirs(PROCESSED_DIR, exist_ok=True)
+            output_filename = os.path.join(PROCESSED_DIR, f"{e['name']}.tsv")
+            make_tsv(
+                input_filename,
+                output_filename,
+                "\t",
+                e["quant_id_col"],
+                e["quant_tpm_col"],
+                no_header=e["quant_no_header"],
+                skip_rows=e["quant_skip_rows"],
+            )
+            return ("quant", e, output_filename)
 
-    elif re.search("IsoQuant.gtf$", input_filename) is not None:
-        # IsoQuant gtf
-        return ("IsoQuant_gtf_file", input_filename)
+    for e in entries:
+        if e["gtf_pattern"] is not None and re.search(e["gtf_pattern"], bn):
+            converter = e["gtf_converter"]
+            if converter is None:
+                # raw GTF is consumed as-is
+                return ("gtf", e, input_filename)
+            if converter == "flames_gff3":
+                if FLAMES_gff3_converter is None:
+                    raise RuntimeError(
+                        "FLAMES gff3 converter path not set "
+                        "(QuantParser.FLAMES_gff3_converter)"
+                    )
+                os.makedirs(PROCESSED_DIR, exist_ok=True)
+                out = os.path.join(PROCESSED_DIR, f"{e['name']}.gtf")
+                cmd = f"{FLAMES_gff3_converter} {input_filename} > {out}"
+                subprocess.check_call(cmd, shell=True)
+                return ("gtf", e, out)
+            raise ValueError(
+                f"entry '{e['name']}': unknown gtf_converter '{converter}'"
+            )
 
-    ############
-    ## IsoSeq ##
-    ############
-
-    elif re.search("IsoSeq.*\\.abundance.txt$", input_filename) is not None:
-        # IsoSeq
-        output_filename = os.path.join(output_dir, "IsoSeq.tsv")
-        make_tsv(
-            input_filename,
-            output_filename,
-            "\t",
-            0,
-            2,
-            skip_rows=3,
-        )
-        return ("IsoSeq_quant_file", output_filename)
-
-    elif re.search("IsoSeq.ref-filtered.ID.gff$", input_filename) is not None:
-        # ref-guided provided if exists
-        return ("IsoSeq_gtf_file", input_filename)
-    elif re.search("IsoSeq.ref-free.ID.gff$", input_filename) is not None:
-        # otherwise, ref-free
-        return ("IsoSeq_gtf_file", input_filename)
-
-    ##########
-    ## LRAA ##
-    ##########
-
-    elif re.search("LRAA.*.quant.expr$", input_filename) is not None:
-        # LRAA
-        output_filename = os.path.join(output_dir, "LRAA.tsv")
-        make_tsv(
-            input_filename,
-            output_filename,
-            "\t",
-            1,
-            3,
-        )
-        return ("LRAA_quant_file", output_filename)
-
-    elif re.search("LRAA.*.gtf$", input_filename) is not None:
-        output_filename = os.path.join(output_dir, "LRAA.gtf")
-        with open(output_filename, "wt") as ofh:
-            with open(input_filename, "rt") as fh:
-                for line in fh:
-                    line = line.rstrip()
-                    if line != "":
-                        print(line, file=ofh)
-
-        return ("LRAA_gtf_file", output_filename)
-
-    #################
-    ## Mandalorion ##
-    #################
-
-    elif (
-        re.search("Mandalorian.Isoforms.filtered.clean.quant$", input_filename)
-        is not None
-    ):
-        # Mandalorion
-        output_filename = os.path.join(output_dir, "Mandalorion.tsv")
-        make_tsv(
-            input_filename,
-            output_filename,
-            "\t",
-            0,
-            2,
-        )
-        return ("Mandalorion_quant_file", output_filename)
-
-    elif (
-        re.search("Mandalorian.Isoforms.filtered.clean.gtf$", input_filename)
-        is not None
-    ):
-        return ("Mandalorion_gtf_file", input_filename)
-
-    ###########################
-    ## Oarfish - byAlignment ##
-    ###########################
-
-    elif re.search("Oarfish.byAlignment.quant$", input_filename) is not None:
-        # Oarfish - byAlignment
-        output_filename = os.path.join(output_dir, "Oarfish_align.tsv")
-        make_tsv(
-            input_filename,
-            output_filename,
-            "\t",
-            0,
-            2,
-        )
-        return ("Oarfish_align_quant_file", output_filename)
-
-    #######################
-    ## Oarfish - byReads ##
-    #######################
-
-    elif re.search("Oarfish.byReads.quant$", input_filename) is not None:
-        # Oarfish - byReads
-        output_filename = os.path.join(output_dir, "Oarfish_reads.tsv")
-        make_tsv(
-            input_filename,
-            output_filename,
-            "\t",
-            0,
-            2,
-        )
-        return ("Oarfish_reads_quant_file", output_filename)
-
-    ##############
-    ## ESPRESSO ##
-    ##############
-
-    elif re.search("espresso.counts.tsv$", input_filename) is not None:
-        # ESPRESSO
-        output_filename = os.path.join(output_dir, "espresso.tsv")
-        make_tsv(
-            input_filename,
-            output_filename,
-            "\t",
-            0,
-            3,
-        )
-        return ("ESPRESSO_quant_file", output_filename)
-
-    elif re.search("espresso.gtf$", input_filename) is not None:
-        return ("ESPRESSO_gtf_file", input_filename)
-
-    ###########
-    ## FLAIR ##
-    ###########
-
-    elif re.search("flair.counts.tsv$", input_filename) is not None:
-        # flair
-        output_filename = os.path.join(output_dir, "flair.tsv")
-        make_tsv(
-            input_filename,
-            output_filename,
-            "\t",
-            0,
-            1,
-        )
-        return ("FLAIR_quant_file", output_filename)
-
-    elif re.search("flair.gtf$", input_filename) is not None:
-        return ("FLAIR_gtf_file", input_filename)
-
-    ###############
-    ## Isosceles ##
-    ###############
-
-    elif re.search("isosceles.*.counts$", input_filename) is not None:
-        # Isosceles
-        output_filename = os.path.join(output_dir, "isosceles.tsv")
-        make_tsv(
-            input_filename,
-            output_filename,
-            "\t",
-            0,
-            1,
-        )
-        return ("Isosceles_quant_file", output_filename)
-
-    elif re.search("isosceles.*.gtf$", input_filename) is not None:
-        return ("Isosceles_gtf_file", input_filename)
-
-    ###########
-    ## Bambu ##
-    ###########
-
-    elif re.search("bambu.counts.txt$", input_filename) is not None:
-        # bambu
-        output_filename = os.path.join(output_dir, "bambu.tsv")
-        make_tsv(
-            input_filename,
-            output_filename,
-            "\t",
-            0,
-            2,
-        )
-        return ("Bambu_quant_file", output_filename)
-
-    elif re.search("bambu.gtf$", input_filename) is not None:
-        return ("Bambu_gtf_file", input_filename)
-
-    ###############
-    ## Stringtie ##
-    ###############
-
-    elif re.search("stringtie.quant.tsv$", input_filename) is not None:
-        # StringTie
-        output_filename = os.path.join(output_dir, "stringtie.tsv")
-        make_tsv(
-            input_filename,
-            output_filename,
-            "\t",
-            1,
-            4,
-            True,
-        )
-        return ("StringTie_quant_file", output_filename)
-
-    elif re.search("stringtie.gtf$", input_filename) is not None:
-        return ("StringTie_gtf_file", input_filename)
-
-    elif re.search("talon_abundance_filtered.tsv$", input_filename) is not None:
-        # TALON
-        output_filename = os.path.join(output_dir, "talon.tsv")
-        make_tsv(
-            input_filename,
-            output_filename,
-            "\t",
-            3,
-            11,
-        )
-        return ("TALON_quant_file", output_filename)
-
-    elif re.search("talon.gtf$", input_filename) is not None:
-        return ("TALON_gtf_file", input_filename)
-
-    # nothing recognized
-    return (None, None)
+    return (None, None, None)
 
 
 def make_tsv(
@@ -305,7 +149,7 @@ def make_tsv(
                 next(fh)
 
         if not no_header:
-            header = next(fh)
+            next(fh)
         for line in fh:
             line = line.rstrip()
             vals = line.split(delim)
@@ -318,5 +162,3 @@ def make_tsv(
     df.to_csv(output_filename, sep="\t", index=False)
 
     print("Done writing {}".format(output_filename))
-
-    return
