@@ -23,6 +23,27 @@ ENV PATH=/opt/conda/envs/flair_env/bin:$PATH
 # Install FLAIR from source release tag to avoid broken conda bam2Bed12 entrypoint
 RUN pip install --no-cache-dir git+https://github.com/BrooksLabUCSC/flair.git@v3.0.0
 
+# Hotfix FLAIR v3.0.0 bug in ssPrep: juncsToBed12 can return None tuples for
+# malformed corrected junctions; downstream code calls min(sizes) and crashes.
+# Skip those reads instead of aborting the whole run.
+RUN python - <<'PY'
+from pathlib import Path
+ssprep = Path('/opt/conda/envs/flair_env/lib/python3.12/site-packages/flair/ssPrep.py')
+txt = ssprep.read_text()
+needle = "        blocks, sizes, starts = juncsToBed12(bedObj.name, bedObj.chrom, bedObj.start, bedObj.end, newJuncs)\n\n        if correctStrand:\n"
+patch = (
+    "        blocks, sizes, starts = juncsToBed12(bedObj.name, bedObj.chrom, bedObj.start, bedObj.end, newJuncs)\n"
+    "        if sizes is None:\n"
+    "            # malformed corrected junction chain; skip read instead of crashing\n"
+    "            continue\n\n"
+    "        if correctStrand:\n"
+)
+if needle not in txt:
+    raise SystemExit('Could not find ssPrep patch location')
+ssprep.write_text(txt.replace(needle, patch, 1))
+print('Patched', ssprep)
+PY
+
 # Provide working bam2Bed12 (FLAIR v3 package ships a dangling entrypoint)
 RUN cat > /opt/conda/envs/flair_env/bin/bam2Bed12 <<'PY' && \
     chmod +x /opt/conda/envs/flair_env/bin/bam2Bed12
@@ -41,7 +62,7 @@ def juncs_to_bed12(start, end, coords):
             ss1, ss2 = junc
             if num == 0:
                 st = 0
-                size = abs(start - ss1)
+                size = ss1 - start
             else:
                 st = coords[num - 1][1] - start
                 size = ss1 - (st + start)
@@ -126,8 +147,10 @@ def bam2bed12(alignment_file, keep_supplementary=False):
             junc_dir = "+" if flags == "0" else "-"
 
         blocks, sizes, starts = juncs_to_bed12(start_pos, end_pos, junctions)
-        sizes_str = ",".join(str(x) for x in sizes) + ","
-        starts_str = ",".join(str(x) for x in starts) + ","
+        # BED12 blockSizes/blockStarts should be comma-separated lists without
+        # an extra trailing comma for parser compatibility.
+        sizes_str = ",".join(str(x) for x in sizes)
+        starts_str = ",".join(str(x) for x in starts)
         outitems = [
             chrom,
             start_pos,
