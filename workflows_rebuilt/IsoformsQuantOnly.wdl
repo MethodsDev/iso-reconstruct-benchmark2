@@ -92,9 +92,7 @@ workflow QuantOnly_wf {
                 inputBAMIndex = inputBAMIndex,
                 referenceGenomeFasta = referenceGenomeFasta,
                 referenceGenomeIndex = referenceGenomeIndex,
-                referenceAnnotationGTF = referenceAnnotationGTF,
-                data_type = data_type,
-            
+                referenceAnnotationGTF = referenceAnnotationGTF
         }
     }
 

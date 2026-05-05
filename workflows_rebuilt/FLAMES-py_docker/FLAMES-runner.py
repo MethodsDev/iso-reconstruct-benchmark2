@@ -5,6 +5,21 @@ import subprocess
 import argparse
 
 
+def str_to_bool(value):
+    if isinstance(value, bool):
+        return value
+
+    normalized = value.strip().lower()
+    if normalized in {"true", "t", "1", "yes", "y"}:
+        return True
+    if normalized in {"false", "f", "0", "no", "n"}:
+        return False
+
+    raise argparse.ArgumentTypeError(
+        f"Invalid boolean value: {value}. Use true or false."
+    )
+
+
 def main():
 
     parser = argparse.ArgumentParser(
@@ -22,10 +37,11 @@ def main():
         "--ncpu", type=int, required=False, default=4, help="num threads"
     )
     parser.add_argument(
-        "--data_type",
-        type=str,
-        required=True,
-        choices=["pacbio_ccs", "nanopore"],
+        "--strand_specific",
+        type=str_to_bool,
+        required=False,
+        default=True,
+        help="Whether reads are strand-specific. Use true or false.",
     )
 
     args = parser.parse_args()
@@ -35,12 +51,12 @@ def main():
     gtf_file = args.gtf
     bam_file = args.bam
     num_threads = args.ncpu
-    data_type = args.data_type
+    strand_specific = args.strand_specific
 
     json_dir = os.path.dirname(os.path.abspath(__file__))
     config_json = (
         os.path.join(json_dir, "flames.pbio.config.json")
-        if data_type == "pacbio_ccs"
+        if strand_specific
         else os.path.join(json_dir, "flames.ont.config.json")
     )
 

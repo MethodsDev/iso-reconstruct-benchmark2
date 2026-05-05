@@ -9,7 +9,7 @@ task flamesTask {
         File referenceGenomeFasta
         File referenceGenomeIndex
         File referenceAnnotationGTF
-        String data_type
+        Boolean strand_specific = true
         
         Int cpu = 4
         Int numThreads = 8
@@ -27,7 +27,7 @@ task flamesTask {
                          --genome ~{referenceGenomeFasta} \
                          --bam ~{inputBAM} \
                          --gtf ~{referenceAnnotationGTF} \
-                         --data_type ~{data_type}
+                         --strand_specific ~{if strand_specific then "true" else "false"}
                 
     >>>
 
@@ -53,7 +53,7 @@ workflow flamesWorkflow {
         File referenceGenomeFasta
         File referenceGenomeIndex
         File referenceAnnotationGTF
-        String data_type
+        Boolean strand_specific = true
     }
 
     call flamesTask {
@@ -64,7 +64,7 @@ workflow flamesWorkflow {
             referenceGenomeFasta = referenceGenomeFasta,
             referenceGenomeIndex = referenceGenomeIndex,
             referenceAnnotationGTF = referenceAnnotationGTF,
-            data_type = data_type
+            strand_specific = strand_specific
     }
 
     output {
