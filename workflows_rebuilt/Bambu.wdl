@@ -10,13 +10,14 @@ task bambuTask {
         File referenceGenomeIndex
         File? referenceAnnotationGTF
         Boolean quant_only
+        Boolean stranded = false
+        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/bambu:3.12.1a"
         
         Int cpu = 4
         Int numThreads = 8
         Int memoryGB = 64
         Int diskSizeGB = 250
         String bambu_version = "3.12.1"
-        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/bambu:3.12.1"
         
     }
 
@@ -30,6 +31,7 @@ task bambuTask {
         --genome ~{referenceGenomeFasta} \
         ~{"--gtf " + referenceAnnotationGTF} \
         --output_prefix ~{sample_id} \
+        --stranded ~{if stranded then "true" else "false"} \
         ~{quant_only_flag}
             
     >>>
@@ -58,6 +60,8 @@ workflow bambuWorkflow {
         File referenceGenomeIndex
         File? referenceAnnotationGTF
         Boolean quant_only
+        Boolean stranded = false
+        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/bambu:3.12.1a"
     }
 
     call bambuTask {
@@ -68,7 +72,9 @@ workflow bambuWorkflow {
             referenceGenomeFasta = referenceGenomeFasta,
             referenceGenomeIndex = referenceGenomeIndex,
             referenceAnnotationGTF = referenceAnnotationGTF,
-            quant_only = quant_only
+            quant_only = quant_only,
+            stranded = stranded,
+            docker = docker
     }
 
     output {

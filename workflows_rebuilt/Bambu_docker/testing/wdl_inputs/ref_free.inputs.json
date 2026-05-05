@@ -4,5 +4,7 @@
   "bambuWorkflow.inputBAMIndex": "data/sim.fasta.mm2.bam.bai",
   "bambuWorkflow.referenceGenomeFasta": "data/SIRVs1-7.genome.fa",
   "bambuWorkflow.referenceGenomeIndex": "data/SIRVs1-7.genome.fa.fai",
-  "bambuWorkflow.quant_only": false
+  "bambuWorkflow.quant_only": false,
+  "bambuWorkflow.stranded": true,
+  "bambuWorkflow.docker": "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/bambu:latest"
 }

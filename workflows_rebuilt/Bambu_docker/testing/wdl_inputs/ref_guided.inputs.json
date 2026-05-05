@@ -5,5 +5,7 @@
   "bambuWorkflow.referenceGenomeFasta": "data/SIRVs1-7.genome.fa",
   "bambuWorkflow.referenceGenomeIndex": "data/SIRVs1-7.genome.fa.fai",
   "bambuWorkflow.referenceAnnotationGTF": "data/SIRVs1-7.annot.reduced.gtf",
-  "bambuWorkflow.quant_only": false
+  "bambuWorkflow.quant_only": false,
+  "bambuWorkflow.stranded": true,
+  "bambuWorkflow.docker": "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/bambu:latest"
 }

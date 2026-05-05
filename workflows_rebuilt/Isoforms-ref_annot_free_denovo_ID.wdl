@@ -23,6 +23,7 @@ workflow QuantOnly_wf {
 
         String data_type
         String oarfish_seq_tech
+        Boolean bambu_stranded = false
         Boolean LRAA_LowFi
         String? LRAA_main_chromosomes
         
@@ -45,7 +46,8 @@ workflow QuantOnly_wf {
                 inputBAMIndex = inputBAMIndex,
                 referenceGenomeFasta = referenceGenomeFasta,
                 referenceGenomeIndex = referenceGenomeIndex,
-                quant_only = false
+                quant_only = false,
+                stranded = bambu_stranded
         }
     }
 
