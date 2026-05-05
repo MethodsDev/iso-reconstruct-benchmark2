@@ -44,9 +44,11 @@ Key config decisions currently enforced:
 
 - `pipeline_parameters.oarfish_quantification = FALSE`
   - Forces non-Oarfish FLAMES quantification (`transcript_count.csv.gz`) for stable benchmark output mapping.
-- `pipeline_parameters.do_isoform_identification = !quant_only`
-  - `quant_only=false`: reference-guided isoform ID + quantification.
-  - `quant_only=true`: skip isoform discovery, quantify against reference-guided transcript model.
+- `pipeline_parameters.do_isoform_identification = TRUE`
+  - This is currently forced on in the wrapper, including `--quant_only` runs.
+  - Reason: in local verification against `ghcr.io/mritchielab/flames:devel` on 2026-05-05, setting `do_isoform_identification = FALSE` allowed `genome_alignment` and `read_realignment` to complete, but `transcript_quantification` then failed with:
+    - `TypeError: argument of type 'NoneType' is not iterable`
+  - The traceback came from FLAMES Python code in `count_tr.py` during bulk transcript quantification.
 
 ### Output contract
 
@@ -78,7 +80,9 @@ This runs genome alignment, isoform identification, read realignment, transcript
 - WDL: `quant_only = true`
 - Runner: `--quant_only`
 
-This skips isoform identification and performs transcript quantification from reference annotation.
+`quant_only` is currently only a benchmark/workflow mode label in this wrapper.
+
+At present, the runner still keeps `do_isoform_identification = TRUE` because disabling it causes upstream FLAMES bulk transcript quantification to crash. So the current `quant_only` mode does not truly skip isoform identification inside FLAMES v2.
 
 ## WDL integration
 
@@ -110,11 +114,35 @@ make test
 1. FLAMES config template uses `type = "sc_3end"` as a base because FLAMES currently lacks a dedicated `type = "bulk"` preset in `create_config()`.
    - We override key fields for bulk benchmarking behavior.
 2. If upstream FLAMES changes output file names or config structure, update `FLAMESv2-runner.Rscript` mapping logic first.
-3. If future workflows want Oarfish quantification, add an explicit switch and separate output adapter path.
-4. If multi-sample bulk is required later, update runner to pass multiple FASTQs/sample names and revise count-collapsing logic.
+3. Bulk FLAMES currently appears to be FASTQ-first at the R API level:
+   - `BulkPipeline()` documents `fastq`, `annotation`, and `genome_fa` inputs, but no input BAM argument.
+   - The pipeline then performs its own `genome_alignment` and `read_realignment` steps.
+4. Verified upstream issue: `pipeline_parameters.do_isoform_identification = FALSE` currently crashes in bulk mode during `transcript_quantification`.
+   - Reproduced on 2026-05-05 with the FLAMES upstream container `ghcr.io/mritchielab/flames:devel`.
+   - Observed failure:
+     - `TypeError: argument of type 'NoneType' is not iterable`
+   - Python traceback location:
+     - `/usr/local/lib/R/site-library/FLAMES/python/count_tr.py`
+   - Until upstream clarifies or fixes this path, the wrapper keeps isoform identification enabled even for `--quant_only`.
+5. If future workflows want Oarfish quantification, add an explicit switch and separate output adapter path.
+6. If multi-sample bulk is required later, update runner to pass multiple FASTQs/sample names and revise count-collapsing logic.
 
 ## Versioning notes
 
 - Image name: `us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/flames-v2`
 - Version source: `VERSION.txt`
 - Current scaffold version: `0.1.0`
+
+
+
+## Documentation Sources:
+- http://mritchielab.github.io/FLAMES/reference/index.html
+- https://sefi196.github.io/FLAMESv2_LR_sc_tutorial/
+- https://github.com/mritchielab/FLAMES
+
+## Notes From Documentation Review
+
+- Official FLAMES reference for `BulkPipeline()` documents a FASTQ-oriented bulk interface, not a BAM-oriented one.
+- The upstream FLAMES GitHub README also describes FLAMES input as long-read FASTQ, followed by genome alignment and later transcriptome realignment/quantification.
+- The linked `FLAMESv2_LR_sc_tutorial` is a single-cell tutorial and does not add bulk-pipeline guidance or a BAM-input path for `BulkPipeline()`.
+- Older legacy FLAMES wrappers may have exposed BAM-related entrypoints, but the current R `BulkPipeline()` API used here does not provide a direct bulk input BAM argument.

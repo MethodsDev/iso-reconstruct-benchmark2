@@ -16,9 +16,37 @@ parser$add_argument("--quant_only", action = "store_true", default = FALSE, help
 
 args <- parser$parse_args()
 
+timestamp <- function() format(Sys.time(), "%Y-%m-%d %H:%M:%S")
+log_msg <- function(...) message(sprintf("[%s] %s", timestamp(), paste0(..., collapse = "")))
+
+snapshot_outdir <- function(outdir, label = "") {
+  if (!dir.exists(outdir)) {
+    log_msg("Output snapshot", if (nzchar(label)) paste0(" (", label, ")") else "", ": outdir missing")
+    return(invisible(NULL))
+  }
+  files <- list.files(outdir, recursive = TRUE, full.names = TRUE)
+  log_msg(
+    "Output snapshot", if (nzchar(label)) paste0(" (", label, ")") else "",
+    ": ", length(files), " files under ", outdir
+  )
+  if (length(files) > 0) {
+    info <- file.info(files)
+    info <- info[order(info$mtime, decreasing = TRUE), , drop = FALSE]
+    top_n <- min(10, nrow(info))
+    log_msg("Most recently modified files:")
+    for (i in seq_len(top_n)) {
+      f <- rownames(info)[i]
+      log_msg("  - ", basename(f), " | ", format(info$mtime[i], "%Y-%m-%d %H:%M:%S"), " | ", info$size[i], " bytes")
+    }
+  }
+}
+
 run_cmd <- function(cmd) {
-  message("CMD: ", cmd)
+  t0 <- Sys.time()
+  log_msg("CMD start: ", cmd)
   status <- system(cmd)
+  elapsed <- round(as.numeric(difftime(Sys.time(), t0, units = "secs")), 1)
+  log_msg("CMD end (exit=", status, ", elapsed=", elapsed, "s): ", cmd)
   if (status != 0) {
     stop(sprintf("Command failed with exit code %d: %s", status, cmd))
   }
@@ -26,11 +54,19 @@ run_cmd <- function(cmd) {
 
 outdir <- file.path(getwd(), "flamesv2_out")
 dir.create(outdir, showWarnings = FALSE, recursive = TRUE)
+log_msg("Runner start")
+log_msg("Arguments: quant_only=", args$quant_only, ", data_type=", args$data_type, ", ncpu=", args$ncpu)
+log_msg("Output directory: ", outdir)
+snapshot_outdir(outdir, "initial")
 
 fastq <- file.path(outdir, "input.fastq")
+log_msg("Stage 1/6: Convert BAM to FASTQ")
 run_cmd(sprintf("samtools bam2fq %s > %s", shQuote(args$bam), shQuote(fastq)))
+if (!file.exists(fastq)) stop("FASTQ conversion finished but input.fastq was not created")
+log_msg("FASTQ ready: ", fastq, " (", file.info(fastq)$size, " bytes)")
 
 strand_specific <- ifelse(args$data_type == "pacbio_ccs", 1L, 0L)
+log_msg("Stage 2/6: Build FLAMES config")
 config_file <- create_config(
   outdir = outdir,
   type = "sc_3end",
@@ -41,7 +77,9 @@ config_file <- create_config(
   pipeline_parameters.do_isoform_identification = TRUE,
   isoform_parameters.strand_specific = strand_specific
 )
+log_msg("Config written: ", config_file)
 
+log_msg("Stage 3/6: Initialize FLAMES pipeline")
 pipeline <- BulkPipeline(
   config_file = config_file,
   outdir = outdir,
@@ -49,7 +87,15 @@ pipeline <- BulkPipeline(
   annotation = args$gtf,
   genome_fa = args$genome
 )
+log_msg("Pipeline initialized")
+snapshot_outdir(outdir, "pre-run_FLAMES")
+
+log_msg("Stage 4/6: Run FLAMES pipeline (this is usually the longest step)")
+t0_flames <- Sys.time()
 pipeline <- run_FLAMES(pipeline)
+flames_elapsed <- round(as.numeric(difftime(Sys.time(), t0_flames, units = "secs")), 1)
+log_msg("run_FLAMES completed in ", flames_elapsed, "s")
+snapshot_outdir(outdir, "post-run_FLAMES")
 
 if (length(pipeline@last_error) > 0) {
   stop(paste(c("FLAMES pipeline failed:", unlist(pipeline@last_error)), collapse = "\n"))
@@ -64,6 +110,7 @@ cand_gff <- c(
   file.path(outdir, "isoform_annotated.gtf")
 )
 existing_gff <- cand_gff[file.exists(cand_gff)]
+log_msg("Stage 5/6: Resolve isoform annotation output")
 if (length(existing_gff) == 0 && args$quant_only) {
   file.copy(args$gtf, output_gff3, overwrite = TRUE)
 } else if (length(existing_gff) == 0) {
@@ -71,10 +118,12 @@ if (length(existing_gff) == 0 && args$quant_only) {
 } else {
   file.copy(existing_gff[[1]], output_gff3, overwrite = TRUE)
 }
+log_msg("Annotation output: ", output_gff3)
 
 cnt_gz <- file.path(outdir, "transcript_count.csv.gz")
 cnt_csv <- file.path(outdir, "transcript_count.csv")
 
+log_msg("Stage 6/6: Build benchmark count table")
 if (file.exists(cnt_gz)) {
   run_cmd(sprintf("gunzip -c %s > %s", shQuote(cnt_gz), shQuote(cnt_csv)))
   cnt <- read.csv(cnt_csv, stringsAsFactors = FALSE, check.names = FALSE)
@@ -131,6 +180,8 @@ if (file.exists(cnt_gz)) {
 
 write.table(out, file = output_counts, sep = "\t", quote = FALSE, row.names = FALSE)
 
-message("Wrote: ", output_gff3)
-message("Wrote: ", output_counts)
+log_msg("Wrote: ", output_gff3)
+log_msg("Wrote: ", output_counts)
+snapshot_outdir(outdir, "final")
+log_msg("Runner finished successfully")
 q(status = 0)

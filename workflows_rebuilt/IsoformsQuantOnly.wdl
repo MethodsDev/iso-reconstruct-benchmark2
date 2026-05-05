@@ -26,6 +26,7 @@ workflow QuantOnly_wf {
 
         String data_type
         String oarfish_seq_tech
+        String oarfish_strand_filter = "both"
         Boolean LRAA_LowFi
         String? LRAA_main_chromosomes
         
@@ -143,6 +144,7 @@ workflow QuantOnly_wf {
                 referenceGenomeIndex = referenceGenomeIndex,
                 referenceAnnotationGTF = referenceAnnotationGTF,
                 oarfish_seq_tech = oarfish_seq_tech,
+                oarfish_strand_filter = oarfish_strand_filter,
                 oarfish_mode = "byAlignment"
         }
 
@@ -154,6 +156,7 @@ workflow QuantOnly_wf {
                 referenceGenomeIndex = referenceGenomeIndex,
                 referenceAnnotationGTF = referenceAnnotationGTF,
                 oarfish_seq_tech = oarfish_seq_tech,
+                oarfish_strand_filter = oarfish_strand_filter,
                 oarfish_mode = "byReads"
         }
                     

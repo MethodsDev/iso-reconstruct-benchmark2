@@ -43,6 +43,12 @@ def main():
         default="v0.9.4",
         help="oarfish version token to include in output file names",
     )
+    parser.add_argument(
+        "--strand_filter",
+        choices=["fw", "+", "rc", "-", "both", "."],
+        default="both",
+        help="strand filter to pass to oarfish",
+    )
 
     args = parser.parse_args()
 
@@ -52,6 +58,7 @@ def main():
     fastq_file = args.fastq
     oarfish_mode = args.mode
     oarfish_version_tag = args.oarfish_version_tag
+    strand_filter = args.strand_filter
     output_base = f"{output_prefix}.oarfish-{oarfish_version_tag}.Oarfish"
 
     num_threads = args.ncpu
@@ -80,6 +87,7 @@ def main():
                 f"-o {output_base}.byAlignment",
                 "--model-coverage",
                 f"--threads {num_threads}",
+                f"--strand-filter {strand_filter}",
             ]
         )
         run_cmd(cmd)
@@ -96,6 +104,7 @@ def main():
                 f"--threads {num_threads}",
                 "--annotated transcriptome.fa",
                 f"--seq-tech {seq_tech}",
+                f"--strand-filter {strand_filter}",
             ]
         )
 

@@ -11,6 +11,7 @@ task oarfishTask {
         File referenceAnnotationGTF
         String oarfish_seq_tech # ont-cdna, ont-drna, pac-bio, or pac-bio-hifi
         String oarfish_mode # byAlignment or byReads
+        String oarfish_strand_filter = "both" # fw/+, rc/-, or both/.
         String oarfish_version_tag = "v0.9.4"
         
         Int cpu = 4
@@ -40,6 +41,7 @@ task oarfishTask {
                      --ncpu ~{cpu} \
                      --mode ~{oarfish_mode} \
                      --seq_tech ~{oarfish_seq_tech} \
+                     --strand_filter ~{oarfish_strand_filter} \
                      --oarfish_version_tag ~{oarfish_version_tag}
         
     >>>
@@ -69,6 +71,7 @@ workflow oarfishWorkflow {
         File referenceAnnotationGTF
         String oarfish_seq_tech # ont-cdna, ont-drna, pac-bio, or pac-bio-hifi
         String oarfish_mode # byAlignment or byReads 
+        String oarfish_strand_filter = "both" # fw/+, rc/-, or both/.
         String oarfish_version_tag = "v0.9.4"
     }
 
@@ -82,6 +85,7 @@ workflow oarfishWorkflow {
             referenceAnnotationGTF = referenceAnnotationGTF,
             oarfish_seq_tech = oarfish_seq_tech,
             oarfish_mode = oarfish_mode,
+            oarfish_strand_filter = oarfish_strand_filter,
             oarfish_version_tag = oarfish_version_tag
     }
 
