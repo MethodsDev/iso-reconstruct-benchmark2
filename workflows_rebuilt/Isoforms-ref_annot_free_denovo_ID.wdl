@@ -22,6 +22,7 @@ workflow QuantOnly_wf {
         File referenceGenomeIndex
 
         String data_type
+        String isoquant_stranded = "none"
         String oarfish_seq_tech
         Boolean bambu_stranded = false
         Boolean LRAA_LowFi
@@ -60,6 +61,7 @@ workflow QuantOnly_wf {
                 referenceGenomeFasta = referenceGenomeFasta,
                 referenceGenomeIndex = referenceGenomeIndex,
                 data_type = data_type,
+                stranded = isoquant_stranded,
                 quant_only = false
         }
     }

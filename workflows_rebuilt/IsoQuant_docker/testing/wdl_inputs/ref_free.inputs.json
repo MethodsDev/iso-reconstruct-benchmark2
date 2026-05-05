@@ -5,5 +5,6 @@
   "isoquantWorkflow.referenceGenomeFasta": "data/SIRVs1-7.genome.fa",
   "isoquantWorkflow.referenceGenomeIndex": "data/SIRVs1-7.genome.fa.fai",
   "isoquantWorkflow.quant_only": false,
-  "isoquantWorkflow.data_type": "pacbio_ccs"
+  "isoquantWorkflow.data_type": "pacbio_ccs",
+  "isoquantWorkflow.stranded": "forward"
 }

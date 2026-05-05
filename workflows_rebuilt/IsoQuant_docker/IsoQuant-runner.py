@@ -27,6 +27,14 @@ def main():
         choices=["assembly", "pacbio_ccs", "nanopore"],
     )
     parser.add_argument(
+        "--stranded",
+        type=str,
+        required=False,
+        default="none",
+        choices=["none", "forward", "reverse"],
+        help="reads strandness type",
+    )
+    parser.add_argument(
         "--ncpu", type=int, required=False, default=4, help="num threads"
     )
     parser.add_argument(
@@ -52,6 +60,7 @@ def main():
     num_threads = args.ncpu
     quant_only_flag = args.quant_only
     data_type = args.data_type
+    stranded = args.stranded
     isoquant_version_tag = args.isoquant_version_tag
 
     versioned_output_prefix = f"{output_prefix}.isoquant-{isoquant_version_tag}"
@@ -69,6 +78,7 @@ def main():
             f"--reference {genome_fasta}",
             f"--bam {bam_file}",
             f"--data_type {data_type}",
+            f"--stranded {stranded}",
             f"--threads {num_threads}",
             f"--output {output_dir}",
         ]

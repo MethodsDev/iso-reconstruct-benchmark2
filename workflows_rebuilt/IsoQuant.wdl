@@ -10,6 +10,7 @@ task isoquantTask {
         File? referenceAnnotationGTF
         Boolean quant_only
         String data_type
+        String stranded = "none"
         
         Int cpu = 4
         Int numThreads = 8
@@ -31,6 +32,7 @@ task isoquantTask {
                             --bam ~{inputBAM} \
                             ~{"--gtf " + referenceAnnotationGTF} \
                             --data_type ~{data_type} \
+                            --stranded ~{stranded} \
                             --output_prefix ~{sample_id} \
                             --isoquant_version_tag ~{isoquant_version_tag} \
                             ~{quant_only_flag} || RUNNER_STATUS=$?
@@ -102,6 +104,7 @@ workflow isoquantWorkflow {
         File? referenceAnnotationGTF
         Boolean quant_only
         String data_type
+        String stranded = "none"
     }
 
     call isoquantTask {
@@ -113,7 +116,8 @@ workflow isoquantWorkflow {
             referenceGenomeIndex = referenceGenomeIndex,
             referenceAnnotationGTF = referenceAnnotationGTF,
             quant_only = quant_only,
-            data_type = data_type
+            data_type = data_type,
+            stranded = stranded
     }
 
     output {

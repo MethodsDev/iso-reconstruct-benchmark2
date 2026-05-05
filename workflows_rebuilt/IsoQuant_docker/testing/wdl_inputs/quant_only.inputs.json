@@ -6,5 +6,6 @@
   "isoquantWorkflow.referenceGenomeIndex": "data/SIRVs1-7.genome.fa.fai",
   "isoquantWorkflow.referenceAnnotationGTF": "data/SIRVs1-7.annot.reduced.gtf",
   "isoquantWorkflow.quant_only": true,
-  "isoquantWorkflow.data_type": "pacbio_ccs"
+  "isoquantWorkflow.data_type": "pacbio_ccs",
+  "isoquantWorkflow.stranded": "forward"
 }
