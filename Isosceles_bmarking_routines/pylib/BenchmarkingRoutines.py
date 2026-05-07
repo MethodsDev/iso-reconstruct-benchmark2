@@ -196,13 +196,15 @@ def parseQuantsTSV(quant_tsv):
         [colnames[0], colnames[-1]]
     ]  # colnames[0] = txIds, colnames[-1] = counts.
     countDf.columns = ["transcript_id", "tpm"]
-    countDf = countDf.groupby(
-        "transcript_id"
-    ).sum()  # sets the transcript_id as the index automatically.
 
-    countDf.columns = ["tpm"]
-
-    countDf.reset_index(inplace=True)
+    duplicate_ids = countDf.loc[countDf["transcript_id"].duplicated(), "transcript_id"]
+    if not duplicate_ids.empty:
+        duplicate_ids_preview = ", ".join(sorted(duplicate_ids.unique())[:10])
+        raise RuntimeError(
+            f"{quant_tsv}: duplicate transcript_id rows found in processed quant TSV; "
+            f"expected unique transcript IDs before splice-pattern aggregation. "
+            f"Example duplicate IDs: {duplicate_ids_preview}"
+        )
 
     return countDf
 

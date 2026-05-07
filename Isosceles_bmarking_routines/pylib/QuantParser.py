@@ -155,6 +155,7 @@ def make_tsv(
     print("-processing {}".format(input_filename))
 
     tpm_val_dict = dict()
+    duplicate_ids = set()
     with open(input_filename, "rt") as fh:
         if skip_rows > 0:
             for _ in range(skip_rows):
@@ -166,7 +167,17 @@ def make_tsv(
             line = line.rstrip()
             vals = line.split(delim)
             transcript_id, tpm = vals[transcript_id_field], vals[tpm_field]
+            if transcript_id in tpm_val_dict:
+                duplicate_ids.add(transcript_id)
             tpm_val_dict[transcript_id] = float(tpm)
+
+    if duplicate_ids:
+        duplicate_ids_preview = ", ".join(sorted(duplicate_ids)[:10])
+        raise RuntimeError(
+            f"{input_filename}: duplicate transcript_id rows found in quant input; "
+            f"expected unique transcript IDs before splice-pattern aggregation. "
+            f"Example duplicate IDs: {duplicate_ids_preview}"
+        )
 
     df = pd.DataFrame(list(tpm_val_dict.items()), columns=["transcript_id", "TPM"])
     df["TPM"] = df["TPM"] / df["TPM"].sum() * 1e6

@@ -277,6 +277,7 @@ def prep_files(active_entries):
         raise RuntimeError("Error, not finding result files at raw_prog_results/")
 
     program_files: dict = {}
+    matched_inputs: dict = {}
     for filename in filenames:
         if not os.path.isfile(filename):
             continue
@@ -294,13 +295,26 @@ def prep_files(active_entries):
                 "venn": bool(entry["venn"]),
             },
         )
+        matched_rec = matched_inputs.setdefault(entry["name"], {"quant": None, "gtf": None})
         if kind == "quant":
+            if matched_rec["quant"] is not None:
+                raise RuntimeError(
+                    f"entry {entry['name']}: multiple quant files matched in "
+                    f"raw_prog_results/: {matched_rec['quant']} and {filename}"
+                )
             rec["quant"] = processed_path
+            matched_rec["quant"] = filename
         elif kind == "gtf":
+            if matched_rec["gtf"] is not None:
+                raise RuntimeError(
+                    f"entry {entry['name']}: multiple gtf files matched in "
+                    f"raw_prog_results/: {matched_rec['gtf']} and {filename}"
+                )
             # only propagate the GTF to the notebook if the entry asks
             # to use its own gtf for intron derivation
             if entry["gtf_source"] == "own":
                 rec["gtf"] = processed_path
+            matched_rec["gtf"] = filename
             # else: file is recognized (no deposit warning) but unused
 
     # Drop any entry that didn't yield a quant file -- a tool can't be
