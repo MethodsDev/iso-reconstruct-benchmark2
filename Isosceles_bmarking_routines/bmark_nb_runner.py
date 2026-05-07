@@ -326,16 +326,21 @@ def prep_files(active_entries):
         )
         del program_files[n]
 
-    # Warn about own-gtf entries that produced a quant but no gtf; those
-    # will silently fall back to REF_gtf at the notebook layer, which is
-    # probably wrong for tools with private transcript IDs.
+    # Fail own-gtf entries that produced a quant but no gtf. Falling back
+    # to REF_gtf at the notebook layer would benchmark the quant file
+    # against the wrong transcript structures.
     by_name = {e["name"]: e for e in active_entries}
+    own_gtf_missing = []
     for n, r in program_files.items():
         if by_name[n]["gtf_source"] == "own" and r["gtf"] is None:
-            logger.warning(
-                f"entry {n}: gtf_source is 'own' but no GTF was matched; "
-                f"REF_gtf will be substituted, transcript IDs may not align"
-            )
+            own_gtf_missing.append(n)
+
+    if own_gtf_missing:
+        missing_str = ", ".join(sorted(own_gtf_missing))
+        raise RuntimeError(
+            "Active registry entries require gtf_source='own' but no matching "
+            f"GTF was found in raw_prog_results/ for: {missing_str}"
+        )
 
     return program_files
 
