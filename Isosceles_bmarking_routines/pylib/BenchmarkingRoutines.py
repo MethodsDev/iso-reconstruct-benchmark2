@@ -196,17 +196,26 @@ def parseQuantsTSV(quant_tsv):
         [colnames[0], colnames[-1]]
     ]  # colnames[0] = txIds, colnames[-1] = counts.
     countDf.columns = ["transcript_id", "tpm"]
-
-    duplicate_ids = countDf.loc[countDf["transcript_id"].duplicated(), "transcript_id"]
-    if not duplicate_ids.empty:
-        duplicate_ids_preview = ", ".join(sorted(duplicate_ids.unique())[:10])
-        raise RuntimeError(
-            f"{quant_tsv}: duplicate transcript_id rows found in processed quant TSV; "
-            f"expected unique transcript IDs before splice-pattern aggregation. "
-            f"Example duplicate IDs: {duplicate_ids_preview}"
-        )
+    countDf = countDf.groupby("transcript_id", as_index=False).sum()
 
     return countDf
+
+
+def renormalize_tpm_columns(df, column_names):
+    """Return a copy with the selected TPM columns re-normalized to 1e6.
+
+    This is used after subsetting/joining to ensure truth and estimate are
+    compared on the same transcript universe.
+    """
+
+    df = df.copy()
+    for col in column_names:
+        df[col] = df[col].astype(float)
+        total = df[col].sum()
+        if total > 0:
+            df[col] = df[col] / total * 1000000
+
+    return df
 
 
 def absRelativeDiffEach(ground_truth_TPMs, estimated_TPMs):
@@ -250,12 +259,7 @@ def assign_binned_expr_quantile(i_ref_df, i_sample_df, num_bins):
         .join(i_sample_df, how="outer")
         .fillna(0)
     )
-
-    for counts in [bigDf["ref_tpm"], bigDf["tpm"]]:
-        counts = counts.astype(
-            float
-        )  # Convert ground truth & estimated counts to float type.
-        counts = (counts / np.sum(counts)) * 1000000  # Re-normalize to TPMs.
+    bigDf = renormalize_tpm_columns(bigDf, ["ref_tpm", "tpm"])
 
     groundTruth = "ref_tpm"
     estimated = "tpm"
@@ -751,14 +755,9 @@ def scatterplot_adj(i_ref_df, progname_to_df_dict):
         prog_quants = df[["tpm"]].copy().rename(columns={"tpm": prog_tpm_colname})
 
         bigDf = prog_quants.join(ref_quants, how="inner").fillna(0)
-        colnames = list(bigDf.columns.values)
+        bigDf = renormalize_tpm_columns(bigDf, ["ref_tpm", prog_tpm_colname])
 
         name, c, l = colorAndLabel(progname)
-        for counts in [bigDf["ref_tpm"], bigDf[prog_tpm_colname]]:
-            counts = counts.astype(
-                float
-            )  # Convert ground truth & estimated counts to float type.
-            counts = (counts / np.sum(counts)) * 1000000  # Re-normalize to TPMs.
 
         groundTruth = np.array(bigDf["ref_tpm"])
         estimated = np.array(bigDf[prog_tpm_colname])
@@ -835,15 +834,9 @@ def ma_plot_adj(i_ref_df, progname_to_df_dict):
         prog_quants = df[["tpm"]].copy().rename(columns={"tpm": prog_tpm_colname})
 
         bigDf = prog_quants.join(ref_quants, how="inner").fillna(0)
-
-        colnames = list(bigDf.columns.values)
+        bigDf = renormalize_tpm_columns(bigDf, ["ref_tpm", prog_tpm_colname])
 
         name, c, l = colorAndLabel(progname)
-        for counts in [bigDf["ref_tpm"], bigDf[prog_tpm_colname]]:
-            counts = counts.astype(
-                float
-            )  # Convert ground truth & estimated counts to float type.
-            counts = (counts / np.sum(counts)) * 1000000  # Re-normalize to TPMs.
 
         groundTruth = np.array(bigDf["ref_tpm"])
         estimated = np.array(bigDf[prog_tpm_colname])
@@ -899,6 +892,7 @@ def cor_spearman_barplot(i_ref_df, progname_to_df_dict):
         program_names.append(program_tuple[0])
         program_colors.append(program_tuple[1])
         program_df = df[["tpm"]].join(ref_quants, how="inner").fillna(0)
+        program_df = renormalize_tpm_columns(program_df, ["ref_tpm", "tpm"])
         cor_values.append(
             stat.spearmanr(program_df[["ref_tpm"]], program_df[["tpm"]]).correlation
         )
@@ -943,6 +937,7 @@ def cor_pearson_barplot(i_ref_df, progname_to_df_dict):
         program_names.append(program_tuple[0])
         program_colors.append(program_tuple[1])
         program_df = df[["tpm"]].join(ref_quants, how="inner").fillna(0)
+        program_df = renormalize_tpm_columns(program_df, ["ref_tpm", "tpm"])
 
         # Apply log transformation (adding a small constant to avoid log(0))
         log_col1 = np.log1p(program_df["ref_tpm"])
@@ -995,6 +990,7 @@ def rel_diff_barplot(i_ref_df, progname_to_df_dict, relDiffType):
         program_colors.append(program_tuple[1])
 
         program_df = df[["tpm"]].join(ref_quants[["ref_tpm"]], how="right").fillna(0)
+        program_df = renormalize_tpm_columns(program_df, ["ref_tpm", "tpm"])
 
         prog_rel_diffs = relativeDiff(
             program_df["ref_tpm"], program_df["tpm"], relDiffType
@@ -1020,7 +1016,8 @@ def rel_diff_barplot(i_ref_df, progname_to_df_dict, relDiffType):
             "median_rel_diff": median_rel_diffs,
         }
     )
-    plot_df = plot_df.sort_values(by="median_rel_diff")
+    sort_col = "rel_diff" if relDiffType == "mean" else "median_rel_diff"
+    plot_df = plot_df.sort_values(by=sort_col)
     plot_df = plot_df.drop("median_rel_diff", axis=1)
     fig, ax = plt.subplots(
         ncols=1, nrows=1, figsize=(4, 3), dpi=100, layout="constrained"

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import sys, os
+import sys, os, re
 import argparse
 import logging
 import glob
@@ -70,6 +70,36 @@ def load_report_set(path: str) -> dict:
     if not isinstance(overrides, dict):
         raise ValueError(f"{path}: 'overrides' must be a mapping of name -> {{display, venn}}")
     return {"include": include, "overrides": overrides}
+
+
+def _pick_preferred_match(entry: dict, kind: str, current_filename: str, new_filename: str):
+    """Resolve an otherwise-ambiguous duplicate match using optional
+    <kind>_preference regexes declared on the registry entry.
+
+    Returns the filename to keep, or None if no unique preference applies.
+    """
+
+    preference_key = f"{kind}_preference"
+    preference_patterns = entry.get(preference_key)
+    if not preference_patterns:
+        return None
+
+    current_bn = os.path.basename(current_filename)
+    new_bn = os.path.basename(new_filename)
+
+    def _rank(basename):
+        for i, pattern in enumerate(preference_patterns):
+            if pattern is not None and re.search(pattern, basename):
+                return i
+        return len(preference_patterns)
+
+    current_rank = _rank(current_bn)
+    new_rank = _rank(new_bn)
+
+    if current_rank == new_rank:
+        return None
+
+    return current_filename if current_rank < new_rank else new_filename
 
 
 def execute_notebook_isolated(notebook_to_run, notebook_output, inputs_dict):
@@ -298,18 +328,33 @@ def prep_files(active_entries):
         matched_rec = matched_inputs.setdefault(entry["name"], {"quant": None, "gtf": None})
         if kind == "quant":
             if matched_rec["quant"] is not None:
-                raise RuntimeError(
-                    f"entry {entry['name']}: multiple quant files matched in "
-                    f"raw_prog_results/: {matched_rec['quant']} and {filename}"
+                preferred = _pick_preferred_match(
+                    entry, "quant", matched_rec["quant"], filename
                 )
+                if preferred is None:
+                    raise RuntimeError(
+                        f"entry {entry['name']}: multiple quant files matched in "
+                        f"raw_prog_results/: {matched_rec['quant']} and {filename}"
+                    )
+                matched_rec["quant"] = preferred
+                if preferred == filename:
+                    rec["quant"] = processed_path
+                continue
             rec["quant"] = processed_path
             matched_rec["quant"] = filename
         elif kind == "gtf":
             if matched_rec["gtf"] is not None:
-                raise RuntimeError(
-                    f"entry {entry['name']}: multiple gtf files matched in "
-                    f"raw_prog_results/: {matched_rec['gtf']} and {filename}"
+                preferred = _pick_preferred_match(
+                    entry, "gtf", matched_rec["gtf"], filename
                 )
+                if preferred is None:
+                    raise RuntimeError(
+                        f"entry {entry['name']}: multiple gtf files matched in "
+                        f"raw_prog_results/: {matched_rec['gtf']} and {filename}"
+                    )
+                matched_rec["gtf"] = preferred
+                if preferred != filename:
+                    continue
             # only propagate the GTF to the notebook if the entry asks
             # to use its own gtf for intron derivation
             if entry["gtf_source"] == "own":

@@ -169,14 +169,16 @@ def make_tsv(
             transcript_id, tpm = vals[transcript_id_field], vals[tpm_field]
             if transcript_id in tpm_val_dict:
                 duplicate_ids.add(transcript_id)
-            tpm_val_dict[transcript_id] = float(tpm)
+                tpm_val_dict[transcript_id] += float(tpm)
+            else:
+                tpm_val_dict[transcript_id] = float(tpm)
 
     if duplicate_ids:
-        duplicate_ids_preview = ", ".join(sorted(duplicate_ids)[:10])
-        raise RuntimeError(
-            f"{input_filename}: duplicate transcript_id rows found in quant input; "
-            f"expected unique transcript IDs before splice-pattern aggregation. "
-            f"Example duplicate IDs: {duplicate_ids_preview}"
+        duplicate_ids_list = ", ".join(sorted(duplicate_ids))
+        print(
+            f"WARNING: {input_filename}: duplicate transcript_id rows found in quant "
+            f"input; aggregating sums across duplicates before normalization. "
+            f"Duplicate IDs: {duplicate_ids_list}"
         )
 
     df = pd.DataFrame(list(tpm_val_dict.items()), columns=["transcript_id", "TPM"])
