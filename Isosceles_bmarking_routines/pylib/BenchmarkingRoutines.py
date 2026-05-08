@@ -784,7 +784,9 @@ def scatterplot_adj(i_ref_df, progname_to_df_dict):
 
         prog_quants = df[["tpm"]].copy().rename(columns={"tpm": prog_tpm_colname})
 
-        bigDf = prog_quants.join(ref_quants, how="inner").fillna(0)
+        # Keep the full reference truth set and assign zero TPM to
+        # reference intronIds omitted from the program quant table.
+        bigDf = prog_quants.join(ref_quants, how="right").fillna(0)
         bigDf = renormalize_tpm_columns(bigDf, ["ref_tpm", prog_tpm_colname])
 
         name, c, l = colorAndLabel(progname)
@@ -811,7 +813,7 @@ def scatterplot_adj(i_ref_df, progname_to_df_dict):
         estimated = tpm[1].copy()
         estimated[estimated <= 0.001] = 0.001  # Set all estimated values that are
         # <= 0.001 to 0.001 to show instances of
-        # undetected transcripts at x = 0.001.
+        # undetected transcripts at y = 0.001.
         color = tpm[2]
         corr_val = safe_spearman(tpm[1], tpm[0])
         pearson_val = safe_pearson(np.log(tpm[1] + 1), np.log(tpm[0] + 1))
@@ -819,7 +821,7 @@ def scatterplot_adj(i_ref_df, progname_to_df_dict):
         pcorr = "R = " + str(round(pearson_val, 3))
 
         ax[subplotIndex].plot(groundTruth, groundTruth, color="red", lw=1)
-        ax[subplotIndex].scatter(estimated, groundTruth, 0.25, c=color, alpha=0.5)
+        ax[subplotIndex].scatter(groundTruth, estimated, 0.25, c=color, alpha=0.5)
         ax[subplotIndex].text(0.002, 3000, corr)
         ax[subplotIndex].text(0.002, 1000, pcorr)
         ax[subplotIndex].text(0.002, 100, program)
@@ -832,8 +834,8 @@ def scatterplot_adj(i_ref_df, progname_to_df_dict):
         ax[subplotIndex].set_xticklabels(
             ["0", r"$10^{-2}$", r"$10^0$", r"$10^2$", r"$10^4$"]
         )
-        ax[subplotIndex].set_xlabel("estimated TPM")
-        ax[subplotIndex].set_ylabel("ground truth TPM")
+        ax[subplotIndex].set_xlabel("ground truth TPM")
+        ax[subplotIndex].set_ylabel("estimated TPM")
         subplotIndex += 1
 
 
@@ -863,7 +865,9 @@ def ma_plot_adj(i_ref_df, progname_to_df_dict):
 
         prog_quants = df[["tpm"]].copy().rename(columns={"tpm": prog_tpm_colname})
 
-        bigDf = prog_quants.join(ref_quants, how="inner").fillna(0)
+        # Keep the full reference truth set and assign zero TPM to
+        # reference intronIds omitted from the program quant table.
+        bigDf = prog_quants.join(ref_quants, how="right").fillna(0)
         bigDf = renormalize_tpm_columns(bigDf, ["ref_tpm", prog_tpm_colname])
 
         name, c, l = colorAndLabel(progname)
@@ -921,7 +925,7 @@ def cor_spearman_barplot(i_ref_df, progname_to_df_dict):
         program_tuple = colorAndLabel(progname)
         program_names.append(program_tuple[0])
         program_colors.append(program_tuple[1])
-        program_df = df[["tpm"]].join(ref_quants, how="inner").fillna(0)
+        program_df = df[["tpm"]].join(ref_quants, how="right").fillna(0)
         program_df = renormalize_tpm_columns(program_df, ["ref_tpm", "tpm"])
         cor_values.append(safe_spearman(program_df["ref_tpm"], program_df["tpm"]))
     plot_df = pd.DataFrame(
@@ -964,7 +968,7 @@ def cor_pearson_barplot(i_ref_df, progname_to_df_dict):
         program_tuple = colorAndLabel(progname)
         program_names.append(program_tuple[0])
         program_colors.append(program_tuple[1])
-        program_df = df[["tpm"]].join(ref_quants, how="inner").fillna(0)
+        program_df = df[["tpm"]].join(ref_quants, how="right").fillna(0)
         program_df = renormalize_tpm_columns(program_df, ["ref_tpm", "tpm"])
 
         # Apply log transformation (adding a small constant to avoid log(0))
