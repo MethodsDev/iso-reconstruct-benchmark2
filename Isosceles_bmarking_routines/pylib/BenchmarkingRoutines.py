@@ -218,6 +218,28 @@ def renormalize_tpm_columns(df, column_names):
     return df
 
 
+def safe_spearman(x, y):
+    """Return Spearman correlation or NaN for degenerate inputs."""
+
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    if len(x) < 2 or len(y) < 2:
+        return np.nan
+    return stat.spearmanr(x, y).correlation
+
+
+def safe_pearson(x, y):
+    """Return Pearson correlation or NaN for degenerate inputs."""
+
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    if len(x) < 2 or len(y) < 2:
+        return np.nan
+    if np.all(x == x[0]) or np.all(y == y[0]):
+        return np.nan
+    return stat.pearsonr(x, y).statistic
+
+
 def absRelativeDiffEach(ground_truth_TPMs, estimated_TPMs):
     """
     Calculate absolute relative difference between ground truth
@@ -273,10 +295,18 @@ def assign_binned_expr_quantile(i_ref_df, i_sample_df, num_bins):
     # Subset bigDf for rows where ground truth isn't 0, then order them by ground truth expression.
     nonzeros = bigDf[bigDf[groundTruth] > 0].sort_values(by=[groundTruth]).copy()
 
+    if len(nonzeros) == 0:
+        zeros["quantile"] = np.nan
+        return zeros
+
     # Bin the data into n bins based on ground truth expression.
     # .rank(method='first') is required because otherwise we have issues with nonunique bin edge values.
+    q = min(num_bins, len(nonzeros))
     nonzeros["quantile"] = pd.qcut(
-        nonzeros[groundTruth].rank(method="first"), q=num_bins, labels=False
+        nonzeros[groundTruth].rank(method="first"),
+        q=q,
+        labels=False,
+        duplicates="drop",
     )
 
     # Assign false positives to bins based on their detected expression
@@ -783,10 +813,10 @@ def scatterplot_adj(i_ref_df, progname_to_df_dict):
         # <= 0.001 to 0.001 to show instances of
         # undetected transcripts at x = 0.001.
         color = tpm[2]
-        corr = r"$\rho$ = " + str(round(stat.spearmanr(tpm[1], tpm[0]).correlation, 3))
-        pcorr = "R = " + str(
-            round(stat.pearsonr(np.log(tpm[1] + 1), np.log(tpm[0] + 1)).statistic, 3)
-        )
+        corr_val = safe_spearman(tpm[1], tpm[0])
+        pearson_val = safe_pearson(np.log(tpm[1] + 1), np.log(tpm[0] + 1))
+        corr = r"$\rho$ = " + str(round(corr_val, 3))
+        pcorr = "R = " + str(round(pearson_val, 3))
 
         ax[subplotIndex].plot(groundTruth, groundTruth, color="red", lw=1)
         ax[subplotIndex].scatter(estimated, groundTruth, 0.25, c=color, alpha=0.5)
@@ -893,9 +923,7 @@ def cor_spearman_barplot(i_ref_df, progname_to_df_dict):
         program_colors.append(program_tuple[1])
         program_df = df[["tpm"]].join(ref_quants, how="inner").fillna(0)
         program_df = renormalize_tpm_columns(program_df, ["ref_tpm", "tpm"])
-        cor_values.append(
-            stat.spearmanr(program_df[["ref_tpm"]], program_df[["tpm"]]).correlation
-        )
+        cor_values.append(safe_spearman(program_df["ref_tpm"], program_df["tpm"]))
     plot_df = pd.DataFrame(
         {"name": program_names, "color": program_colors, "cor_value": cor_values}
     )
@@ -943,7 +971,7 @@ def cor_pearson_barplot(i_ref_df, progname_to_df_dict):
         log_col1 = np.log1p(program_df["ref_tpm"])
         log_col2 = np.log1p(program_df["tpm"])
 
-        cor_values.append(stat.pearsonr(log_col1, log_col2).statistic)
+        cor_values.append(safe_pearson(log_col1, log_col2))
 
     plot_df = pd.DataFrame(
         {"name": program_names, "color": program_colors, "cor_value": cor_values}
