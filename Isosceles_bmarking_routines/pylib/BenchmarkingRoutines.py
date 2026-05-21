@@ -240,6 +240,138 @@ def safe_pearson(x, y):
     return stat.pearsonr(x, y).statistic
 
 
+def safe_kendall(x, y):
+    """Return Kendall tau correlation or NaN for degenerate inputs."""
+
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    if len(x) < 2 or len(y) < 2:
+        return np.nan
+    if np.all(x == x[0]) or np.all(y == y[0]):
+        return np.nan
+    return stat.kendalltau(x, y).correlation
+
+
+def concordance_correlation_coefficient(x, y):
+    """Return Lin's concordance correlation coefficient or NaN."""
+
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    if len(x) < 2 or len(y) < 2:
+        return np.nan
+
+    pearson_corr = safe_pearson(x, y)
+    if np.isnan(pearson_corr):
+        return np.nan
+
+    mean_x = np.mean(x)
+    mean_y = np.mean(y)
+    var_x = np.var(x)
+    var_y = np.var(y)
+    denominator = var_x + var_y + (mean_x - mean_y) ** 2
+    if denominator == 0:
+        return np.nan
+
+    return 2 * pearson_corr * np.sqrt(var_x) * np.sqrt(var_y) / denominator
+
+
+def oarfish_style_metrics_table(i_ref_df, progname_to_df_dict):
+    """Build Oarfish-style quantification metrics for truth-set benchmarks.
+
+    The reference and estimated TPM columns are re-normalized on the shared
+    scoring universe before metric calculation, matching the existing quant-only
+    correlation and relative-difference helpers in this module.
+    """
+
+    assert (
+        i_ref_df.index.name == "intronId"
+    ), "Error, i_ref_df input not indexed on intronId"
+
+    ref_quants = i_ref_df.copy().rename(columns={"tpm": "ref_tpm"})
+    columns = [
+        "name",
+        "color",
+        "spearman",
+        "pearson_log1p",
+        "ccc_log1p",
+        "kendall",
+        "rmse",
+        "nrmse_mean_truth",
+        "mard",
+        "pr_auc",
+        "average_precision",
+        "n_scored",
+        "n_truth_expressed",
+        "n_truth_unexpressed",
+    ]
+    rows = []
+    epsilon = 1e-10
+
+    for progname, df in progname_to_df_dict.items():
+
+        assert (
+            df.index.name == "intronId"
+        ), "Error, df for {} not indexed on intronId".format(progname)
+
+        name, color, _ = colorAndLabel(progname)
+        program_df = df[["tpm"]].join(ref_quants[["ref_tpm"]], how="right").fillna(0)
+        program_df = renormalize_tpm_columns(program_df, ["ref_tpm", "tpm"])
+
+        y_true = np.asarray(program_df["ref_tpm"], dtype=float)
+        y_pred = np.asarray(program_df["tpm"], dtype=float)
+        y_true_log = np.log1p(y_true)
+        y_pred_log = np.log1p(y_pred)
+
+        rmse = np.sqrt(np.mean((y_pred - y_true) ** 2)) if len(y_true) else np.nan
+        mean_truth = np.mean(y_true) if len(y_true) else np.nan
+        nrmse = rmse / mean_truth if mean_truth > 0 else np.nan
+        mard = (
+            np.mean(np.abs((y_pred - y_true) / (y_pred + y_true + epsilon)))
+            if len(y_true)
+            else np.nan
+        )
+
+        truth_expressed = y_true > 0
+        n_truth_expressed = int(np.sum(truth_expressed))
+        n_truth_unexpressed = int(len(truth_expressed) - n_truth_expressed)
+        if n_truth_expressed > 0 and n_truth_unexpressed > 0:
+            precision, recall, _ = sklearn.metrics.precision_recall_curve(
+                truth_expressed.astype(int), y_pred
+            )
+            pr_auc = sklearn.metrics.auc(recall, precision)
+            average_precision = sklearn.metrics.average_precision_score(
+                truth_expressed.astype(int), y_pred
+            )
+        else:
+            pr_auc = np.nan
+            average_precision = np.nan
+
+        rows.append(
+            {
+                "name": name,
+                "color": color,
+                "spearman": safe_spearman(y_true, y_pred),
+                "pearson_log1p": safe_pearson(y_true_log, y_pred_log),
+                "ccc_log1p": concordance_correlation_coefficient(
+                    y_true_log, y_pred_log
+                ),
+                "kendall": safe_kendall(y_true, y_pred),
+                "rmse": rmse,
+                "nrmse_mean_truth": nrmse,
+                "mard": mard,
+                "pr_auc": pr_auc,
+                "average_precision": average_precision,
+                "n_scored": len(y_true),
+                "n_truth_expressed": n_truth_expressed,
+                "n_truth_unexpressed": n_truth_unexpressed,
+            }
+        )
+
+    return pd.DataFrame(rows, columns=columns).sort_values(
+        by="pearson_log1p", ascending=False
+    )
+
+
 def absRelativeDiffEach(ground_truth_TPMs, estimated_TPMs):
     """
     Calculate absolute relative difference between ground truth
@@ -827,11 +959,15 @@ def scatterplot_adj(i_ref_df, progname_to_df_dict):
         ax[subplotIndex].text(0.002, 100, program)
 
         ax[subplotIndex].set_xlim(0.0005, 10000)
-        ax[subplotIndex].set_ylim(0.1, 10000)
+        ax[subplotIndex].set_ylim(0.0005, 10000)
         ax[subplotIndex].set_yscale("log")
         ax[subplotIndex].set_xscale("log")
         ax[subplotIndex].set_xticks([0.001, 0.01, 1, 100, 10000])
         ax[subplotIndex].set_xticklabels(
+            ["0", r"$10^{-2}$", r"$10^0$", r"$10^2$", r"$10^4$"]
+        )
+        ax[subplotIndex].set_yticks([0.001, 0.01, 1, 100, 10000])
+        ax[subplotIndex].set_yticklabels(
             ["0", r"$10^{-2}$", r"$10^0$", r"$10^2$", r"$10^4$"]
         )
         ax[subplotIndex].set_xlabel("ground truth TPM")
