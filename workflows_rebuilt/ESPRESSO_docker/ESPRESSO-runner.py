@@ -16,7 +16,7 @@ def main():
 
     parser.add_argument("--output_prefix", required=True, help="output file prefix")
     parser.add_argument("--genome", type=str, required=True, help="genome fasta file")
-    parser.add_argument("--gtf", type=str, required=True, help="input gtf file")
+    parser.add_argument("--gtf", type=str, required=False, help="input gtf file")
     parser.add_argument(
         "--bam", type=str, required=True, help="input bam alignment file"
     )
@@ -46,6 +46,9 @@ def main():
     with open(samples_file, "wt") as ofh:
         print("\t".join([f"{output_prefix}.sam", "espresso"]), file=ofh)
 
+    annotation_args = [f"-A {gtf_file}"] if gtf_file else []
+    denovo_s_args = [] if gtf_file else ["--alignment_read_groups"]
+
     # run espresso S
     cmd = " ".join(
         [
@@ -53,7 +56,8 @@ def main():
         "--sort_buffer_size {}".format(sort_buffer_memGB),
         f"-L {samples_file}",
         f"-F {genome_fasta}",
-        f"-A {gtf_file}",
+        *annotation_args,
+        *denovo_s_args,
         "-O . ",
         f"-T {num_threads}",
         ]
@@ -78,7 +82,7 @@ def main():
         [
         "perl /opt/conda/envs/espresso_env/bin/ESPRESSO_Q.pl",
         f"-L {samples_file}.updated",
-        f"-A {gtf_file}",
+        *annotation_args,
         f"-T {num_threads}",
         ]
     )

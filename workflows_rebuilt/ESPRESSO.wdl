@@ -8,7 +8,7 @@ task espressoTask {
         File inputBAMIndex
         File referenceGenomeFasta
         File referenceGenomeIndex
-        File referenceAnnotationGTF
+        File? referenceAnnotationGTF
 
         Int cpu = 4
         Int numThreads = 8
@@ -23,7 +23,7 @@ task espressoTask {
 
         ESPRESSO-runner.py --output_prefix ~{sample_id} \
                            --genome ~{referenceGenomeFasta} \
-                           --gtf ~{referenceAnnotationGTF} \
+                           ~{"--gtf " + referenceAnnotationGTF} \
                            --bam ~{inputBAM}
 
     >>>
@@ -49,7 +49,8 @@ workflow espressoWorkflow {
         File inputBAMIndex
         File referenceGenomeFasta
         File referenceGenomeIndex
-        File referenceAnnotationGTF
+        File? referenceAnnotationGTF
+        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/espresso:latest"
     }
 
     call espressoTask {
@@ -59,7 +60,8 @@ workflow espressoWorkflow {
             inputBAMIndex = inputBAMIndex,
             referenceGenomeFasta = referenceGenomeFasta,
             referenceGenomeIndex = referenceGenomeIndex,
-            referenceAnnotationGTF = referenceAnnotationGTF
+            referenceAnnotationGTF = referenceAnnotationGTF,
+            docker = docker
     }
 
     output {
