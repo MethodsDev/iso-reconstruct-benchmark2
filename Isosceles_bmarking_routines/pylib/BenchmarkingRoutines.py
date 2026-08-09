@@ -49,13 +49,58 @@ def getFiles(path, dataType):
         print("Must specify dataType argument.")
 
 
+def _sanitize_gtf_stray_quotes(src, dst):
+    """
+    Copy `src` to `dst`, stripping a single stray trailing double-quote from
+    any line with an odd number of double-quotes. Some reference GTFs (e.g.
+    GRCh38.gencode.v39 ...one_transcript_per_gene..., where ~2600 'gene'
+    lines end '...; level 3;"') carry a spurious trailing '"' that makes
+    polars' CSV reader treat it as an open quoted field spanning lines,
+    raising ComputeError. Only odd-quote lines that end in '"' are altered;
+    every other line is copied verbatim. Returns the number of lines fixed.
+    """
+    n_fixed = 0
+    with open(src, "rt") as fh, open(dst, "wt") as ofh:
+        for line in fh:
+            content = line.rstrip("\n")
+            if content.count('"') % 2 == 1 and content.endswith('"'):
+                content = content[:-1]
+                n_fixed += 1
+            ofh.write(content + "\n")
+    return n_fixed
+
+
+def _read_gtf_tolerant(gtf):
+    """
+    read_gtf(gtf), but if polars fails to parse (e.g. malformed stray-quote
+    lines), sanitize to a temp copy and retry. Well-formed GTFs parse on the
+    first attempt and never touch the sanitizer, so their result is unchanged.
+    """
+    try:
+        return read_gtf(gtf)
+    except Exception as e:
+        import tempfile
+
+        fd, tmp = tempfile.mkstemp(suffix=".gtf")
+        os.close(fd)
+        try:
+            n_fixed = _sanitize_gtf_stray_quotes(gtf, tmp)
+            print(
+                "  read_gtf failed on {} ({}); sanitized {} stray-quote "
+                "line(s) and retrying".format(gtf, type(e).__name__, n_fixed)
+            )
+            return read_gtf(tmp)
+        finally:
+            os.remove(tmp)
+
+
 def processGtf(gtf):
     """
     Read in GTF file, subset for only multi-exon transcripts and
     add a column that shows the next row's transcript ID.
     """
     print("-processGtf( {} )\n".format(gtf))
-    df_polar = read_gtf(gtf)
+    df_polar = _read_gtf_tolerant(gtf)
     df = pd.DataFrame(df_polar)
     df.columns = df_polar.columns
     df = df[df["feature"] == "exon"]

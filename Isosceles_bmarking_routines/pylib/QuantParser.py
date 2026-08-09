@@ -161,9 +161,20 @@ def make_tsv(
             for _ in range(skip_rows):
                 next(fh)
 
-        if not no_header:
-            next(fh)
+        # Drop any leading comment lines (one or more) starting with '#',
+        # e.g. LRAA v0.18.2's '# LRAA version' / '# LRAA CMD:' banner. Only
+        # the contiguous leading block is removed; parsing begins at the
+        # first non-'#' line, which is then treated as the header unless
+        # no_header is set.
+        in_leading_comments = True
+        header_pending = not no_header
         for line in fh:
+            if in_leading_comments and line.lstrip().startswith("#"):
+                continue
+            in_leading_comments = False
+            if header_pending:
+                header_pending = False
+                continue
             line = line.rstrip()
             vals = line.split(delim)
             transcript_id, tpm = vals[transcript_id_field], vals[tpm_field]
