@@ -653,15 +653,28 @@ def f1_score(df):
 
 
 def calc_TP_FP_FN(i_ref_df, i_sample_df):
-    """Calculate TP, FP and FN to get Sensitivty and False Discovery Rate of a sample."""
+    """Calculate TP, FP and FN to get Sensitivty and False Discovery Rate of a sample.
 
-    i_ref_tmp_df = i_ref_df[["tpm"]].copy().rename(columns={"tpm": "ref_tpm"})
+    If i_ref_df carries an "fn_eligible" boolean column, only reference entries
+    flagged True can become FNs; the rest are left unscored. TP assignment is
+    unaffected, so a reference isoform can still be credited to whoever found it
+    while not being charged against everyone who missed it. Without the column
+    every reference entry is FN-eligible, which is the historical behavior.
+    """
+
+    ref_cols = ["tpm"] + (["fn_eligible"] if "fn_eligible" in i_ref_df.columns else [])
+    i_ref_tmp_df = i_ref_df[ref_cols].copy().rename(columns={"tpm": "ref_tpm"})
     i_ref_tmp_df["is_ref"] = True
 
     i_merged_df = i_ref_tmp_df.join(i_sample_df, how="outer")
     i_merged_df["is_ref"] = i_merged_df["is_ref"].fillna(False)
     i_merged_df["ref_tpm"] = i_merged_df["ref_tpm"].fillna(0)
     i_merged_df["tpm"] = i_merged_df["tpm"].fillna(0)
+    if "fn_eligible" in i_merged_df.columns:
+        i_merged_df["fn_eligible"] = i_merged_df["fn_eligible"].fillna(False).astype(bool)
+        fn_eligible = i_merged_df["fn_eligible"]
+    else:
+        fn_eligible = True
 
     # set TP, FP, FN
     i_merged_df["class"] = "?"
@@ -685,7 +698,8 @@ def calc_TP_FP_FN(i_ref_df, i_sample_df):
     i_merged_df.loc[
         (i_merged_df["is_ref"] == True)
         & (i_merged_df["ref_tpm"] > 0)
-        & (i_merged_df["tpm"] == 0),
+        & (i_merged_df["tpm"] == 0)
+        & fn_eligible,
         "class",
     ] = "FN"
 
