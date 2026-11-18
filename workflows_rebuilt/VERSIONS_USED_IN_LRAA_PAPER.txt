@@ -16,5 +16,5 @@ Versions benchmarked in the paper, and the docker image each WDL defaults to
     TALON:        6.0      talon:6.0-BI
 
 Letter suffixes (a, b, c) are rebuilds of the same tool version (runner or packaging fixes).
-The IsoSeq and Mandalorion images are tagged in the registry under older labels (BI, 4.3.1-BI), so
-the WDLs name them by digest. Output files named "isoseq-v4.0.0" were produced by isoseq 4.2.0.
+The IsoSeq and Mandalorion images also carry older labels in the registry (BI, 4.3.1-BI); they are
+tagged 4.2.0-BI and 4.5.0-BI, and the WDLs name them by digest. Output files named "isoseq-v4.0.0" were produced by isoseq 4.2.0.
