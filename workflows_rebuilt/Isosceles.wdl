@@ -14,7 +14,7 @@ task isoscelesTask {
         Int numThreads = 8
         Int memoryGB = 64
         Int diskSizeGB = 250
-        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/isoceles2:latest"
+        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/isoceles2:0.2.0-BI-a"
     }
 
     String quant_only_str = if (quant_only) then "--quant_only" else ""

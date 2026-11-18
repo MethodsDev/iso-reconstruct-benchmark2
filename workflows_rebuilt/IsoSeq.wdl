@@ -14,7 +14,7 @@ task isoseqTask {
         Int numThreads = 8
         Int memoryGB = 64
         Int diskSizeGB = 250
-        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/isoseq"
+        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/isoseq@sha256:18f5f46a7731e7af59ac3ebddb91a1f882f16314deb72b275cfce219077fa8c8"
     }
 
     

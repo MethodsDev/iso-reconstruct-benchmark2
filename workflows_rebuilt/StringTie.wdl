@@ -14,7 +14,7 @@ task stringtieTask {
         Int numThreads = 8
         Int memoryGB = 64
         Int diskSizeGB = 250
-        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/stringtie"
+        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/stringtie:3.0.3"
         String stringtie_version_tag = "v3.0.3"
     }
 

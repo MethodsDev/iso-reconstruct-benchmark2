@@ -17,7 +17,7 @@ task isoquantTask {
         Int memoryGB = 64
         Int diskSizeGB = 500
         String isoquant_version_tag = "v3.13.0"
-        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/isoquant:latest"
+        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/isoquant:3.13.0b"
     }
 
     String quant_only_flag = if (quant_only) then "--quant_only" else ""

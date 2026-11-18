@@ -13,7 +13,7 @@ task mandalorionTask {
         Int numThreads = 8
         Int memoryGB = 64
         Int diskSizeGB = 2048
-        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/mandalorion"
+        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/mandalorion@sha256:f4e08d0dd3474f226afc0ebfe731618162fe75a70ab3191adc1d7e7914e5364a"
 
     }
     

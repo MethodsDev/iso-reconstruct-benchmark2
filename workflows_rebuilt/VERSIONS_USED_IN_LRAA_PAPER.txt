@@ -1,0 +1,20 @@
+Competitor versions of the LRAA paper (copied as Workflows_and_Dockers_for_Competing_Methods/notes there)
+
+Versions benchmarked in the paper, and the docker image each WDL defaults to
+(us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/):
+
+    Bambu:        3.12.1   bambu:3.12.1a
+    ESPRESSO:     1.6.0    espresso:1.6.0b
+    FLAIR:        3.0.0    flair:3.0.0c
+    FLAMES:       0.1      flames-py:0.1a  (LuyiTian/FLAMES, commit 2748984; the python FLAMES has no releases)
+    Isosceles:    0.2.0    isoceles2:0.2.0-BI-a
+    IsoQuant:     3.13.0   isoquant:3.13.0b
+    IsoSeq:       4.2.0    isoseq@sha256:18f5f46a... (isoseq 4.2.0, pbmm2 1.16.99, pbpigeon 1.3.0)
+    Mandalorion:  4.5.0    mandalorion@sha256:f4e08d0d... (v4.5 plus a configurable defineIsoforms delay, commit bb1b76b1)
+    Oarfish:      0.9.4    oarfish:v0.9.4a
+    StringTie:    3.0.3    stringtie:3.0.3
+    TALON:        6.0      talon:6.0-BI
+
+Letter suffixes (a, b, c) are rebuilds of the same tool version (runner or packaging fixes).
+The IsoSeq and Mandalorion images are tagged in the registry under older labels (BI, 4.3.1-BI), so
+the WDLs name them by digest. Output files named "isoseq-v4.0.0" were produced by isoseq 4.2.0.

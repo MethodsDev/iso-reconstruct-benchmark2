@@ -15,7 +15,7 @@ task flairTask {
         Int numThreads = 8
         Int memoryGB = 64
         Int diskSizeGB = 512
-        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/flair:latest"
+        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/flair:3.0.0c"
         String flair_version_tag = "v3.0.0"
     }
 

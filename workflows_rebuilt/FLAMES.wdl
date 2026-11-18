@@ -15,7 +15,7 @@ task flamesTask {
         Int numThreads = 8
         Int memoryGB = 64
         Int diskSizeGB = 250
-        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/flames-py"
+        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/flames-py:0.1a"
     }
     
 

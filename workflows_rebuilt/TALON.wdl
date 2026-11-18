@@ -13,7 +13,7 @@ task talonTask {
         Int numThreads = 16
         Int memoryGB = 128
         Int diskSizeGB = 1024
-        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/talon"
+        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/talon:6.0-BI"
 
     }
 

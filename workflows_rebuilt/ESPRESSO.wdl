@@ -14,7 +14,7 @@ task espressoTask {
         Int numThreads = 8
         Int memoryGB = 64
         Int diskSizeGB = 256
-        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/espresso:latest"
+        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/espresso:1.6.0b"
     }
 
     command <<<
@@ -50,7 +50,7 @@ workflow espressoWorkflow {
         File referenceGenomeFasta
         File referenceGenomeIndex
         File? referenceAnnotationGTF
-        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/espresso:latest"
+        String docker = "us-central1-docker.pkg.dev/methods-dev-lab/iso-reconstruct-benchmark/espresso:1.6.0b"
     }
 
     call espressoTask {

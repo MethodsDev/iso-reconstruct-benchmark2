@@ -52,7 +52,8 @@ RUN pip install editdistance
 # FLAMES
 WORKDIR $SRC
 
-RUN git clone https://github.com/LuyiTian/FLAMES.git
+RUN git clone https://github.com/LuyiTian/FLAMES.git && \
+    cd FLAMES && git checkout 2748984
 
 COPY FLAMES-runner.py /usr/local/bin/
 

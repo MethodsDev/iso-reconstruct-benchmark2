@@ -46,8 +46,10 @@ ENV PATH=${PATH}:/usr/local/src/samtools-1.9
 
 #RUN git clone https://github.com/christopher-vollmers/Mandalorion.git && \
 
+# v4.5 (christopher-vollmers/Mandalorion tag v4.5) plus a configurable defineIsoforms delay
 RUN git clone https://github.com/brianjohnhaas/Mandalorion.git && \
     cd Mandalorion && \
+    git checkout bb1b76b1 && \
 	chmod +x setup.sh && \
 	sh setup.sh && \
 	/usr/local/src/Mandalorion/Mando.py -h
